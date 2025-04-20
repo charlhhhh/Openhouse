@@ -1,11 +1,38 @@
-# front‑end node modules & Expo cache
+# === FRONTEND ===
 frontend/node_modules/
-frontend/.expo/
-frontend/web-build/
+frontend/dist/
+frontend/dist-ssr/
+frontend/logs/
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+frontend/*.local
 
-# back‑end Python venv
+# Optional: editor config in frontend
+frontend/.vscode/
+frontend/.idea/
+
+# === BACKEND ===
 backend/venv/
+backend/__pycache__/
+backend/.mypy_cache/
+backend/.pytest_cache/
+backend/.env
 
-# environment variables
-.env
+# === GLOBAL ===
+.DS_Store
+.env*
+*.pem
+*.key
+*.p12
+*.jks
+*.orig.*
+
+# Optional: top-level editor/project
+.vscode/
+.idea/
+*.sw?
+
 

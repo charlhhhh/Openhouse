@@ -1,36 +1,24 @@
-# === FRONTEND ===
-frontend/node_modules/
-frontend/dist/
-frontend/dist-ssr/
-frontend/logs/
-frontend/*.log
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/pnpm-debug.log*
-frontend/lerna-debug.log*
-frontend/*.local
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Optional: editor config in frontend
-frontend/.vscode/
-frontend/.idea/
+node_modules
+dist
+dist-ssr
+*.local
 
-# === BACKEND ===
-backend/venv/
-backend/__pycache__/
-backend/.mypy_cache/
-backend/.pytest_cache/
-backend/.env
-
-# === GLOBAL ===
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
 .DS_Store
-.env*
-*.pem
-*.key
-*.p12
-*.jks
-*.orig.*
-
-# Optional: top-level editor/project
-.vscode/
-.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 *.sw?
