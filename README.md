@@ -1,50 +1,127 @@
-# Welcome to your Expo app 👋
+```markdown
+# 🏠 Openhouse
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+**Mission:** Become the world’s largest researcher community—an organization built to outlast centuries and fully deconstruct the frontiers of human science.
 
-## Get started
+---
 
-1. Install dependencies
+## 🚀 Project Overview
 
+Openhouse is a full‑stack, multi‑platform community platform that connects researchers across disciplines. Key features include:
+
+- **Password‑less Login** via email magic link  
+- **AI Sage** — daily “coin” lottery, contribution scoring, and inspirational messages  
+- **1:1 Researcher Matching** — tag‑based pairing with a 7‑day cooldown  
+- **Real‑time Chat** between matched partners  
+- **Public & Anonymous Posting** — community feed and “Treehole” anonymous wall  
+
+We’re running the entire front‑end as a single Expo app (Web / iOS / Android) and the back‑end with FastAPI + PostgreSQL.
+
+---
+
+## 🔧 Tech Stack
+
+| Layer      | Technology                         |
+| ---------- | ---------------------------------- |
+| Front‑end  | Expo (React Native + React Native Web) |
+| Back‑end   | FastAPI, Uvicorn, SQLAlchemy       |
+| Database   | PostgreSQL                         |
+| Dev & Build| Node.js (v20+), Python (3.8+), nvm, pip |
+| Deployment | Vercel / Netlify (Web) + EAS (Mobile) / Cloud Run |
+
+---
+
+## 📦 Prerequisites
+
+- **Node.js** (v20.x) & **npm** (via [nvm](https://github.com/nvm-sh/nvm))
+- **Python** (>= 3.8) & **pip**
+- **PostgreSQL** running locally (or remote) with a database named `openhouse`
+- **Expo Go** (for mobile testing)
+
+---
+
+## 🔨 Installation & Setup
+
+1. **Clone the repo**  
    ```bash
-   npm install
+   git clone https://github.com/your-username/openhouse.git
+   cd openhouse
    ```
 
-2. Start the app
-
+2. **Back‑end**  
    ```bash
-    npx expo start
+   cd backend
+   python3 -m venv venv
+   source venv/bin/activate        # on Windows: venv\Scripts\activate
+   pip install -r requirements.txt
    ```
+   - Copy `.env.example` → `.env` and fill in your `DATABASE_URL`  
+   - Run migrations (if any) or let SQLAlchemy create tables  
+   - Start the server:
+     ```bash
+     uvicorn app.main:app --reload
+     ```
+   - API docs live at: `http://localhost:8000/docs`
 
-In the output, you'll find options to open the app in a
+3. **Front‑end**  
+   ```bash
+   cd ../      # back to repo root
+   npx create-expo-app .          # (run once when first setting up)
+   npm install                    # install all JS/TS dependencies
+   ```
+   - Start in your browser:
+     ```bash
+     npm run web
+     ```
+     → opens `http://localhost:19006`
+   - Or run in simulator / device:
+     ```bash
+     npx expo start
+     ```
+     → scan the QR code in **Expo Go**
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## ⚡ Development Workflow
 
-## Get a fresh project
+- **Front‑end**
+  - Components in `components/`
+  - Screens in `screens/` (add as you build Login, Feed, Chat, Sage…)
+  - Expo commands: `npm run web`, `npx expo start ios`, `npx expo start android`
 
-When you're ready, run:
+- **Back‑end**
+  - Routers in `backend/app/routers/`
+  - Models in `backend/app/models.py`
+  - Database setup in `backend/app/database.py`
+  - CRUD logic in `backend/app/crud.py`
 
-```bash
-npm run reset-project
+---
+
+## 📂 Folder Structure
+
 ```
+openhouse/
+├── App.tsx           # Expo entry (Web + iOS + Android)
+├── app.json          # Expo config
+├── assets/           # Images, fonts, icons
+├── components/       # Reusable UI components
+├── hooks/            # Custom React hooks
+├── backend/          # FastAPI back‑end
+│   ├── app/
+│   │   ├── main.py
+│   │   ├── routers/
+│   │   ├── models.py
+│   │   ├── crud.py
+│   │   └── database.py
+│   └── requirements.txt
+├── .gitignore
+└── README.md
+```
+---
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## 📄 License
 
-## Learn more
+This project is licensed under the **Apache 2.0 License**. See [LICENSE](LICENSE) for details.
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+```
