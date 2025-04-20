@@ -1,127 +1,158 @@
-```markdown
-# 🏠 Openhouse
+# 🏠 OpenHouse
 
-**Mission:** Become the world’s largest researcher community—an organization built to outlast centuries and fully deconstruct the frontiers of human science.
+## Mission
 
----
+Become the world's largest researcher community.
 
-## 🚀 Project Overview
+Create an organization that exists for over 300 years with the mission to completely deconstruct human science.
 
-Openhouse is a full‑stack, multi‑platform community platform that connects researchers across disciplines. Key features include:
+## Project Overview
 
-- **Password‑less Login** via email magic link  
-- **AI Sage** — daily “coin” lottery, contribution scoring, and inspirational messages  
-- **1:1 Researcher Matching** — tag‑based pairing with a 7‑day cooldown  
-- **Real‑time Chat** between matched partners  
-- **Public & Anonymous Posting** — community feed and “Treehole” anonymous wall  
+OpenHouse is a community platform connecting researchers worldwide, managed by an AI-driven ecosystem dedicated to matching complementary research partners and promoting interdisciplinary collaboration. Core features include:
 
-We’re running the entire front‑end as a single Expo app (Web / iOS / Android) and the back‑end with FastAPI + PostgreSQL.
+- **Passwordless Login** - Quick authentication via email verification code
+- **AI Sage Advisor** - Daily coin rewards, contribution scoring, and intelligent matching
+- **Researcher Precision Matching** - Tag-based pairing system with a 7-day cooldown to ensure quality
+- **Real-time Chat** - Instant messaging after successful matching
+- **Community Content Sharing** - Public posts and the "TreeHole" anonymous wall
 
----
+## Tech Stack
 
-## 🔧 Tech Stack
+| Layer | Technology |
+|-------|------------|
+| Frontend | React Native (Expo) |
+| Backend | Python (FastAPI) |
+| Database | PostgreSQL |
+| Development | Node.js, Python 3.8+ |
+| Deployment | TBD |
 
-| Layer      | Technology                         |
-| ---------- | ---------------------------------- |
-| Front‑end  | Expo (React Native + React Native Web) |
-| Back‑end   | FastAPI, Uvicorn, SQLAlchemy       |
-| Database   | PostgreSQL                         |
-| Dev & Build| Node.js (v20+), Python (3.8+), nvm, pip |
-| Deployment | Vercel / Netlify (Web) + EAS (Mobile) / Cloud Run |
-
----
-
-## 📦 Prerequisites
-
-- **Node.js** (v20.x) & **npm** (via [nvm](https://github.com/nvm-sh/nvm))
-- **Python** (>= 3.8) & **pip**
-- **PostgreSQL** running locally (or remote) with a database named `openhouse`
-- **Expo Go** (for mobile testing)
-
----
-
-## 🔨 Installation & Setup
-
-1. **Clone the repo**  
-   ```bash
-   git clone https://github.com/your-username/openhouse.git
-   cd openhouse
-   ```
-
-2. **Back‑end**  
-   ```bash
-   cd backend
-   python3 -m venv venv
-   source venv/bin/activate        # on Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
-   - Copy `.env.example` → `.env` and fill in your `DATABASE_URL`  
-   - Run migrations (if any) or let SQLAlchemy create tables  
-   - Start the server:
-     ```bash
-     uvicorn app.main:app --reload
-     ```
-   - API docs live at: `http://localhost:8000/docs`
-
-3. **Front‑end**  
-   ```bash
-   cd ../      # back to repo root
-   npx create-expo-app .          # (run once when first setting up)
-   npm install                    # install all JS/TS dependencies
-   ```
-   - Start in your browser:
-     ```bash
-     npm run web
-     ```
-     → opens `http://localhost:19006`
-   - Or run in simulator / device:
-     ```bash
-     npx expo start
-     ```
-     → scan the QR code in **Expo Go**
-
----
-
-## ⚡ Development Workflow
-
-- **Front‑end**
-  - Components in `components/`
-  - Screens in `screens/` (add as you build Login, Feed, Chat, Sage…)
-  - Expo commands: `npm run web`, `npx expo start ios`, `npx expo start android`
-
-- **Back‑end**
-  - Routers in `backend/app/routers/`
-  - Models in `backend/app/models.py`
-  - Database setup in `backend/app/database.py`
-  - CRUD logic in `backend/app/crud.py`
-
----
-
-## 📂 Folder Structure
+## Project Structure
 
 ```
 openhouse/
-├── App.tsx           # Expo entry (Web + iOS + Android)
-├── app.json          # Expo config
-├── assets/           # Images, fonts, icons
-├── components/       # Reusable UI components
-├── hooks/            # Custom React hooks
-├── backend/          # FastAPI back‑end
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── routers/
-│   │   ├── models.py
-│   │   ├── crud.py
-│   │   └── database.py
-│   └── requirements.txt
-├── .gitignore
+├── backend/              # Backend directory
+│   ├── app/              # Main application
+│   └── venv/             # Python virtual environment
+├── frontend/             # Frontend directory
+│   ├── .expo/            # Expo configuration
+│   ├── app/              # Main app components
+│   ├── assets/           # Static resources
+│   ├── components/       # Reusable UI components
+│   ├── constants/        # Constant definitions
+│   ├── hooks/            # Custom React hooks
+│   ├── scripts/          # Helper scripts
+│   ├── .gitignore
+│   ├── app.json
+│   ├── package.json
+│   └── tsconfig.json
+├── LICENSE
 └── README.md
 ```
----
 
-## 📄 License
+## Prerequisites
 
-This project is licensed under the **Apache 2.0 License**. See [LICENSE](LICENSE) for details.
+- **Node.js** (v16+ recommended, use nvm for version management)
+- **Python** 3.8 or higher
+- **PostgreSQL** database
+- **Expo Go** app (for mobile testing)
 
----
-```
+## Installation & Setup
+
+### Backend Setup
+
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
+   ```
+
+2. Create and activate a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # Windows: venv\Scripts\activate
+   ```
+
+3. Install the required Python packages:
+   ```bash
+   pip install fastapi uvicorn sqlalchemy pydantic psycopg2-binary python-jose passlib bcrypt python-multipart
+   ```
+   
+   Or if you have a requirements.txt file:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+4. Start the backend server:
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+
+   The API will be available at http://localhost:8000 and API documentation at http://localhost:8000/docs
+
+### Frontend Setup
+
+1. Navigate to the frontend directory from the project root:
+   ```bash
+   cd frontend
+   ```
+
+2. For first-time setup, create a new Expo app:
+   ```bash
+   npx create-expo-app .   # choose "blank (TypeScript)" when prompted
+   ```
+
+3. Install the required dependencies:
+   ```bash
+   npm install expo-router react-native-safe-area-context react-native-screens expo-linking expo-constants expo-status-bar @expo/vector-icons axios react-native-gesture-handler
+   ```
+
+4. Additional UI and functionality dependencies:
+   ```bash
+   npm install react-native-paper @react-navigation/native @react-navigation/stack react-hook-form
+   ```
+
+5. Start the frontend development server:
+
+   For web:
+   ```bash
+   npm run web
+   ```
+
+   For iOS/Android:
+   ```bash
+   npx expo start
+   ```
+   Then scan the QR code with the Expo Go app on your device
+
+## Key Features Explained
+
+### Login and Registration
+
+- Passwordless login using email verification codes
+- Supports school/company/Google/Microsoft emails
+- After successful login, users are directed to the profile binding page
+
+### AI Sage
+
+- Daily coin reward system
+- Contribution-based scoring mechanism
+- Intelligent matching algorithm recommendations
+
+### Researcher Matching
+
+- Matching system based on 2-6 research tags
+- Limited to one match every 7 days to ensure quality
+- Four matching states: Unmatched, Matching, Match Completed, Match Successful
+
+### Community Interaction
+
+- Public posting functionality
+- "TreeHole" anonymous wall (text posts only)
+- Comment and reply system
+
+## Project Status
+
+Current version: 1.0 (In development)
+
+## License
+
+See the LICENSE file in the project root directory for details.
