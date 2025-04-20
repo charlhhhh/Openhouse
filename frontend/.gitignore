@@ -1,38 +1,36 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# === FRONTEND ===
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+frontend/logs/
+frontend/*.log
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/pnpm-debug.log*
+frontend/lerna-debug.log*
+frontend/*.local
 
-# dependencies
-node_modules/
+# Optional: editor config in frontend
+frontend/.vscode/
+frontend/.idea/
 
-# Expo
-.expo/
-dist/
-web-build/
-expo-env.d.ts
+# === BACKEND ===
+backend/venv/
+backend/__pycache__/
+backend/.mypy_cache/
+backend/.pytest_cache/
+backend/.env
 
-# Native
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
-
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
+# === GLOBAL ===
 .DS_Store
+.env*
 *.pem
+*.key
+*.p12
+*.jks
+*.orig.*
 
-# local env files
-.env*.local
-
-# typescript
-*.tsbuildinfo
-
-app-example
+# Optional: top-level editor/project
+.vscode/
+.idea/
+*.sw?
