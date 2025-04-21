@@ -11,42 +11,18 @@ const COUNTDOWN_SECONDS = 60;
 interface SMSVerifyCodeInputProps {
     onInputCompleted: (code: string) => void;
     onVerificationSend: () => void;
+    autoStartCountdown?: boolean;
 }
 
-export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSend }: SMSVerifyCodeInputProps) {
+export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSend, autoStartCountdown = false }: SMSVerifyCodeInputProps) {
     const [code, setCode] = useState<string[]>(Array(CODE_LENGTH).fill(''));
     const [activeIndex, setActiveIndex] = useState(0);
     const [countdown, setCountdown] = useState(0);
     const inputRef = useRef<InputRef>(null);
     const countdownRef = useRef<number | null>(null);
 
-    // 处理验证码输入
-    const handleCodeChange = (text: string) => {
-        // 只允许输入数字
-        const newText = text.replace(/[^0-9]/g, '');
-        
-        // 如果输入长度超过剩余位数，只取需要的位数
-        const newCode = [...code];
-        const remainingLength = CODE_LENGTH - activeIndex;
-        const inputLength = Math.min(newText.length, remainingLength);
 
-        for (let i = 0; i < inputLength; i++) {
-            newCode[activeIndex + i] = newText[i];
-        }
-
-        setCode(newCode);
-
-        // 更新当前激活的输入框索引
-        const nextIndex = Math.min(activeIndex + inputLength, CODE_LENGTH - 1);
-        setActiveIndex(nextIndex);
-
-        // 如果输入完成，触发回调
-        if (newCode.every(c => c !== '') && newCode.length === CODE_LENGTH) {
-            onInputCompleted(newCode.join(''));
-        }
-    };
-
-    // 处理退格键
+    // 处理验证码输入和退格键
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Backspace' && activeIndex > 0) {
             const newCode = [...code];
@@ -59,7 +35,6 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
             setCode(newCode);
             const nextIndex = Math.min(activeIndex + 1, CODE_LENGTH - 1);
             setActiveIndex(nextIndex);
-            
             // 如果输入完成，触发回调
             if (newCode.every(c => c !== '') && newCode.length === CODE_LENGTH) {
                 onInputCompleted(newCode.join(''));
@@ -103,6 +78,13 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
         };
     }, []);
 
+    useEffect(() => {
+        if (autoStartCountdown) {
+            setCountdown(60);
+            handleSendVerification();
+        }
+    }, []);
+
     // 聚焦输入框
     useEffect(() => {
         inputRef.current?.focus();
@@ -115,7 +97,6 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
                 style={styles.hiddenInput}
                 value={code.join('')}
                 onKeyDown={handleKeyPress}
-                onChange={(e) => handleCodeChange(e.target.value)}
                 maxLength={CODE_LENGTH}
                 type="text"
             />
@@ -218,6 +199,8 @@ const styles: Record<string, React.CSSProperties> = {
         borderRadius: 8,
         marginLeft: 8,
         overflow: 'hidden',
+        border: 'none',
+        outline: 'none',
         cursor: 'pointer',
     },
     sendButtonDisabled: {

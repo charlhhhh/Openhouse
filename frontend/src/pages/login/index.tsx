@@ -31,8 +31,8 @@ const TopBar = ({ isLoggedIn, onLoginPress }: { isLoggedIn: boolean; onLoginPres
                     className="icon-button"
                     onClick={onLoginPress}
                 >
-                    {isLoggedIn ? 
-                        <UserOutlined style={{ fontSize: '24px', color: '#333' }} /> : 
+                    {isLoggedIn ?
+                        <UserOutlined style={{ fontSize: '24px', color: '#333' }} /> :
                         <LoginOutlined style={{ fontSize: '24px', color: '#333' }} />
                     }
                 </button>
@@ -62,9 +62,9 @@ const Sidebar = () => {
                         className={`sidebar-item ${isActive ? 'active' : ''}`}
                     // onClick={() => router.push(tab.path)}
                     >
-                        <span style={{ 
-                            fontSize: '24px', 
-                            color: isActive ? '#007AFF' : '#666' 
+                        <span style={{
+                            fontSize: '24px',
+                            color: isActive ? '#007AFF' : '#666'
                         }}>
                             {tab.icon}
                         </span>
