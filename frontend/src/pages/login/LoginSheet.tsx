@@ -1,17 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, KeyboardAvoidingView, Platform, ImageBackground, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Button, Input, Divider } from 'antd';
+import { CloseOutlined, MailOutlined, GoogleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import SMSVerifyCodeInput from './SMSVerifyCodeInput';
 
 const SHEET_WIDTH = 840;
 const SHEET_HEIGHT = 908;
-
-// 配置Google登录
-GoogleSignin.configure({
-    webClientId: 'YOUR_GOOGLE_WEB_CLIENT_ID', // 需要替换为您的Google OAuth客户端ID
-});
 
 interface LoginSheetProps {
     visible: boolean;
@@ -66,17 +59,8 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
     };
 
     const handleGoogleLogin = async () => {
-        setIsLoading(true);
-        try {
-            await GoogleSignin.hasPlayServices();
-            const userInfo = await GoogleSignin.signIn();
-            console.log('Google登录成功:', userInfo);
-            onLoginSuccess();
-        } catch (error) {
-            console.error('Google登录失败:', error);
-        } finally {
-            setIsLoading(false);
-        }
+        // 添加谷歌登录逻辑
+        console.log('谷歌登录');
     };
 
     const isButtonEnabled = showVerification
@@ -90,9 +74,12 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
             <div style={styles.sheetContainer}>
                 <div style={styles.backgroundImage}>
                     <div style={styles.header}>
-                        <button onClick={onClose} style={styles.closeButton}>
-                            <Ionicons name="close" size={24} color="#fff" />
-                        </button>
+                        <Button 
+                            onClick={onClose} 
+                            style={styles.closeButton}
+                            type="text"
+                            icon={<CloseOutlined style={{ fontSize: '24px', color: '#fff' }} />}
+                        />
                     </div>
 
                     <div style={styles.content}>
@@ -102,57 +89,47 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
                                 <p style={styles.subtitle}>Sign in to continue</p>
 
                                 <div style={styles.inputContainer}>
-                                    <Ionicons name="mail-outline" size={24} color="#A0A1A5" style={{ marginRight: 12 }} />
-                                    <input
+                                    <MailOutlined style={{ marginRight: 12, fontSize: '24px', color: '#A0A1A5' }} />
+                                    <Input
                                         style={styles.input}
                                         placeholder="Email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         type="email"
-                                        autoCapitalize="none"
+                                        bordered={false}
                                     />
                                 </div>
 
-                                <button
+                                <Button
                                     style={{
                                         ...styles.button,
-                                        ...(!isButtonEnabled && styles.buttonDisabled)
-                                    } as React.CSSProperties}
+                                        ...(!isButtonEnabled && styles.buttonDisabled),
+                                        background: 'linear-gradient(to bottom, #6A4C93, #20172D)'
+                                    }}
                                     onClick={handleEmailSubmit}
                                     disabled={!isButtonEnabled || isLoading}
+                                    type="primary"
                                 >
-                                    <LinearGradient
-                                        colors={['#6A4C93', '#20172D']}
-                                        start={{ x: 0, y: 0 }}
-                                        end={{ x: 0, y: 1 }}
-                                    >
-                                        <span style={styles.buttonText}>Continue with email</span>
-                                    </LinearGradient>
-                                </button>
+                                    <span style={styles.buttonText}>Continue with email</span>
+                                </Button>
 
-                                <div style={styles.divider}>
-                                    <div style={styles.dividerLine} />
+                                <Divider style={styles.divider}>
                                     <span style={styles.dividerText}>or</span>
-                                    <div style={styles.dividerLine} />
-                                </div>
+                                </Divider>
 
-                                <button
+                                <Button
                                     style={{
                                         ...styles.button,
-                                        ...styles.googleButton
-                                    } as React.CSSProperties}
-                                    onClick={handleEmailSubmit}
-                                    disabled={!isButtonEnabled || isLoading}
+                                        ...styles.googleButton,
+                                        background: 'linear-gradient(to bottom, #6A4C93, #20172D)'
+                                    }}
+                                    onClick={handleGoogleLogin}
+                                    disabled={isLoading}
+                                    type="primary"
+                                    icon={<GoogleOutlined style={{ marginRight: 8, fontSize: '20px', color: '#fff' }} />}
                                 >
-                                    <LinearGradient
-                                        colors={['#6A4C93', '#20172D']}
-                                        start={{ x: 0, y: 0 }}
-                                        end={{ x: 0, y: 1 }}
-                                    >
-                                        <Ionicons name="logo-google" size={20} color="#fff" style={{ marginRight: 8 }} />
-                                        <span style={styles.buttonText}>Continue with Google</span>
-                                    </LinearGradient>
-                                </button>
+                                    <span style={styles.buttonText}>Continue with Google</span>
+                                </Button>
                             </>
                         ) : (
                             <>
@@ -164,13 +141,14 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
                                     onVerificationSend={handleVerificationSend}
                                 />
 
-                                <button
+                                <Button
                                     style={styles.backButton}
                                     onClick={() => setShowVerification(false)}
+                                    type="text"
+                                    icon={<ArrowLeftOutlined style={{ fontSize: '20px', color: '#6A4C93' }} />}
                                 >
-                                    <Ionicons name="arrow-back" size={20} color="#6A4C93" />
                                     <span style={styles.backButtonText}>Back</span>
-                                </button>
+                                </Button>
                             </>
                         )}
                     </div>
@@ -279,15 +257,8 @@ const styles: { [key: string]: React.CSSProperties } = {
         fontWeight: 600,
     },
     divider: {
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
         margin: '20px 60px',
-    },
-    dividerLine: {
-        flex: 1,
-        height: '1px',
-        backgroundColor: '#6A4C93',
+        color: '#6A4C93',
     },
     dividerText: {
         margin: '0 16px',

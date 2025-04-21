@@ -1,50 +1,40 @@
 import React, { useState } from 'react';
-import { Ionicons } from '@expo/vector-icons';
+import { SearchOutlined, MessageOutlined, BellOutlined, PlusCircleOutlined, UserOutlined, LoginOutlined, HomeOutlined, TeamOutlined, BookOutlined, BulbOutlined } from '@ant-design/icons';
+import { Input } from 'antd';
 import LoginSheet from './LoginSheet';
 
 import './login.css'; // 导入CSS文件
-
-
-const SIDEBAR_WIDTH = 200;
-
-// 占位页面组件
-const PlaceholderScreen = ({ title }: { title: string }) => (
-    <div className="placeholder-container">
-        <p>{title}</p>
-    </div>
-);
 
 // 顶部导航栏组件
 const TopBar = ({ isLoggedIn, onLoginPress }: { isLoggedIn: boolean; onLoginPress: () => void }) => {
     return (
         <div className="top-bar">
             <div className="search-container">
-                <Ionicons name="search" size={20} color="#666" />
-                <input
+                <SearchOutlined style={{ fontSize: '20px', color: '#666' }} />
+                <Input
                     className="search-input"
                     placeholder="搜索..."
-                    style={{ '--placeholder-color': '#666' } as React.CSSProperties}
+                    bordered={false}
                 />
             </div>
             <div className="icons-container">
                 <button className="icon-button">
-                    <Ionicons name="chatbubble-outline" size={24} color="#333" />
+                    <MessageOutlined style={{ fontSize: '24px', color: '#333' }} />
                 </button>
                 <button className="icon-button">
-                    <Ionicons name="notifications-outline" size={24} color="#333" />
+                    <BellOutlined style={{ fontSize: '24px', color: '#333' }} />
                 </button>
                 <button className="icon-button">
-                    <Ionicons name="add-circle-outline" size={24} color="#333" />
+                    <PlusCircleOutlined style={{ fontSize: '24px', color: '#333' }} />
                 </button>
                 <button
                     className="icon-button"
                     onClick={onLoginPress}
                 >
-                    <Ionicons
-                        name={isLoggedIn ? "person-circle" : "log-in"}
-                        size={24}
-                        color="#333"
-                    />
+                    {isLoggedIn ? 
+                        <UserOutlined style={{ fontSize: '24px', color: '#333' }} /> : 
+                        <LoginOutlined style={{ fontSize: '24px', color: '#333' }} />
+                    }
                 </button>
             </div>
         </div>
@@ -53,32 +43,31 @@ const TopBar = ({ isLoggedIn, onLoginPress }: { isLoggedIn: boolean; onLoginPres
 
 // 侧边栏组件
 const Sidebar = () => {
-
-
     const tabs = [
-        { name: 'Home', icon: 'home', path: '/(tabs)/index' },
-        { name: 'Following', icon: 'people', path: '/(tabs)/following' },
-        { name: 'Saved Topic', icon: 'bookmark', path: '/(tabs)/saved-topic' },
-        { name: 'Sage AI', icon: 'bulb', path: '/(tabs)/sage-ai' },
-        { name: 'Find Partner', icon: 'search', path: '/(tabs)/find-partner' },
-        { name: 'Account', icon: 'person', path: '/(tabs)/account' },
+        { name: 'Home', icon: <HomeOutlined />, path: '/(tabs)/index' },
+        { name: 'Following', icon: <TeamOutlined />, path: '/(tabs)/following' },
+        { name: 'Saved Topic', icon: <BookOutlined />, path: '/(tabs)/saved-topic' },
+        { name: 'Sage AI', icon: <BulbOutlined />, path: '/(tabs)/sage-ai' },
+        { name: 'Find Partner', icon: <SearchOutlined />, path: '/(tabs)/find-partner' },
+        { name: 'Account', icon: <UserOutlined />, path: '/(tabs)/account' },
     ];
 
     return (
         <div className="sidebar">
             {tabs.map((tab) => {
-                const isActive = TextTrackCueList;
+                const isActive = false; // 临时设为false，后续可根据路由状态判断
                 return (
                     <button
                         key={tab.path}
                         className={`sidebar-item ${isActive ? 'active' : ''}`}
                     // onClick={() => router.push(tab.path)}
                     >
-                        <Ionicons
-                            name={tab.icon as any}
-                            size={24}
-                            color={isActive ? '#007AFF' : '#666'}
-                        />
+                        <span style={{ 
+                            fontSize: '24px', 
+                            color: isActive ? '#007AFF' : '#666' 
+                        }}>
+                            {tab.icon}
+                        </span>
                         <span className={`sidebar-text ${isActive ? 'active' : ''}`}>
                             {tab.name}
                         </span>
