@@ -191,7 +191,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     sheetContainer: {
         width: SHEET_WIDTH,
         height: SHEET_HEIGHT,
-        borderRadius: '20px',
         overflow: 'hidden',
         position: 'relative',
     },
@@ -222,7 +221,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     content: {
         position: 'relative',
-        padding: '288px 40px 0 40px',
+        padding: '380px 0px 0 0px',
         paddingTop: `calc(${SHEET_HEIGHT} * 0.35)`,
         color: '#fff',
     },
