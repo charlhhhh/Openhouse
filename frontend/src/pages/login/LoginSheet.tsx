@@ -1,17 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Modal, KeyboardAvoidingView, Platform, ImageBackground, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { LinearGradient } from 'expo-linear-gradient';
+import React, { useState, useEffect } from 'react';
+import { Button, Input, Divider } from 'antd';
+import { CloseOutlined, MailOutlined, GoogleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import SMSVerifyCodeInput from './SMSVerifyCodeInput';
 
 const SHEET_WIDTH = 840;
 const SHEET_HEIGHT = 908;
-
-// 配置Google登录
-GoogleSignin.configure({
-    webClientId: 'YOUR_GOOGLE_WEB_CLIENT_ID', // 需要替换为您的Google OAuth客户端ID
-});
 
 interface LoginSheetProps {
     visible: boolean;
@@ -24,15 +17,45 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
     const [verificationCode] = useState(['', '', '', '']);
     const [showVerification, setShowVerification] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isEmailValid, setIsEmailValid] = useState(false);
+    const [shouldStartCountdown, setShouldStartCountdown] = useState(false);
+
+    // 验证邮箱格式
+    const validateEmail = (email: string) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    // 监听邮箱变化
+    useEffect(() => {
+        setIsEmailValid(validateEmail(email));
+    }, [email]);
+
+    // 重置所有状态
+    const resetState = () => {
+        setEmail('');
+        setShowVerification(false);
+        setIsLoading(false);
+        setIsEmailValid(false);
+        setShouldStartCountdown(false);
+    };
+
+    // 监听 visible 变化，当关闭时重置状态
+    useEffect(() => {
+        if (!visible) {
+            resetState();
+        }
+    }, [visible]);
 
     const handleEmailSubmit = async () => {
-        if (!email) return;
+        if (!isEmailValid) return;
 
         setIsLoading(true);
         try {
             // TODO: 发送验证码到邮箱
             console.log('发送验证码到:', email);
             setShowVerification(true);
+            setShouldStartCountdown(true);
         } catch (error) {
             console.error('发送验证码失败:', error);
         } finally {
@@ -66,22 +89,13 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
     };
 
     const handleGoogleLogin = async () => {
-        setIsLoading(true);
-        try {
-            await GoogleSignin.hasPlayServices();
-            const userInfo = await GoogleSignin.signIn();
-            console.log('Google登录成功:', userInfo);
-            onLoginSuccess();
-        } catch (error) {
-            console.error('Google登录失败:', error);
-        } finally {
-            setIsLoading(false);
-        }
+        // 添加谷歌登录逻辑
+        console.log('谷歌登录');
     };
 
     const isButtonEnabled = showVerification
         ? verificationCode.every(code => code)
-        : email;
+        : isEmailValid;
 
     if (!visible) return null;
 
@@ -90,11 +104,13 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
             <div style={styles.sheetContainer}>
                 <div style={styles.backgroundImage}>
                     <div style={styles.header}>
-                        <button onClick={onClose} style={styles.closeButton}>
-                            <Ionicons name="close" size={24} color="#fff" />
-                        </button>
+                        <Button
+                            onClick={onClose}
+                            style={styles.closeButton}
+                            type="text"
+                            icon={<CloseOutlined style={{ fontSize: '24px', color: '#fff' }} />}
+                        />
                     </div>
-
                     <div style={styles.content}>
                         {!showVerification ? (
                             <>
@@ -102,75 +118,66 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
                                 <p style={styles.subtitle}>Sign in to continue</p>
 
                                 <div style={styles.inputContainer}>
-                                    <Ionicons name="mail-outline" size={24} color="#A0A1A5" style={{ marginRight: 12 }} />
-                                    <input
+                                    <MailOutlined style={{ marginRight: 12, fontSize: '24px', color: '#A0A1A5' }} />
+                                    <Input
                                         style={styles.input}
                                         placeholder="Email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
                                         type="email"
-                                        autoCapitalize="none"
                                     />
                                 </div>
 
-                                <button
+                                <Button
                                     style={{
                                         ...styles.button,
-                                        ...(!isButtonEnabled && styles.buttonDisabled)
-                                    } as React.CSSProperties}
+                                        ...(!isEmailValid && styles.buttonDisabled),
+                                        background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)'
+                                    }}
                                     onClick={handleEmailSubmit}
-                                    disabled={!isButtonEnabled || isLoading}
+                                    disabled={!isEmailValid || isLoading}
                                 >
-                                    <LinearGradient
-                                        colors={['#6A4C93', '#20172D']}
-                                        start={{ x: 0, y: 0 }}
-                                        end={{ x: 0, y: 1 }}
-                                    >
-                                        <span style={styles.buttonText}>Continue with email</span>
-                                    </LinearGradient>
-                                </button>
+                                    <span style={styles.buttonText}>Continue with email</span>
+                                </Button>
 
-                                <div style={styles.divider}>
-                                    <div style={styles.dividerLine} />
-                                    <span style={styles.dividerText}>or</span>
-                                    <div style={styles.dividerLine} />
-                                </div>
+                                <Divider orientation="center">or</Divider>
 
-                                <button
+                                <Button
                                     style={{
                                         ...styles.button,
-                                        ...styles.googleButton
-                                    } as React.CSSProperties}
-                                    onClick={handleEmailSubmit}
-                                    disabled={!isButtonEnabled || isLoading}
+                                        ...styles.googleButton,
+                                        background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)'
+                                    }}
+                                    onClick={handleGoogleLogin}
+                                    disabled={isLoading}
+                                    icon={<GoogleOutlined style={{ marginRight: 8, fontSize: '20px', color: '#fff' }} />}
                                 >
-                                    <LinearGradient
-                                        colors={['#6A4C93', '#20172D']}
-                                        start={{ x: 0, y: 0 }}
-                                        end={{ x: 0, y: 1 }}
-                                    >
-                                        <Ionicons name="logo-google" size={20} color="#fff" style={{ marginRight: 8 }} />
-                                        <span style={styles.buttonText}>Continue with Google</span>
-                                    </LinearGradient>
-                                </button>
+                                    <span style={styles.buttonText}>Continue with Google</span>
+                                </Button>
                             </>
                         ) : (
                             <>
                                 <h1 style={styles.title}>Enter verification code</h1>
                                 <p style={styles.subtitle}>We sent a code to {email}</p>
 
-                                <SMSVerifyCodeInput
-                                    onInputCompleted={handleVerificationSubmit}
-                                    onVerificationSend={handleVerificationSend}
-                                />
+                                <div style={styles.verificationContainer}>
+                                    <SMSVerifyCodeInput
+                                        onInputCompleted={handleVerificationSubmit}
+                                        onVerificationSend={handleVerificationSend}
+                                        autoStartCountdown={shouldStartCountdown}
+                                    />
+                                </div>
 
-                                <button
-                                    style={styles.backButton}
-                                    onClick={() => setShowVerification(false)}
-                                >
-                                    <Ionicons name="arrow-back" size={20} color="#6A4C93" />
-                                    <span style={styles.backButtonText}>Back</span>
-                                </button>
+                                <div style={styles.backButtonContainer}>
+                                    <Button
+                                        style={styles.backButton}
+                                        onClick={() => setShowVerification(false)}
+                                        type="text"
+                                        icon={<ArrowLeftOutlined style={{ fontSize: '20px', color: '#6A4C93' }} />}
+                                    >
+                                        <span style={styles.backButtonText}>Back</span>
+                                    </Button>
+                                </div>
                             </>
                         )}
                     </div>
@@ -200,13 +207,20 @@ const styles: { [key: string]: React.CSSProperties } = {
         height: SHEET_HEIGHT,
         borderRadius: '20px',
         overflow: 'hidden',
+        position: 'relative',
     },
     backgroundImage: {
         width: '100%',
         height: '100%',
-        backgroundImage: 'url(../../assets/images/bg_login.png)',
+        backgroundImage: 'url(/bg_login.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        opacity: 0.8
     },
     header: {
         display: 'flex',
@@ -221,8 +235,10 @@ const styles: { [key: string]: React.CSSProperties } = {
         cursor: 'pointer',
     },
     content: {
-        padding: '0 40px',
+        position: 'relative',
+        padding: '288px 40px',
         paddingTop: `calc(${SHEET_HEIGHT} * 0.35)`,
+        color: '#fff',
     },
     title: {
         fontSize: '24px',
@@ -233,7 +249,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     subtitle: {
         fontSize: '16px',
-        color: '#A7A8D9',
+        color: '#6A4C93',
         marginBottom: '40px',
         textAlign: 'center',
     },
@@ -243,7 +259,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         alignItems: 'center',
         backgroundColor: '#ffffff',
         borderRadius: '8px',
-        marginBottom: '20px',
+        marginBottom: '18px',
         padding: '0 16px',
         width: '60%',
         margin: '0 auto',
@@ -259,6 +275,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     button: {
         height: '60px',
         borderRadius: '8px',
+        marginTop: '10px',
         marginBottom: '20px',
         display: 'flex',
         alignItems: 'center',
@@ -268,9 +285,9 @@ const styles: { [key: string]: React.CSSProperties } = {
         cursor: 'pointer',
         width: '50%',
         margin: '0 auto',
+        outline: 'none',
     },
     buttonDisabled: {
-        backgroundColor: 'rgba(255, 255, 255, 0.2)',
         cursor: 'not-allowed',
     },
     buttonText: {
@@ -279,18 +296,13 @@ const styles: { [key: string]: React.CSSProperties } = {
         fontWeight: 600,
     },
     divider: {
+        color: '#000000',
+        borderTop: '1px solid #000000', // 明确添加分割线样式
         display: 'flex',
-        flexDirection: 'row',
         alignItems: 'center',
-        margin: '20px 60px',
-    },
-    dividerLine: {
-        flex: 1,
-        height: '1px',
-        backgroundColor: '#6A4C93',
+        justifyContent: 'center',
     },
     dividerText: {
-        margin: '0 16px',
         color: '#000000',
     },
     googleButton: {
@@ -310,5 +322,16 @@ const styles: { [key: string]: React.CSSProperties } = {
         color: '#6A4C93',
         fontSize: '16px',
         marginLeft: '8px',
+    },
+    verificationContainer: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        marginBottom: '12px',
+    },
+    backButtonContainer: {
+        display: 'flex',
+        justifyContent: 'center',
+        marginTop: '20px',
     },
 };

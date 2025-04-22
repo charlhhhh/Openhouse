@@ -2,15 +2,6 @@
 import React from 'react';
 import './Login.css'; // 引入样式文件
 
-// 配置Microsoft登录
-const msalConfig = {
-    auth: {
-        clientId: 'YOUR_MICROSOFT_CLIENT_ID',
-        authority: 'https://login.microsoftonline.com/common',
-        redirectUri: window.location.origin,
-    },
-};
-
 const Login: React.FC = () => {
     // Google登录处理 (Web版)
     const handleGoogleLogin = () => {
@@ -29,14 +20,6 @@ const Login: React.FC = () => {
 
     // Microsoft登录处理 (Web版)
     const handleMicrosoftLogin = async () => {
-        try {
-            const { PublicClientApplication } = await import('@azure/msal-browser');
-            const msalInstance = new PublicClientApplication(msalConfig);
-            const loginResponse = await msalInstance.loginPopup();
-            console.log('Microsoft登录成功:', loginResponse);
-        } catch (error) {
-            console.error('Microsoft登录失败:', error);
-        }
     };
 
     // GitHub登录处理 (Web版)
