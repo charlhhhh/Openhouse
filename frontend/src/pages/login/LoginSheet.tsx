@@ -103,14 +103,6 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
         <div style={styles.modalContainer}>
             <div style={styles.sheetContainer}>
                 <div style={styles.backgroundImage}>
-                    <div style={styles.header}>
-                        <Button
-                            onClick={onClose}
-                            style={styles.closeButton}
-                            type="text"
-                            icon={<CloseOutlined style={{ fontSize: '24px', color: '#fff' }} />}
-                        />
-                    </div>
                     <div style={styles.content}>
                         {!showVerification ? (
                             <>
@@ -191,16 +183,10 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
 // 使用 React.CSSProperties 确保类型安全
 const styles: { [key: string]: React.CSSProperties } = {
     modalContainer: {
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        zIndex: 1000,
     },
     sheetContainer: {
         width: SHEET_WIDTH,
