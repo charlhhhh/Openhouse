@@ -7,6 +7,8 @@ const { Text } = Typography;
 const CODE_LENGTH = 4;
 const CELL_SIZE = 84;
 const COUNTDOWN_SECONDS = 60;
+const CELL_CONTAINER_WIDTH = CELL_SIZE * CODE_LENGTH + 12 * (CODE_LENGTH - 1);
+const SHEET_WIDTH = 840;
 
 interface SMSVerifyCodeInputProps {
     onInputCompleted: (code: string) => void;
@@ -162,7 +164,7 @@ const styles: Record<string, React.CSSProperties> = {
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        width: CELL_SIZE * CODE_LENGTH + 12 * (CODE_LENGTH - 1),
+        width: CELL_CONTAINER_WIDTH,
     },
     cell: {
         width: CELL_SIZE,

@@ -236,7 +236,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     content: {
         position: 'relative',
-        padding: '288px 40px',
+        padding: '288px 40px 0 40px',
         paddingTop: `calc(${SHEET_HEIGHT} * 0.35)`,
         color: '#fff',
     },
@@ -250,7 +250,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     subtitle: {
         fontSize: '16px',
         color: '#6A4C93',
-        marginBottom: '40px',
+        marginBottom: '8px',
         textAlign: 'center',
     },
     inputContainer: {
@@ -259,10 +259,10 @@ const styles: { [key: string]: React.CSSProperties } = {
         alignItems: 'center',
         backgroundColor: '#ffffff',
         borderRadius: '8px',
-        marginBottom: '18px',
+        // marginBottom: '18px',
         padding: '0 16px',
         width: '60%',
-        margin: '0 auto',
+        margin: '10px auto',
     },
     input: {
         flex: 1,
@@ -283,7 +283,6 @@ const styles: { [key: string]: React.CSSProperties } = {
         overflow: 'hidden',
         border: 'none',
         cursor: 'pointer',
-        width: '50%',
         margin: '0 auto',
         outline: 'none',
     },

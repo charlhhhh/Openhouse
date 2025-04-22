@@ -3,6 +3,8 @@ import { SearchOutlined, MessageOutlined, BellOutlined, PlusCircleOutlined, User
 import { Input } from 'antd';
 import LoginSheet from './LoginSheet';
 
+import { useNavigate } from 'react-router-dom';
+
 import './login.css'; // 导入CSS文件
 
 // 顶部导航栏组件
@@ -43,6 +45,7 @@ const TopBar = ({ isLoggedIn, onLoginPress }: { isLoggedIn: boolean; onLoginPres
 
 // 侧边栏组件
 const Sidebar = () => {
+    const navigate = useNavigate();
     const tabs = [
         { name: 'Home', icon: <HomeOutlined />, path: '/(tabs)/index' },
         { name: 'Following', icon: <TeamOutlined />, path: '/(tabs)/following' },
@@ -60,7 +63,8 @@ const Sidebar = () => {
                     <button
                         key={tab.path}
                         className={`sidebar-item ${isActive ? 'active' : ''}`}
-                    // onClick={() => router.push(tab.path)}
+                        // <button onClick={() => navigate('/login')}>Login</button>
+                        onClick={() => navigate(tab.path)}
                     >
                         <span style={{
                             fontSize: '24px',
@@ -82,6 +86,7 @@ const Sidebar = () => {
 const MainScreen = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [showLoginSheet, setShowLoginSheet] = useState(false);
+
 
     const handleLoginSuccess = () => {
         setIsLoggedIn(true);
