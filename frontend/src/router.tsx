@@ -3,7 +3,7 @@ import Login from './pages/login';
 import Home from './pages/home';
 import Following from './pages/following';
 import Find from './pages/find';
-import Layout from './Layout';
+import Layout from './Root';
 
 const routes: RouteObject[] = [
   {

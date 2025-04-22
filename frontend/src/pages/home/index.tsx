@@ -1,8 +1,7 @@
 export default function Home() {
   return (
-    <>
-      <h1>Home</h1>
-      <p>欢迎来到论坛首页</p>
-    </>
-  );
+    <div className="w-full h-full flex flex-col justify-center items-center">
+            <h1 className="text-4xl font-bold">Welcome to OpenHouse</h1>
+        </div>
+    );
 }
