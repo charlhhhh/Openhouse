@@ -1,10 +1,10 @@
 import React from 'react';
 
-export default function Find() {
+export default function FindPartner() {
   return (
     <div>
       <h1>Find</h1>
-      <p>发现感兴趣的话题和用户</p>
+      <p>发现伙伴</p>
     </div>
   );
 } 
