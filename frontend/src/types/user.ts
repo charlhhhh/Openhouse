@@ -1,11 +1,11 @@
 export interface UserProfile {
     id: string;
     email: string;
-    nickname?: string;
+    display_name?: string;
     github_username?: string;
     school_email?: string;
     tags?: string[];
-    research_areas?: string[];
+    research_area?: string;
     avatar?: string;
 }
 

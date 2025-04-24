@@ -21,7 +21,9 @@ export default function Root() {
   // 监听登录状态变化
   useEffect(() => {
     const handleLoginStateChange = () => {
+      console.log("handleLoginStateChange")
       const session = userSession.getSession();
+      console.log("session:", session)
       setIsLoggedIn(!!session);
 
       // 如果用户已登录但没有个人资料，显示资料创建面板
@@ -58,7 +60,7 @@ export default function Root() {
     <Layout className="h-screen w-screen">
       <CustomSider />
       <Layout className="flex-1">
-        <TopBar />
+        <TopBar onShowLogin={showLoginModal} />
         <Content className="h-full" style={{ marginTop: '8px' }}>
           <Outlet />
         </Content>

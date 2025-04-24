@@ -1,7 +1,10 @@
 import React from 'react';
-import { Input, Button } from 'antd';
-import { SearchOutlined, BellOutlined, UserOutlined } from '@ant-design/icons';
+import { Input, Button, Dropdown } from 'antd';
+import { SearchOutlined, BellOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
+import { useNavigate } from 'react-router-dom';
+import { userSession } from '../utils/UserSession';
+import type { MenuProps } from 'antd';
 
 const TopBarContainer = styled.div`
   height: 88px;
@@ -42,11 +45,34 @@ const StyledInput = styled(Input)`
   }
 `;
 
+
 const ButtonGroup = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
 `;
+
+const AccountButton = styled(Button)`
+  width: 35px;
+  height: 35px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  
+  &:hover, &:active, &:focus {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    border-color: #6A4C93!important;
+  }
+`;
+
+
+
 
 const NotificationButton = styled(Button)`
   width: 35px;
@@ -90,26 +116,50 @@ const PostButton = styled(Button)`
   }
 `;
 
-const AccountButton = styled(Button)`
-  width: 35px;
-  height: 35px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  background: transparent;
-  
-  &:hover, &:active, &:focus {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
-    border-color: #6A4C93!important;
+const StyledDropdown = styled(Dropdown)`
+  .ant-dropdown-menu {
+    border-radius: 10px;
+    padding: 8px;
+  }
+
+  .ant-dropdown-menu-item {
+    padding: 8px 16px;
+    color: #000;
+    
+    &:hover {
+      background: rgba(106, 76, 147, 0.1);
+    }
   }
 `;
 
-const TopBar: React.FC = () => {
+interface TopBarProps {
+    onShowLogin: () => void;
+}
+
+const TopBar: React.FC<TopBarProps> = ({ onShowLogin }) => {
+    const navigate = useNavigate();
+
+    const handleAccountClick = () => {
+        const session = userSession.getSession();
+        if (!session) {
+            onShowLogin();
+        }
+    };
+
+    const handleLogout = () => {
+        userSession.clearSession();
+        navigate('/');
+    };
+
+    const accountMenuItems: MenuProps['items'] = [
+        {
+            key: 'logout',
+            label: '退出登录',
+            icon: <LogoutOutlined />,
+            onClick: handleLogout
+        }
+    ];
+
     return (
         <TopBarContainer>
             <SearchContainer>
@@ -121,7 +171,23 @@ const TopBar: React.FC = () => {
             <ButtonGroup>
                 <NotificationButton icon={<BellOutlined style={{ fontSize: '20px' }} />} />
                 <PostButton>+Post</PostButton>
-                <AccountButton icon={<UserOutlined style={{ fontSize: '20px' }} />} />
+                {userSession.getSession() ? (
+                    <StyledDropdown
+                        menu={{ items: accountMenuItems }}
+                        trigger={['click']}
+                        placement="bottomRight"
+                    >
+                        <AccountButton
+                            icon={<UserOutlined style={{ fontSize: '20px' }} />}
+                            onClick={handleAccountClick}
+                        />
+                    </StyledDropdown>
+                ) : (
+                    <AccountButton
+                        icon={<UserOutlined style={{ fontSize: '20px' }} />}
+                        onClick={handleAccountClick}
+                    />
+                )}
             </ButtonGroup>
         </TopBarContainer>
     );

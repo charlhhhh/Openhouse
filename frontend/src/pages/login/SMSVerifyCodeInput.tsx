@@ -51,13 +51,8 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
         inputRef.current?.focus();
     };
 
-    // 处理发送验证码
-    const handleSendVerification = () => {
-        if (countdown > 0) return;
-
-        onVerificationSend();
+    const startAutoCountdown = () => {
         setCountdown(COUNTDOWN_SECONDS);
-
         countdownRef.current = window.setInterval(() => {
             setCountdown(prev => {
                 if (prev <= 1) {
@@ -72,6 +67,28 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
         }, 1000);
     };
 
+    // 处理发送验证码
+    const handleSendVerification = () => {
+        if (countdown > 0) return;
+
+        onVerificationSend();
+        startAutoCountdown();
+        // setCountdown(COUNTDOWN_SECONDS);
+
+        // countdownRef.current = window.setInterval(() => {
+        //     setCountdown(prev => {
+        //         if (prev <= 1) {
+        //             if (countdownRef.current) {
+        //                 window.clearInterval(countdownRef.current);
+        //                 countdownRef.current = null;
+        //             }
+        //             return 0;
+        //         }
+        //         return prev - 1;
+        //     });
+        // }, 1000);
+    };
+
     // 清理倒计时
     useEffect(() => {
         return () => {
@@ -83,8 +100,7 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
 
     useEffect(() => {
         if (autoStartCountdown) {
-            setCountdown(60);
-            handleSendVerification();
+            startAutoCountdown();
         }
     }, []);
 
@@ -126,7 +142,6 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
                         </div>
                     ))}
                 </div>
-
 
             </div>
             <Button

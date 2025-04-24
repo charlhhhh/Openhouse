@@ -22,10 +22,12 @@ interface LoginSheetProps {
 
 
 supabase.auth.onAuthStateChange(async (event, session) => {
+    console.log("onAuthStateChange", event, session)
     if (event === 'SIGNED_IN' && session) {
         const { id, email } = session.user;
         // 保存session信息
         userSession.setSession(id, email ?? "");
+        console.log("session:", session)
         // 查询用户资料
         const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', id).single()
         if (error) {
@@ -99,11 +101,8 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
 
         setIsLoading(true);
         try {
-            // TODO: 发送验证码到邮箱
-            console.log('发送验证码到:', email);
-            setShowVerification(true);
             setShouldStartCountdown(true);
-            // handleVerificationSend();
+            handleVerificationSend();
         } catch (error) {
             console.error('发送验证码失败:', error);
         } finally {
@@ -120,6 +119,7 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
             if (error) {
                 console.error('发送验证码失败:', error);
             } else {
+                setShowVerification(true);
                 console.log('验证码发送成功');
             }
 

@@ -41,6 +41,7 @@ export const UserProfileCreateSheet: React.FC<UserProfileCreateSheetProps> = ({
         setIsSubmitting(true);
         try {
             const session = userSession.getSession();
+            console.log("session:", session)
             if (!session) return;
 
             const profile: UserProfile = {
@@ -48,20 +49,20 @@ export const UserProfileCreateSheet: React.FC<UserProfileCreateSheetProps> = ({
                 email: session.email,
                 display_name: nickname,
                 github_username: githubUsername,
-                research_areas: researchAreas,
+                research_area: researchAreas,
                 tags: [],
                 // school_email: schoolEmail
             };
+            console.log("profile:", profile)
 
             const { error } = await supabase.from('profiles').insert({ ...profile })
+
+
             if (error) {
                 console.error('插入用户资料失败:', error);
                 return;
             }
-            // if (data) {
-            //     console.log('更新用户资料:', data);
 
-            // }
 
             if (error) throw error;
 
@@ -94,8 +95,6 @@ export const UserProfileCreateSheet: React.FC<UserProfileCreateSheetProps> = ({
             <div style={styles.sheetContainer}>
                 <div style={styles.backgroundImage}>
                     <div style={styles.content}>
-                        <h1 style={styles.title}>Welcome to OpenHouse</h1>
-                        <p style={styles.subtitle}>Sign in to continue</p>
                         <div style={styles.inputContainer}>
                             <Input
                                 style={styles.input}
