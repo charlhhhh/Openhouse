@@ -4,10 +4,10 @@ import type { InputRef } from 'antd';
 
 const { Text } = Typography;
 
-const CODE_LENGTH = 4;
-const CELL_SIZE = 84;
+const CODE_LENGTH = 6;
+const CELL_SIZE = 66;
 const COUNTDOWN_SECONDS = 60;
-const CELL_CONTAINER_WIDTH = CELL_SIZE * CODE_LENGTH + 12 * (CODE_LENGTH - 1);
+const CELL_CONTAINER_WIDTH = CELL_SIZE * CODE_LENGTH + 5 * (CODE_LENGTH - 1);
 const SHEET_WIDTH = 840;
 
 interface SMSVerifyCodeInputProps {
@@ -22,7 +22,7 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
     const [countdown, setCountdown] = useState(0);
     const inputRef = useRef<InputRef>(null);
     const countdownRef = useRef<number | null>(null);
-
+    const [isLoading, setIsLoading] = useState(false);
 
     // 处理验证码输入和退格键
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -37,10 +37,11 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
             setCode(newCode);
             const nextIndex = Math.min(activeIndex + 1, CODE_LENGTH - 1);
             setActiveIndex(nextIndex);
+            console.log('newCode:', code);
             // 如果输入完成，触发回调
-            if (newCode.every(c => c !== '') && newCode.length === CODE_LENGTH) {
-                onInputCompleted(newCode.join(''));
-            }
+            // if (newCode.every(c => c !== '') && newCode.length === CODE_LENGTH) {
+            //     onInputCompleted(newCode.join(''));
+            // }
         }
     };
 
@@ -50,13 +51,8 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
         inputRef.current?.focus();
     };
 
-    // 处理发送验证码
-    const handleSendVerification = () => {
-        if (countdown > 0) return;
-
-        onVerificationSend();
+    const startAutoCountdown = () => {
         setCountdown(COUNTDOWN_SECONDS);
-
         countdownRef.current = window.setInterval(() => {
             setCountdown(prev => {
                 if (prev <= 1) {
@@ -71,6 +67,28 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
         }, 1000);
     };
 
+    // 处理发送验证码
+    const handleSendVerification = () => {
+        if (countdown > 0) return;
+
+        onVerificationSend();
+        startAutoCountdown();
+        // setCountdown(COUNTDOWN_SECONDS);
+
+        // countdownRef.current = window.setInterval(() => {
+        //     setCountdown(prev => {
+        //         if (prev <= 1) {
+        //             if (countdownRef.current) {
+        //                 window.clearInterval(countdownRef.current);
+        //                 countdownRef.current = null;
+        //             }
+        //             return 0;
+        //         }
+        //         return prev - 1;
+        //     });
+        // }, 1000);
+    };
+
     // 清理倒计时
     useEffect(() => {
         return () => {
@@ -82,8 +100,7 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
 
     useEffect(() => {
         if (autoStartCountdown) {
-            setCountdown(60);
-            handleSendVerification();
+            startAutoCountdown();
         }
     }, []);
 
@@ -125,20 +142,32 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
                         </div>
                     ))}
                 </div>
-                <Button
-                    style={{
-                        ...styles.sendButton,
-                        ...(countdown > 0 ? styles.sendButtonDisabled : {})
-                    }}
-                    onClick={handleSendVerification}
-                    disabled={countdown > 0}
-                    type="link"
-                >
-                    <Text style={styles.sendButtonText}>
-                        {countdown > 0 ? `${countdown}s Resend` : 'Send'}
-                    </Text>
-                </Button>
+
             </div>
+            <Button
+                style={{
+                    ...styles.button,
+                    ...(styles.buttonDisabled),
+                    background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)'
+                }}
+                onClick={() => { setIsLoading(true); onInputCompleted(code.join('')) }}
+                disabled={!(code.every(c => c !== '') && code.length === CODE_LENGTH)}
+            >
+                <span style={styles.buttonText}>Login</span>
+            </Button>
+            <Button
+                style={{
+                    ...styles.sendButton,
+                    ...(countdown > 0 ? styles.sendButtonDisabled : {})
+                }}
+                onClick={handleSendVerification}
+                disabled={countdown > 0}
+                type="link"
+            >
+                <Text style={styles.sendButtonText}>
+                    {countdown > 0 ? `${countdown}s Resend` : 'Send'}
+                </Text>
+            </Button>
         </div>
     );
 }
@@ -146,8 +175,9 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
 const styles: Record<string, React.CSSProperties> = {
     container: {
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
     },
     hiddenInput: {
         position: 'absolute',
@@ -214,5 +244,23 @@ const styles: Record<string, React.CSSProperties> = {
         fontSize: 18,
         fontWeight: '400',
         textDecoration: 'underline',
+    },
+    button: {
+        height: '49px',
+        width: '158px',
+        borderRadius: '8px',
+        marginTop: '35px',
+        marginBottom: '20px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+        border: 'none',
+        cursor: 'pointer',
+        outline: 'none',
+        color: '#fff',
+    },
+    buttonDisabled: {
+        cursor: 'not-allowed',
     },
 }; 

@@ -1,7 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Input, Divider } from 'antd';
-import { CloseOutlined, MailOutlined, GoogleOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { Button, Input, Divider, message } from 'antd';
+import { CloseOutlined, MailOutlined, GoogleOutlined, ArrowLeftOutlined, GithubOutlined, AppleOutlined } from '@ant-design/icons';
 import SMSVerifyCodeInput from './SMSVerifyCodeInput';
+import { supabase } from '../../supabase/client';
+import { userSession } from "../../utils/UserSession";
+
+
+import { Provider } from '@supabase/supabase-js';
+
 
 const SHEET_WIDTH = 840;
 const SHEET_HEIGHT = 908;
@@ -11,6 +17,31 @@ interface LoginSheetProps {
     onClose: () => void;
     onLoginSuccess: () => void;
 }
+
+
+
+
+supabase.auth.onAuthStateChange(async (event, session) => {
+    console.log("onAuthStateChange", event, session)
+    if (event === 'SIGNED_IN' && session) {
+        const { id, email } = session.user;
+        // 保存session信息
+        userSession.setSession(id, email ?? "");
+        console.log("session:", session)
+        // 查询用户资料
+        const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', id).single()
+        if (error) {
+            console.error('获取用户资料失败:', error);
+            return;
+        }
+        if (profile) {
+            console.log('更新用户资料:', profile);
+            userSession.updateProfile(profile);
+        }
+    } else if (event === 'SIGNED_OUT') {
+        userSession.clearSession();
+    }
+});
 
 export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSheetProps) {
     const [email, setEmail] = useState('');
@@ -30,6 +61,24 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
     useEffect(() => {
         setIsEmailValid(validateEmail(email));
     }, [email]);
+    // 监听登录状态变化
+    useEffect(() => {
+        const handleLoginStateChange = () => {
+            const session = userSession.getSession()
+            // 如果用户已登录但没有个人资料，显示资料创建面板
+            if (session) {
+                onLoginSuccess();
+            }
+        };
+        // 初始化时检查登录状态
+        handleLoginStateChange();
+        // 添加登录状态变化监听
+        userSession.addListener(handleLoginStateChange);
+        // 清理监听器
+        return () => {
+            userSession.removeListener(handleLoginStateChange);
+        };
+    }, []);
 
     // 重置所有状态
     const resetState = () => {
@@ -52,10 +101,8 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
 
         setIsLoading(true);
         try {
-            // TODO: 发送验证码到邮箱
-            console.log('发送验证码到:', email);
-            setShowVerification(true);
             setShouldStartCountdown(true);
+            handleVerificationSend();
         } catch (error) {
             console.error('发送验证码失败:', error);
         } finally {
@@ -67,7 +114,15 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
         setIsLoading(true);
         try {
             // TODO: 重新发送验证码
-            console.log('重新发送验证码到:', email);
+            console.log('发送验证码到:', email);
+            const { error } = await supabase.auth.signInWithOtp({ email });
+            if (error) {
+                console.error('发送验证码失败:', error);
+            } else {
+                setShowVerification(true);
+                console.log('验证码发送成功');
+            }
+
         } catch (error) {
             console.error('发送验证码失败:', error);
         } finally {
@@ -80,7 +135,15 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
         try {
             // TODO: 验证验证码
             console.log('验证验证码:', code);
-            onLoginSuccess();
+            const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' })
+            if (error) {
+                console.error('验证失败:', error);
+                message.warning(error?.message ?? '验证失败');
+            } else {
+                console.log('验证成功');
+                //  onLoginSuccess();
+            }
+            // onLoginSuccess();
         } catch (error) {
             console.error('验证失败:', error);
         } finally {
@@ -88,9 +151,27 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
         }
     };
 
-    const handleGoogleLogin = async () => {
+    const handleThirdPartyLogin = async (thirdParty: string) => {
         // 添加谷歌登录逻辑
-        console.log('谷歌登录');
+        setIsLoading(true);
+        try {
+            console.log('登录', thirdParty);
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: thirdParty as Provider,
+                options: {
+                    redirectTo: window.location.origin
+                }
+            });
+            if (error) {
+                console.error('登录失败:', error);
+            } else {
+                console.log('登录成功');
+            }
+        } catch (error) {
+            console.error('登录失败:', error);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const isButtonEnabled = showVerification
@@ -100,82 +181,108 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
     if (!visible) return null;
 
     return (
-        <div style={styles.modalContainer}>
-            <div style={styles.sheetContainer}>
-                <div style={styles.backgroundImage}>
-                    <div style={styles.content}>
-                        {!showVerification ? (
-                            <>
-                                <h1 style={styles.title}>Welcome to OpenHouse</h1>
-                                <p style={styles.subtitle}>Sign in to continue</p>
+        // <div style={styles.modalContainer}>
+        <div style={styles.sheetContainer}>
+            <div style={styles.backgroundImage}>
+                <div style={styles.content}>
+                    {!showVerification ? (
+                        <>
+                            <h1 style={styles.title}>Welcome to OpenHouse</h1>
+                            <p style={styles.subtitle}>Sign in to continue</p>
 
-                                <div style={styles.inputContainer}>
-                                    <MailOutlined style={{ marginRight: 12, fontSize: '24px', color: '#A0A1A5' }} />
-                                    <Input
-                                        style={styles.input}
-                                        placeholder="Email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        type="email"
-                                    />
-                                </div>
+                            <div style={styles.inputContainer}>
+                                <MailOutlined style={{ marginRight: 12, fontSize: '24px', color: '#A0A1A5' }} />
+                                <Input
+                                    style={styles.input}
+                                    placeholder="Email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    type="email"
+                                />
+                            </div>
 
+                            <Button
+                                style={{
+                                    ...styles.button,
+                                    ...(!isEmailValid && styles.buttonDisabled),
+                                    background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)'
+                                }}
+                                onClick={handleEmailSubmit}
+                                disabled={!isEmailValid || isLoading}
+                            >
+                                <span style={styles.buttonText}>Continue with email</span>
+                            </Button>
+
+                            {/* <Divider orientation="center">or</Divider> */}
+
+                            <Button
+                                style={{
+                                    ...styles.button,
+                                    ...styles.googleButton,
+                                    background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)'
+                                }}
+                                onClick={() => handleThirdPartyLogin('google')}
+                                disabled={isLoading}
+                                icon={<GoogleOutlined style={{ marginRight: 8, fontSize: '20px', color: '#fff' }} />}
+                            >
+                                <span style={styles.buttonText}>Continue with Google</span>
+                            </Button>
+
+                            <Button
+                                style={{
+                                    ...styles.button,
+                                    ...styles.googleButton,
+                                    background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)'
+                                }}
+                                onClick={() => handleThirdPartyLogin('github')}
+                                disabled={isLoading}
+                                icon={<GithubOutlined style={{ marginRight: 8, fontSize: '20px', color: '#fff' }} />}
+                            >
+                                <span style={styles.buttonText}>Continue with Github</span>
+                            </Button>
+                            <Button
+                                style={{
+                                    ...styles.button,
+                                    ...styles.googleButton,
+                                    background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)'
+                                }}
+                                onClick={() => handleThirdPartyLogin('microsoft')}
+                                disabled={isLoading}
+                            // icon={<AppleOutlined style={{ marginRight: 8, fontSize: '20px', color: '#fff' }} />}
+                            >
+                                <span style={styles.buttonText}>Continue with Microsoft</span>
+                            </Button>
+
+                        </>
+                    ) : (
+                        <>
+                            <h1 style={styles.title}>Enter verification code</h1>
+                            <p style={styles.subtitle}>We sent a code to {email}</p>
+
+                            <div style={styles.verificationContainer}>
+                                <SMSVerifyCodeInput
+                                    onInputCompleted={handleVerificationSubmit}
+                                    onVerificationSend={handleVerificationSend}
+                                    autoStartCountdown={shouldStartCountdown}
+                                />
+                            </div>
+
+                            <div style={styles.backButtonContainer}>
                                 <Button
-                                    style={{
-                                        ...styles.button,
-                                        ...(!isEmailValid && styles.buttonDisabled),
-                                        background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)'
-                                    }}
-                                    onClick={handleEmailSubmit}
-                                    disabled={!isEmailValid || isLoading}
+                                    style={styles.backButton}
+                                    onClick={() => setShowVerification(false)}
+                                    type="text"
+                                    icon={<ArrowLeftOutlined style={{ fontSize: '20px', color: '#6A4C93' }} />}
                                 >
-                                    <span style={styles.buttonText}>Continue with email</span>
+                                    <span style={styles.backButtonText}>Back</span>
                                 </Button>
-
-                                <Divider orientation="center">or</Divider>
-
-                                <Button
-                                    style={{
-                                        ...styles.button,
-                                        ...styles.googleButton,
-                                        background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)'
-                                    }}
-                                    onClick={handleGoogleLogin}
-                                    disabled={isLoading}
-                                    icon={<GoogleOutlined style={{ marginRight: 8, fontSize: '20px', color: '#fff' }} />}
-                                >
-                                    <span style={styles.buttonText}>Continue with Google</span>
-                                </Button>
-                            </>
-                        ) : (
-                            <>
-                                <h1 style={styles.title}>Enter verification code</h1>
-                                <p style={styles.subtitle}>We sent a code to {email}</p>
-
-                                <div style={styles.verificationContainer}>
-                                    <SMSVerifyCodeInput
-                                        onInputCompleted={handleVerificationSubmit}
-                                        onVerificationSend={handleVerificationSend}
-                                        autoStartCountdown={shouldStartCountdown}
-                                    />
-                                </div>
-
-                                <div style={styles.backButtonContainer}>
-                                    <Button
-                                        style={styles.backButton}
-                                        onClick={() => setShowVerification(false)}
-                                        type="text"
-                                        icon={<ArrowLeftOutlined style={{ fontSize: '20px', color: '#6A4C93' }} />}
-                                    >
-                                        <span style={styles.backButtonText}>Back</span>
-                                    </Button>
-                                </div>
-                            </>
-                        )}
-                    </div>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
+        // </div>
     );
 }
 
@@ -186,26 +293,28 @@ const styles: { [key: string]: React.CSSProperties } = {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        // backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        backgroundColor: 'transparent',
     },
     sheetContainer: {
         width: SHEET_WIDTH,
         height: SHEET_HEIGHT,
         overflow: 'hidden',
         position: 'relative',
+        // backgroundColor: 'transparent',
     },
     backgroundImage: {
-        width: '100%',
-        height: '100%',
+        // width: '100%',
+        // height: '100%',
         backgroundImage: 'url(/bg_login.png)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         position: 'absolute',
+        zIndex: 0,
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        opacity: 0.8
     },
     header: {
         display: 'flex',
@@ -220,8 +329,12 @@ const styles: { [key: string]: React.CSSProperties } = {
         cursor: 'pointer',
     },
     content: {
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-between',
         position: 'relative',
-        padding: '380px 0px 0 0px',
+        padding: '380px 0px 0px 0px',
         paddingTop: `calc(${SHEET_HEIGHT} * 0.35)`,
         color: '#fff',
     },
@@ -246,7 +359,8 @@ const styles: { [key: string]: React.CSSProperties } = {
         borderRadius: '8px',
         // marginBottom: '18px',
         padding: '0 16px',
-        width: '60%',
+        width: '455px',
+        height: '65px',
         margin: '10px auto',
     },
     input: {
@@ -259,6 +373,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     },
     button: {
         height: '60px',
+        width: '305px',
         borderRadius: '8px',
         marginTop: '10px',
         marginBottom: '20px',
@@ -268,7 +383,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         overflow: 'hidden',
         border: 'none',
         cursor: 'pointer',
-        margin: '0 auto',
+        margin: '5px auto',
         outline: 'none',
     },
     buttonDisabled: {

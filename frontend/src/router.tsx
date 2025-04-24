@@ -1,32 +1,42 @@
 import { createBrowserRouter, RouteObject } from 'react-router-dom';
-import Login from './pages/login';
+import Root from './Root';
 import Home from './pages/home';
+import Login from './pages/login';
+import FindPartner from './pages/find';
+import Account from './pages/account';
+import Sage from './pages/sage';
 import Following from './pages/following';
-import Find from './pages/find';
-import Layout from './Root';
 
 const routes: RouteObject[] = [
   {
     path: '/',
-    element: <Layout />,
+    element: <Root />,
     children: [
       {
-        path: '',
+        path: '/',
         element: <Home />,
       },
       {
-        path: 'following',
-        element: <Following />,
+        path: '/login',
+        element: <Login />,
       },
       {
-        path: 'find',
-        element: <Find />,
+        path: '/sage',
+        element: <Sage />,
+      },
+      {
+        path: '/findPartner',
+        element: <FindPartner />,
+      },
+      {
+        path: '/account',
+        element: <Account />,
+      },
+      {
+        path: '/following',
+        element: <Following />,
       },
     ],
-  },
-  {
-    path: '/login',
-    element: <Login />,
   },
 ];
 
