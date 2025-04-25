@@ -4,10 +4,18 @@ import { CloseOutlined, MailOutlined, GoogleOutlined, ArrowLeftOutlined, GithubO
 import SMSVerifyCodeInput from './SMSVerifyCodeInput';
 import { supabase } from '../../supabase/client';
 import { userSession } from "../../utils/UserSession";
-
-
 import { Provider } from '@supabase/supabase-js';
+import { create } from 'zustand';
 
+interface LoginSheetStore {
+    isVisible: boolean;
+    setVisible: (visible: boolean) => void;
+}
+
+export const useLoginSheet = create<LoginSheetStore>()((set) => ({
+    isVisible: false,
+    setVisible: (visible: boolean) => set({ isVisible: visible }),
+}));
 
 const SHEET_WIDTH = 840;
 const SHEET_HEIGHT = 908;
@@ -17,10 +25,6 @@ interface LoginSheetProps {
     onClose: () => void;
     onLoginSuccess: () => void;
 }
-
-
-
-
 
 export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSheetProps) {
     const [email, setEmail] = useState('');

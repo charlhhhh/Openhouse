@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     GithubOutlined,
     GoogleOutlined,
@@ -7,9 +7,14 @@ import {
     EditOutlined,
     DeleteOutlined
 } from '@ant-design/icons';
-import { Image } from 'antd';
+import { Image, message } from 'antd';
 import styles from './Account.module.css';
 import ContributionGraph from '../../components/ContributionGraph';
+import { supabase } from '../../supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { useLoginSheet } from '../../pages/login/LoginSheet';
+import { UserProfileEditSheet } from '../../pages/profile/UserProfileEditSheet';
+
 
 interface Post {
     id: string;
@@ -71,18 +76,91 @@ const generateContributionData = (): ContributionDay[] => {
 };
 
 export default function Account() {
-    // 模拟数据
-    const userInfo = {
-        avatar: '/avatar.jpg',
-        nickname: '用户昵称',
-        coins: 24,
-        id: 'ID12345',
-        bio: '这是一段个人介绍文字',
-        followers: 123,
-        followings: 45,
-        isVerified: true,
-        contributions: 8,
+    const navigate = useNavigate();
+    const { setVisible } = useLoginSheet();
+    const [userInfo, setUserInfo] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+    const [editSheetVisible, setEditSheetVisible] = useState(false);
+
+    useEffect(() => {
+        checkAuth();
+    }, []);
+
+    const checkAuth = async () => {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                navigate('/');
+                setVisible(true);
+                return;
+            }
+
+            const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.user.id)
+                .single();
+
+            // 设置用户信息，如果没有 profile 或获取失败则使用默认值
+            const defaultNickname = session.user.email?.split('@')[0] || 'User';
+            setUserInfo({
+                avatar: profile?.avatar_url || '/default-avatar.png',
+                nickname: profile?.nickname || defaultNickname,
+                coins: profile?.coins || 0,
+                id: session.user.id,
+                bio: profile?.bio || '',
+                gender: profile?.gender,
+                followers: profile?.followers_count || 0,
+                followings: profile?.following_count || 0,
+                isVerified: profile?.is_verified || false,
+                contributions: profile?.contributions || 0,
+            });
+
+            if (profileError && profileError.code !== 'PGRST116') {
+                message.warning('获取用户信息失败，显示默认信息');
+            }
+        } catch (error) {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                const defaultNickname = session.user.email?.split('@')[0] || 'User';
+                setUserInfo({
+                    avatar: '/default-avatar.png',
+                    nickname: defaultNickname,
+                    coins: 0,
+                    id: session.user.id,
+                    bio: '',
+                    gender: null,
+                    followers: 0,
+                    followings: 0,
+                    isVerified: false,
+                    contributions: 0,
+                });
+                message.warning('获取用户信息失败，显示默认信息');
+            } else {
+                message.error('发生错误，请稍后重试');
+            }
+        } finally {
+            setLoading(false);
+        }
     };
+
+    const handleEditClick = () => {
+        setEditSheetVisible(true);
+    };
+
+    const handleEditClose = () => {
+        setEditSheetVisible(false);
+        // 重新加载用户信息
+        checkAuth();
+    };
+
+    if (loading) {
+        return <div>加载中...</div>;
+    }
+
+    if (!userInfo) {
+        return null;
+    }
 
     const posts: Post[] = [
         {
@@ -128,8 +206,9 @@ export default function Account() {
 
                         <div className={styles.userInfo}>
                             <div className={styles.userInfoRow}>
-                                <ManOutlined className={styles.icon} />
+                                {userInfo.gender && <ManOutlined className={styles.icon} />}
                                 <span className={styles.userName}>{userInfo.nickname}</span>
+                                <EditOutlined className={styles.editIcon} onClick={handleEditClick} />
                                 <GithubOutlined className={styles.icon} />
                                 <GoogleOutlined className={styles.icon} />
                                 <MailOutlined className={styles.icon} />
@@ -211,6 +290,19 @@ export default function Account() {
                     )}
                 </div>
             </div>
+
+            {/* Edit Profile Sheet */}
+            <UserProfileEditSheet
+                visible={editSheetVisible}
+                onClose={handleEditClose}
+                initialData={{
+                    avatar_url: userInfo?.avatar,
+                    display_name: userInfo?.nickname,
+                    intro: userInfo?.bio,
+                    gender: userInfo?.gender,
+                    research_area: userInfo?.research_area,
+                }}
+            />
         </div>
     );
 } 

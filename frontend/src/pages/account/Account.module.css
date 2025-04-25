@@ -243,3 +243,15 @@
     background-color: #e6e6e6;
     color: #1890ff;
 }
+
+.editIcon {
+    font-size: 16px;
+    color: #6A4C93;
+    margin-left: 8px;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.editIcon:hover {
+    color: #8A6CB3;
+}
