@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input, Button, Dropdown } from 'antd';
 import { SearchOutlined, BellOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { userSession } from '../utils/UserSession';
 import type { MenuProps } from 'antd';
+import { supabase } from '../supabase/client';
 
 const TopBarContainer = styled.div`
   height: 88px;
@@ -136,18 +137,32 @@ interface TopBarProps {
     onShowLogin: () => void;
 }
 
-const TopBar: React.FC<TopBarProps> = ({ onShowLogin }) => {
+export default function TopBar({ onShowLogin }: TopBarProps) {
+    const [session, setSession] = useState<any>(null);
     const navigate = useNavigate();
 
-    const handleAccountClick = () => {
-        const session = userSession.getSession();
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+        });
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+            setSession(session);
+        });
+
+        return () => subscription.unsubscribe();
+    }, []);
+
+    const handleAccountClick = async () => {
         if (!session) {
             onShowLogin();
+        } else {
+            navigate('/account');
         }
     };
 
-    const handleLogout = () => {
-        userSession.clearSession();
+    const handleLogout = async () => {
+        await supabase.auth.signOut();
         navigate('/');
     };
 
@@ -171,10 +186,10 @@ const TopBar: React.FC<TopBarProps> = ({ onShowLogin }) => {
             <ButtonGroup>
                 <NotificationButton icon={<BellOutlined style={{ fontSize: '20px' }} />} />
                 <PostButton>+Post</PostButton>
-                {userSession.getSession() ? (
+                {session ? (
                     <StyledDropdown
                         menu={{ items: accountMenuItems }}
-                        trigger={['click']}
+                        trigger={['hover']}
                         placement="bottomRight"
                     >
                         <AccountButton
@@ -191,6 +206,4 @@ const TopBar: React.FC<TopBarProps> = ({ onShowLogin }) => {
             </ButtonGroup>
         </TopBarContainer>
     );
-};
-
-export default TopBar; 
+} 

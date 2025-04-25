@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { CommentPanel } from './CommentPanel';
 import { fetchComments, addComment } from './mockData';
 import { Post, Comment } from './types';
+import { SageSheet } from '../../components/SageSheet';
 
 // interface Post {
 //   id: string;
@@ -49,7 +50,7 @@ const mockPosts: Post[] = [
   // 可以添加更多模拟数据
 ];
 
-const BannerCard = ({ image, title, tag }: { image: string; title: string; tag: string }) => (
+const BannerCard = ({ image, title, tag, onClick }: { image: string; title: string; tag: string; onClick?: () => void }) => (
   <div className="banner-card">
     <div
       className="banner-card-content"
@@ -200,14 +201,21 @@ const PostCard = ({ post }: { post: Post }) => {
 };
 
 export default function Home() {
+  const [sageSheetVisible, setSageSheetVisible] = useState(false);
+
+  const handleSageClick = () => {
+    setSageSheetVisible(true);
+  };
+
   return (
     <div className="home-container">
       <div className="home-content">
         <div className="banner-container">
           <BannerCard
             image="/banner_sage.png"
-            title="探索科研"
-            tag="发现更多"
+            title="AI Sage"
+            tag="Find More"
+            onClick={handleSageClick}
           />
           <BannerCard
             image="/banner_find.png"
@@ -222,6 +230,11 @@ export default function Home() {
           ))}
         </div>
       </div>
+
+      <SageSheet
+        visible={sageSheetVisible}
+        onClose={() => setSageSheetVisible(false)}
+      />
     </div>
   );
 }

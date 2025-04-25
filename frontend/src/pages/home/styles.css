@@ -1,34 +1,37 @@
 .home-container {
     min-height: 100vh;
     background: #F7F2ECCC;
-    padding: 24px;
+    padding: 24px 68px;
 }
 
 .home-content {
-    max-width: 1152px;
+    /* max-width: 1152px; */
     margin: 0 auto;
 }
 
 .banner-container {
     display: flex;
+    justify-content: space-between;
     margin-bottom: 24px;
 }
 
 .banner-card {
     position: relative;
-    width: 50%;
-    height: 200px;
+    width: 48%;
+    /* height: 200px; */
     overflow: hidden;
     border-radius: 10px;
-    margin-right: 16px;
+    aspect-ratio: 1232 / 928;
+
 }
 
 .banner-card-content {
     width: 100%;
-    height: 100%;
+    height: 110%;
     background-size: cover;
     background-position: center;
-    border-radius: 10px;
+
+    box-shadow: 6px 7px 12.8px 0px rgba(0, 0, 0, 0.25);
 }
 
 .banner-title {
@@ -52,7 +55,7 @@
 }
 
 .feed-container {
-    max-width: 768px;
+    /* max-width: 1152px; */
     margin: 0 auto;
     border-radius: 10px;
     box-shadow: 6px 7px 12.8px 0px rgba(0, 0, 0, 0.25);
@@ -60,6 +63,7 @@
 
 .post-card {
     margin-bottom: 16px;
+    width: 100%;
     border: none;
 }
 

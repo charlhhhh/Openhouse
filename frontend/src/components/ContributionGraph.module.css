@@ -1,0 +1,126 @@
+.container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.graphContainer {
+    display: flex;
+    gap: 12px;
+}
+
+.weekLabels {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding-top: 42px;
+    /* 为月份标签留出空间 */
+}
+
+.weekLabel {
+    height: 15px;
+    line-height: 15px;
+    font-size: 14px;
+    color: #666;
+    text-align: right;
+    padding-right: 6px;
+    min-width: 45px;
+}
+
+.graphContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.scrollContainer {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.scrollContent {
+    display: flex;
+    flex-direction: column;
+    min-width: fit-content;
+}
+
+.monthLabels {
+    display: flex;
+    height: 30px;
+    margin-bottom: 12px;
+}
+
+.monthLabel {
+    width: 19.5px;
+    font-size: 14px;
+    color: #666;
+    text-align: left;
+    padding-left: 3px;
+}
+
+.graph {
+    display: flex;
+    gap: 3px;
+}
+
+.week {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.day {
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.day:hover {
+    transform: scale(1.2);
+}
+
+.legend {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-right: 24px;
+}
+
+.legendBox {
+    width: 15px;
+    height: 15px;
+    border-radius: 3px;
+}
+
+.legendText {
+    font-size: 14px;
+    color: #666;
+}
+
+.legendItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+/* 滚动条样式 */
+.scrollContainer::-webkit-scrollbar {
+    height: 12px;
+}
+
+.scrollContainer::-webkit-scrollbar-thumb {
+    background-color: #d9d9d9;
+    border-radius: 6px;
+}
+
+.scrollContainer::-webkit-scrollbar-track {
+    background-color: #f5f5f5;
+    border-radius: 6px;
+}
