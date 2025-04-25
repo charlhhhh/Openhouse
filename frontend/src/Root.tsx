@@ -1,16 +1,38 @@
-import { Modal, Button } from "antd";
+import { Modal, Button, message } from "antd";
 import { useState, useEffect } from "react";
 import { UserOutlined, CloseOutlined } from "@ant-design/icons";
 import { Layout } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Outlet, useNavigate } from "react-router-dom";
 import LoginSheet from "./pages/login/LoginSheet";
-import { UserProfileCreateSheet } from "./pages/profile/UserProfileCreateSheet";
+import { UserProfileCreateSheet } from "./pages/profile/UserLinkAuthSheet";
 import { userSession } from "./utils/UserSession";
 import CustomSider from "./components/CustomSider";
 import TopBar from './components/TopBar';
+import { supabase } from "./supabase/client";
+import warning from "antd/es/_util/warning";
 
 const SHEET_WIDTH = 840;
+
+// supabase.auth.onAuthStateChange(async (event, session) => {
+//   if (event === 'SIGNED_IN' && session) {
+//     const { id, email } = session.user;
+//     // 保存session信息
+//     userSession.setSession(id, email ?? "");
+//     // 查询用户资料
+//     const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', id).single()
+//     if (error) {
+//       console.error('获取用户资料失败:', error);
+//       return;
+//     }
+//     if (profile) {
+//       console.log('更新用户资料:', profile);
+//       userSession.updateProfile(profile);
+//     }
+//   } else if (event === 'SIGNED_OUT') {
+//     userSession.clearSession();
+//   }
+// });
 
 export default function Root() {
   const navigate = useNavigate();
@@ -18,31 +40,6 @@ export default function Root() {
   const [profileSheetVisible, setProfileSheetVisible] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // 监听登录状态变化
-  useEffect(() => {
-    const handleLoginStateChange = () => {
-      console.log("handleLoginStateChange")
-      const session = userSession.getSession();
-      console.log("session:", session)
-      setIsLoggedIn(!!session);
-
-      // 如果用户已登录但没有个人资料，显示资料创建面板
-      if (session && !session.profile) {
-        setProfileSheetVisible(true);
-      }
-    };
-
-    // 初始化时检查登录状态
-    handleLoginStateChange();
-
-    // 添加登录状态变化监听
-    userSession.addListener(handleLoginStateChange);
-
-    // 清理监听器
-    return () => {
-      userSession.removeListener(handleLoginStateChange);
-    };
-  }, []);
 
   const showLoginModal = () => {
     setLoginModalVisible(true);
@@ -84,8 +81,25 @@ export default function Root() {
         <LoginSheet
           visible={loginModalVisible}
           onClose={handleLoginCancel}
-          onLoginSuccess={() => {
+          onLoginSuccess={async () => {
+            message.success('onLoginSuccess');
             setLoginModalVisible(false);
+            const session = userSession.getSession();
+            if (session) {
+              const { data: profile, error: profileError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', session.userId)
+                .single();
+
+              if (profileError) {
+                message.warning(profileError.message);
+                return;
+              }
+              if (!profile) {
+                setProfileSheetVisible(true);
+              }
+            }
           }}
         />
       </Modal>

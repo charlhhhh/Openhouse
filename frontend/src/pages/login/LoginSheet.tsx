@@ -21,27 +21,6 @@ interface LoginSheetProps {
 
 
 
-supabase.auth.onAuthStateChange(async (event, session) => {
-    console.log("onAuthStateChange", event, session)
-    if (event === 'SIGNED_IN' && session) {
-        const { id, email } = session.user;
-        // 保存session信息
-        userSession.setSession(id, email ?? "");
-        console.log("session:", session)
-        // 查询用户资料
-        const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', id).single()
-        if (error) {
-            console.error('获取用户资料失败:', error);
-            return;
-        }
-        if (profile) {
-            console.log('更新用户资料:', profile);
-            userSession.updateProfile(profile);
-        }
-    } else if (event === 'SIGNED_OUT') {
-        userSession.clearSession();
-    }
-});
 
 export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSheetProps) {
     const [email, setEmail] = useState('');
@@ -61,24 +40,6 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
     useEffect(() => {
         setIsEmailValid(validateEmail(email));
     }, [email]);
-    // 监听登录状态变化
-    useEffect(() => {
-        const handleLoginStateChange = () => {
-            const session = userSession.getSession()
-            // 如果用户已登录但没有个人资料，显示资料创建面板
-            if (session) {
-                onLoginSuccess();
-            }
-        };
-        // 初始化时检查登录状态
-        handleLoginStateChange();
-        // 添加登录状态变化监听
-        userSession.addListener(handleLoginStateChange);
-        // 清理监听器
-        return () => {
-            userSession.removeListener(handleLoginStateChange);
-        };
-    }, []);
 
     // 重置所有状态
     const resetState = () => {
@@ -141,9 +102,8 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
                 message.warning(error?.message ?? '验证失败');
             } else {
                 console.log('验证成功');
-                //  onLoginSuccess();
+                onLoginSuccess();
             }
-            // onLoginSuccess();
         } catch (error) {
             console.error('验证失败:', error);
         } finally {
@@ -166,6 +126,7 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
                 console.error('登录失败:', error);
             } else {
                 console.log('登录成功');
+                onLoginSuccess()
             }
         } catch (error) {
             console.error('登录失败:', error);

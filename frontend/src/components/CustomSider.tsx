@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Layout, Menu } from 'antd';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { SageSheet } from './SageSheet';
 
 const { Sider } = Layout;
 
@@ -148,12 +149,16 @@ const menuItems: MenuItem[] = [
 ];
 
 const CustomSider: React.FC = () => {
+    const [sageSheetVisible, setSageSheetVisible] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
 
     const handleMenuClick = (key: string) => {
-        console.log('Navigating to:', key); // 添加日志以便调试
-        navigate(key);
+        if (key === '/sage') {
+            setSageSheetVisible(true);
+        } else {
+            navigate(key);
+        }
     };
 
     const renderMenuItem = (item: MenuItem) => {
@@ -185,13 +190,17 @@ const CustomSider: React.FC = () => {
                 <StyledMenu
                     mode="inline"
                     selectedKeys={[location.pathname]}
+                    onClick={({ key }) => handleMenuClick(key)}
                     items={menuItems.map(item => ({
                         key: item.key,
-                        onClick: () => navigate(item.key),
                         label: renderMenuItem(item)
                     }))}
                 />
             </ContentWrapper>
+            <SageSheet
+                visible={sageSheetVisible}
+                onClose={() => setSageSheetVisible(false)}
+            />
         </StyledSider>
     );
 };

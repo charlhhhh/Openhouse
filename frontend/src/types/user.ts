@@ -5,7 +5,11 @@ export interface UserProfile {
     github_username?: string;
     school_email?: string;
     tags?: string[];
+<<<<<<< HEAD
     research_area?: string;
+=======
+    research_area?: string[];
+>>>>>>> 209d7ac ([feat] add sage card.)
     avatar?: string;
 }
 
