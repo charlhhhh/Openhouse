@@ -40,7 +40,6 @@ export default function Root() {
   const [profileSheetVisible, setProfileSheetVisible] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-
   const showLoginModal = () => {
     setLoginModalVisible(true);
   };
@@ -58,7 +57,7 @@ export default function Root() {
       <CustomSider />
       <Layout className="flex-1">
         <TopBar onShowLogin={showLoginModal} />
-        <Content className="h-full" style={{ marginTop: '8px' }}>
+        <Content className="h-full" style={{ marginTop: '8px', backgroundColor: '#F7F2ECCC' }}>
           <Outlet />
         </Content>
       </Layout>
@@ -84,14 +83,13 @@ export default function Root() {
           onLoginSuccess={async () => {
             message.success('onLoginSuccess');
             setLoginModalVisible(false);
-            const session = userSession.getSession();
-            if (session) {
+            const session = await supabase.auth.getSession();
+            if (session.data.session) {
               const { data: profile, error: profileError } = await supabase
                 .from('profiles')
                 .select('*')
-                .eq('id', session.userId)
+                .eq('id', session.data.session.user.id)
                 .single();
-
               if (profileError) {
                 message.warning(profileError.message);
                 return;
