@@ -1,15 +1,16 @@
 package service
 
 import (
-	"IShare/global"
-	"IShare/model/database"
+	"OpenHouse/global"
+	"OpenHouse/model/database"
 	"errors"
 	"fmt"
-	"github.com/jinzhu/gorm"
-	"gopkg.in/gomail.v2"
 	"log"
 	"strconv"
 	"time"
+
+	"github.com/jinzhu/gorm"
+	"gopkg.in/gomail.v2"
 )
 
 //func QueryApplicationByAuthor(author_id string) (submit database.Application, notFound bool) {

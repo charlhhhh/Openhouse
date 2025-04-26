@@ -1,8 +1,8 @@
 package main
 
 import (
-	"IShare/global"
-	"IShare/initialize"
+	"OpenHouse/global"
+	"OpenHouse/initialize"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -16,7 +16,7 @@ func main() {
 	defer initialize.CloseMySQL()
 
 	initialize.InitMedia()
-	initialize.InitElasticSearch()
+	// initialize.InitElasticSearch()
 
 	r := gin.Default()
 	initialize.SetupRouter(r)

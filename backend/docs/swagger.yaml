@@ -1829,6 +1829,27 @@ paths:
       summary: 显示用户建立的所有收藏夹 Vera
       tags:
       - 社交
+  /test:
+    get:
+      consumes:
+      - application/json
+      description: 测试前后端联通性
+      parameters:
+      - description: ping
+        in: query
+        name: data
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"message": "pong", "success": true}'
+          schema:
+            type: string
+      summary: 测试前后端联通性
+      tags:
+      - 测试
   /user/headshot:
     post:
       description: 上传用户头像

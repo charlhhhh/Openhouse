@@ -7,7 +7,7 @@ import (
 
 	"github.com/golang-jwt/jwt"
 
-	"IShare/global"
+	"OpenHouse/global"
 )
 
 // GenerateToken 生成一个token

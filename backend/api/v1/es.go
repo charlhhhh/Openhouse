@@ -1,10 +1,10 @@
 package v1
 
 import (
-	"IShare/model/database"
-	"IShare/model/response"
-	"IShare/service"
-	"IShare/utils"
+	"OpenHouse/model/database"
+	"OpenHouse/model/response"
+	"OpenHouse/service"
+	"OpenHouse/utils"
 	"encoding/json"
 	"fmt"
 	"log"

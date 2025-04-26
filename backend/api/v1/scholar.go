@@ -1,11 +1,11 @@
 package v1
 
 import (
-	"IShare/global"
-	"IShare/model/database"
-	"IShare/model/response"
-	"IShare/service"
-	"IShare/utils"
+	"OpenHouse/global"
+	"OpenHouse/model/database"
+	"OpenHouse/model/response"
+	"OpenHouse/service"
+	"OpenHouse/utils"
 	"fmt"
 	"log"
 	"math"
@@ -810,7 +810,7 @@ func GetPaperPDF(c *gin.Context) {
 	for _, work := range works {
 		// log.Println(work)
 		if work.PDF != "" {
-			url := "http://ishare.horik.cn:8000/api/media/pdf/" + work.PDF
+			url := "http://OpenHouse.horik.cn:8000/api/media/pdf/" + work.PDF
 			c.JSON(200, gin.H{"msg": "获取成功", "data": url})
 			return
 		}

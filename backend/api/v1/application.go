@@ -1,10 +1,10 @@
 package v1
 
 import (
-	"IShare/global"
-	"IShare/model/database"
-	"IShare/model/response"
-	"IShare/service"
+	"OpenHouse/global"
+	"OpenHouse/model/database"
+	"OpenHouse/model/response"
+	"OpenHouse/service"
 	"fmt"
 	"math/rand"
 	"net/http"

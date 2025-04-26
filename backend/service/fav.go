@@ -1,10 +1,11 @@
 package service
 
 import (
-	"IShare/global"
-	"IShare/model/database"
+	"OpenHouse/global"
+	"OpenHouse/model/database"
 	"errors"
 	"fmt"
+
 	"github.com/jinzhu/gorm"
 )
 

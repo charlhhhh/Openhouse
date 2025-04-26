@@ -1,9 +1,9 @@
 package v1
 
 import (
-	"IShare/model/database"
-	"IShare/model/response"
-	"IShare/service"
+	"OpenHouse/model/database"
+	"OpenHouse/model/response"
+	"OpenHouse/service"
 	"net/http"
 	"time"
 

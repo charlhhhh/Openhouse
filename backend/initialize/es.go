@@ -9,7 +9,7 @@ import (
 
 	"github.com/olivere/elastic/v7"
 
-	"IShare/global"
+	"OpenHouse/global"
 )
 
 func InitElasticSearch() {

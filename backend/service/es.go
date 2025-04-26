@@ -1,9 +1,9 @@
 package service
 
 import (
-	"IShare/global"
-	"IShare/model/database"
-	"IShare/utils"
+	"OpenHouse/global"
+	"OpenHouse/model/database"
+	"OpenHouse/utils"
 	"context"
 	"encoding/json"
 	"errors"

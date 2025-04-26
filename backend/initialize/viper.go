@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/viper"
 
-	"IShare/global"
+	"OpenHouse/global"
 )
 
 func InitViper() (err error) {

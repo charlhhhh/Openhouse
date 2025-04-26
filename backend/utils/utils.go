@@ -263,8 +263,8 @@ func RemovePrefix(s string) string {
 	return strings.Replace(s, "https://openalex.org/", "", -1)
 }
 
-//https://api.openalex.org/authors?search=kaiming%20he&page=2&per_page=10&sort=cited_by_count:desc
-//https://api.openalex.org/authors?search=kaiming%20he&group_by=last_known_institution.id
+// https://api.openalex.org/authors?search=kaiming%20he&page=2&per_page=10&sort=cited_by_count:desc
+// https://api.openalex.org/authors?search=kaiming%20he&group_by=last_known_institution.id
 func GetByUrl(urlstring string) (map[string]interface{}, error) {
 	u, _ := url.Parse(urlstring)
 	q := u.Query()

@@ -12,7 +12,7 @@ import (
 	"github.com/rifflock/lfshook"
 	"github.com/sirupsen/logrus"
 
-	"IShare/global"
+	"OpenHouse/global"
 )
 
 func LoggerToFile() gin.HandlerFunc {

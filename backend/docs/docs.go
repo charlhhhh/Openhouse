@@ -2126,6 +2126,38 @@ const docTemplate = `{
                 }
             }
         },
+        "/test": {
+            "get": {
+                "description": "测试前后端联通性",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "测试"
+                ],
+                "summary": "测试前后端联通性",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ping",
+                        "name": "data",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"message\": \"pong\", \"success\": true}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/user/headshot": {
             "post": {
                 "description": "上传用户头像",

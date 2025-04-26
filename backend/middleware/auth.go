@@ -1,10 +1,11 @@
 package middleware
 
 import (
-	"IShare/service"
-	"github.com/gin-gonic/gin"
+	"OpenHouse/service"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 func AuthRequired() gin.HandlerFunc {
