@@ -1,0 +1,9 @@
+config.yml
+/.idea
+/logs
+/media/
+/main
+*log
+scripts/urls/
+scripts/manifests
+scripts/*.json
