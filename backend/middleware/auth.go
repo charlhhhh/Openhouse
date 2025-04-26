@@ -1,32 +1,42 @@
 package middleware
 
 import (
-	"OpenHouse/service"
-	"net/http"
-	"strconv"
+	"OpenHouse/global"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	jwt "github.com/golang-jwt/jwt"
 )
 
-func AuthRequired() gin.HandlerFunc {
+func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		token := c.GetHeader("token")
-		//id, err := utils.ParseToken(token)
-		id, err := strconv.ParseUint(token, 0, 64)
-		if err != nil {
-			c.JSON(http.StatusBadGateway, gin.H{
-				"msg": "token错误",
-			})
-			c.Abort()
+		tokenString := c.GetHeader("Authorization")
+		if tokenString == "" {
+			c.AbortWithStatusJSON(401, gin.H{"message": "未提供token"})
 			return
 		}
-		if user, notFound := service.GetUserByID(id); notFound {
-			c.JSON(http.StatusBadGateway, gin.H{
-				"msg": "用户不存在 or id不合法",
-			})
-			c.Abort()
-		} else {
-			c.Set("user", user)
+
+		// 去掉 Bearer 前缀
+		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			return []byte(global.VP.GetString("jwt.secret")), nil
+		})
+		if err != nil || !token.Valid {
+			c.AbortWithStatusJSON(401, gin.H{"message": "无效token"})
+			return
 		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			c.AbortWithStatusJSON(401, gin.H{"message": "token claims错误"})
+			return
+		}
+
+		// 提取uuid放到上下文
+		uuid := claims["uuid"].(string)
+		c.Set("uuid", uuid)
+
+		c.Next()
 	}
 }

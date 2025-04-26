@@ -3,67 +3,55 @@ package service
 import (
 	"OpenHouse/global"
 	"OpenHouse/model/database"
-	"errors"
+	"OpenHouse/model/request"
+	"encoding/json"
 
-	"github.com/jinzhu/gorm"
+	"gorm.io/datatypes"
 )
 
-// 数据库操作
+func GetProfile(uuid string) (database.User, error) {
+	var user database.User
+	if err := global.DB.Where("uuid = ?", uuid).First(&user).Error; err != nil {
+		return user, err
+	}
+	return user, nil
+}
 
-// CreateUser 创建用户
-func CreateUser(user *database.User) (err error) {
-	if err = global.DB.Create(user).Error; err != nil {
+func UpdateProfile(uuid string, input request.UpdateProfileRequest) error {
+	var user database.User
+	if err := global.DB.Where("uuid = ?", uuid).First(&user).Error; err != nil {
 		return err
 	}
-	return nil
-}
 
-// GetUserByID 根据用户 ID 查询某个用户
-func GetUserByID(ID uint64) (user database.User, notFound bool) {
-	err := global.DB.First(&user, ID).Error
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return user, true
-	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return user, true
-	} else {
-		return user, false
+	// 部分更新，只更新非空字段
+	if input.IsVerified != nil {
+		user.IsVerified = *input.IsVerified
 	}
-}
-
-// GetUserByUsername 根据用户名查询某个用户
-func GetUserByUsername(username string) (user database.User, notFound bool) {
-	err := global.DB.Where("username = ?", username).First(&user).Error
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return user, true
-	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return user, true
-	} else {
-		return user, false
+	if input.Username != nil {
+		user.Username = *input.Username
 	}
-}
-
-// QueryAUserByID 根据用户 ID 查询某个用户
-func QueryAUserByID(userID uint64) (user database.User, notFound bool) {
-	err := global.DB.Where("user_id = ?", userID).First(&user).Error
-	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
-		return user, true
-	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		panic(err)
-	} else {
-		return user, false
+	if input.Gender != nil {
+		user.Gender = *input.Gender
 	}
+	if input.IntroShort != nil {
+		user.IntroShort = *input.IntroShort
+	}
+	if input.IntroLong != nil {
+		user.IntroLong = *input.IntroLong
+	}
+	if input.Tags != nil {
+		tagsJSON, _ := json.Marshal(input.Tags)
+		user.Tags = datatypes.JSON(tagsJSON)
+	}
+	if input.ResearchArea != nil {
+		user.ResearchArea = *input.ResearchArea
+	}
+
+	return global.DB.Save(&user).Error
 }
 
-// UpdateAUser 更新用户的用户名、密码、个人信息
-func UpdateAUser(user *database.User, username string, password string, userInfo string) error {
-	user.Username = username
-	user.Password = password
-	user.UserInfo = userInfo
-	err := global.DB.Save(user).Error
-	return err
-}
-func GetAllUser() (num int) {
-	users := make([]database.User, 0)
-	global.DB.Where("").Find(&users)
-	return len(users)
+func UpdateAvatar(uuid string, avatarURL string) error {
+	return global.DB.Model(&database.User{}).
+		Where("uuid = ?", uuid).
+		Update("avatar_url", avatarURL).Error
 }
