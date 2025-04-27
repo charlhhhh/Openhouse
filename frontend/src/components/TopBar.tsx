@@ -166,6 +166,10 @@ export default function TopBar({ onShowLogin }: TopBarProps) {
         navigate('/');
     };
 
+    const handlePostClick = () => {
+        navigate('/createPost');
+    };
+
     const accountMenuItems: MenuProps['items'] = [
         {
             key: 'logout',
@@ -185,7 +189,7 @@ export default function TopBar({ onShowLogin }: TopBarProps) {
             </SearchContainer>
             <ButtonGroup>
                 <NotificationButton icon={<BellOutlined style={{ fontSize: '20px' }} />} />
-                <PostButton>+Post</PostButton>
+                <PostButton onClick={handlePostClick}>+Post</PostButton>
                 {session ? (
                     <StyledDropdown
                         menu={{ items: accountMenuItems }}

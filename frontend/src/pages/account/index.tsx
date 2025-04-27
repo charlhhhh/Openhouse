@@ -14,7 +14,9 @@ import { supabase } from '../../supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useLoginSheet } from '../../pages/login/LoginSheet';
 import { UserProfileEditSheet } from '../../pages/profile/UserProfileEditSheet';
-
+import { EditPostSheet } from '../../pages/post/EditPostSheet';
+import { DeleteConfirmAlert } from '../../components/DeleteConfirmAlert';
+import { deletePost } from '../../services/postService';
 
 interface Post {
     id: string;
@@ -75,12 +77,42 @@ const generateContributionData = (): ContributionDay[] => {
     return data;
 };
 
+// Mock 帖子数据
+const mockPosts = [
+    {
+        id: '1',
+        userId: 'user123',
+        title: '这是一个测试帖子标题',
+        content: '这是帖子的详细内容，包含了很多有趣的信息...',
+        image_urls: [
+            '/test-image-1.jpg',
+            '/test-image-2.jpg'
+        ],
+        created_at: '2024-03-20',
+        updated_at: '2024-03-20'
+    },
+    {
+        id: '2',
+        userId: 'user123',
+        title: '另一个测试帖子',
+        content: '这是第二个帖子的内容...',
+        image_urls: ['/test-image-3.jpg'],
+        created_at: '2024-03-19',
+        updated_at: '2024-03-19'
+    }
+];
+
 export default function Account() {
     const navigate = useNavigate();
     const { setVisible } = useLoginSheet();
     const [userInfo, setUserInfo] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [editSheetVisible, setEditSheetVisible] = useState(false);
+    const [editPostSheetVisible, setEditPostSheetVisible] = useState(false);
+    const [selectedPost, setSelectedPost] = useState<any>(null);
+    const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+    const [postToDelete, setPostToDelete] = useState<string | null>(null);
+    const [posts, setPosts] = useState(mockPosts);
 
     useEffect(() => {
         checkAuth();
@@ -154,6 +186,41 @@ export default function Account() {
         checkAuth();
     };
 
+    const handleEdit = (post: any) => {
+        setSelectedPost(post);
+        setEditPostSheetVisible(true);
+    };
+
+    const handleEditPostClose = () => {
+        setEditPostSheetVisible(false);
+        setSelectedPost(null);
+    };
+
+    const handleDelete = (postId: string) => {
+        setPostToDelete(postId);
+        setDeleteConfirmVisible(true);
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteConfirmVisible(false);
+        setPostToDelete(null);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!postToDelete) return;
+
+        try {
+            await deletePost(postToDelete);
+            setPosts(posts.filter(post => post.id !== postToDelete));
+            message.success('帖子已删除');
+        } catch (error) {
+            message.error('删除失败，请稍后重试');
+        } finally {
+            setDeleteConfirmVisible(false);
+            setPostToDelete(null);
+        }
+    };
+
     if (loading) {
         return <div>加载中...</div>;
     }
@@ -162,23 +229,7 @@ export default function Account() {
         return null;
     }
 
-    const posts: Post[] = [
-        {
-            id: '1',
-            title: 'content dsdadasdasdsadbalbabla',
-            date: '2024-03-20',
-        },
-    ];
-
     const contributionData = generateContributionData();
-
-    const handleEdit = (postId: string) => {
-        console.log('编辑帖子:', postId);
-    };
-
-    const handleDelete = (postId: string) => {
-        console.log('删除帖子:', postId);
-    };
 
     return (
         <div className={styles.container}>
@@ -259,15 +310,15 @@ export default function Account() {
                     <h2>Activities</h2>
                     {posts.length > 0 ? (
                         <>
-                            <p>最近发帖时间: {posts[0].date}</p>
+                            <p>最近发帖时间: {posts[0].created_at}</p>
                             <div className={styles.postHistory}>
                                 {posts.map((post) => (
                                     <div key={post.id} className={styles.postCard}>
                                         <div className={styles.postHeader}>
-                                            <h3>Post History</h3>
+                                            <h3>{post.title}</h3>
                                             <div className={styles.postActions}>
                                                 <button
-                                                    onClick={() => handleEdit(post.id)}
+                                                    onClick={() => handleEdit(post)}
                                                     className={styles.actionButton}
                                                 >
                                                     <EditOutlined />
@@ -280,7 +331,7 @@ export default function Account() {
                                                 </button>
                                             </div>
                                         </div>
-                                        <p>{post.title}</p>
+                                        <p className={styles.postContent}>{post.content}</p>
                                     </div>
                                 ))}
                             </div>
@@ -302,6 +353,22 @@ export default function Account() {
                     gender: userInfo?.gender,
                     research_area: userInfo?.research_area,
                 }}
+            />
+
+            {/* Edit Post Sheet */}
+            {selectedPost && (
+                <EditPostSheet
+                    visible={editPostSheetVisible}
+                    onClose={handleEditPostClose}
+                    post={selectedPost}
+                />
+            )}
+
+            {/* Delete Confirm Alert */}
+            <DeleteConfirmAlert
+                visible={deleteConfirmVisible}
+                onCancel={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
             />
         </div>
     );

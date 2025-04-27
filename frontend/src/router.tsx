@@ -6,6 +6,7 @@ import FindPartner from './pages/find';
 import Account from './pages/account';
 import Sage from './pages/sage';
 import Following from './pages/following';
+import CreatePost from './pages/createPost';
 
 const routes: RouteObject[] = [
   {
@@ -35,6 +36,10 @@ const routes: RouteObject[] = [
       {
         path: '/following',
         element: <Following />,
+      },
+      {
+        path: '/createPost',
+        element: <CreatePost />,
       },
     ],
   },
