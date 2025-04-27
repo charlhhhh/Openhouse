@@ -49,6 +49,25 @@ func SetupRouter(r *gin.Engine) {
 			user.POST("/follow/status", v1.FollowStatus)
 			user.POST("/following/posts", v1.FollowedPosts)
 		}
+
+		postsAuth := apiV1.Group("/posts").Use(middleware.JWTAuthMiddleware())
+		{
+			postsAuth.POST("/create", v1.CreatePost)
+			postsAuth.POST("/mypostlist", v1.ListMyPosts)
+			postsAuth.POST("/delete", v1.DeletePost)
+			postsAuth.POST("/favorite", v1.FavoritePost)
+			postsAuth.POST("/unfavorite", v1.UnfavoritePost)
+			postsAuth.POST("/favorites_list", v1.FavoriteList)
+			postsAuth.POST("/star", v1.StarPost)
+			postsAuth.POST("/unstar", v1.UnstarPost)
+			postsAuth.POST("/list", v1.ListPosts)
+			postsAuth.POST("/detail", v1.PostDetail)
+		}
+
+		// posts := apiV1.Group("/posts")
+		// {
+
+		// }
 	}
 }
 

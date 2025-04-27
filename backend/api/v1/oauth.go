@@ -140,6 +140,7 @@ func GitHubCallback(c *gin.Context) {
 	}
 
 	// 设置一个重定向URL，跳转到前端页面,本地测试
+	fmt.Println("result.Token", result.Token)
 	redirectURL := fmt.Sprintf("http://localhost:5173/oauth_success?token=%s", result.Token)
 	// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/oauth_success?token=%s", result.Token)
 	c.Redirect(http.StatusFound, redirectURL)

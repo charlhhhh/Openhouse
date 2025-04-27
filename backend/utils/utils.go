@@ -1,14 +1,12 @@
 package utils
 
 import (
-<<<<<<< HEAD
-=======
 	"OpenHouse/global"
 	"OpenHouse/model/database"
 	"OpenHouse/model/response"
->>>>>>> 2c63c65... [feat] follow related impl
 	"crypto/md5"
 	"encoding/hex"
+	"encoding/json"
 	"os"
 
 	"github.com/gin-gonic/gin"

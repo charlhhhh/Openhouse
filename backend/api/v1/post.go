@@ -57,6 +57,7 @@ func CreatePost(c *gin.Context) {
 // @Success 200 {object} response.Response{data=response.PostListResponse}
 // @Failure 400 {object} response.Response
 // @Failure 500 {object} response.Response
+// @Security ApiKeyAuth
 // @Router /api/v1/posts/list [post]
 func ListPosts(c *gin.Context) {
 	var req request.ListPostRequest

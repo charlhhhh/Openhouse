@@ -524,6 +524,11 @@ const docTemplate = `{
         },
         "/api/v1/posts/list": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "按时间排序获取帖子列表，支持分页",
                 "consumes": [
                     "application/json"

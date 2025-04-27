@@ -615,6 +615,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: 获取帖子列表（分页、排序）
       tags:
       - 帖子 Posts
