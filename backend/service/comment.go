@@ -5,6 +5,8 @@ import (
 	"OpenHouse/model/database"
 	"OpenHouse/model/response"
 	"errors"
+	"fmt"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -15,6 +17,7 @@ func CreateComment(userUUID string, postID uint, commentID *uint, content string
 		CommentID:  commentID,
 		AuthorUUID: userUUID,
 		Content:    content,
+		CreateTime: time.Now(),
 	}
 	if err := global.DB.Create(&comment).Error; err != nil {
 		return err
@@ -72,7 +75,6 @@ func ListComments(postID uint, pageNum, pageSize int, sortBy string, currentUser
 	if err := db.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
-
 	// 排序方式
 	order := "create_time desc"
 	if sortBy == "likes" {
@@ -98,17 +100,23 @@ func ListComments(postID uint, pageNum, pageSize int, sortBy string, currentUser
 	// 查询用户信息
 	var users []database.User
 	userMap := make(map[string]database.User)
-	if err := global.DB.Where("uuid IN ?", userUUIDs).Find(&users).Error; err == nil {
+	if len(userUUIDs) > 0 {
+		_ = global.DB.Where("uuid IN (?)", userUUIDs).Find(&users)
 		for _, u := range users {
 			userMap[u.UUID] = u
 		}
 	}
+	fmt.Println("一级评论作者信息:", userMap)
 
 	// 查询当前用户对一级评论的点赞
 	likedMap := make(map[uint]bool)
 	if currentUserUUID != "" {
 		var likes []database.CommentLike
-		_ = global.DB.Where("user_id = ? AND comment_id IN ? AND deleted_at IS NULL", currentUserUUID, commentIDs).Find(&likes)
+		if len(commentIDs) > 0 {
+			_ = global.DB.
+				Where("user_id = (?) AND comment_id IN (?) AND deleted_at IS NULL", currentUserUUID, commentIDs).
+				Find(&likes)
+		}
 		for _, l := range likes {
 			likedMap[l.CommentID] = true
 		}
@@ -135,7 +143,7 @@ func ListComments(postID uint, pageNum, pageSize int, sortBy string, currentUser
 		var subUsers []database.User
 		subUserMap := make(map[string]database.User)
 		if len(childUUIDs) > 0 {
-			_ = global.DB.Where("uuid IN ?", childUUIDs).Find(&subUsers)
+			_ = global.DB.Where("uuid IN (?)", childUUIDs).Find(&subUsers)
 			for _, su := range subUsers {
 				subUserMap[su.UUID] = su
 			}
@@ -145,7 +153,7 @@ func ListComments(postID uint, pageNum, pageSize int, sortBy string, currentUser
 		subLikedMap := make(map[uint]bool)
 		if currentUserUUID != "" && len(childIDs) > 0 {
 			var likes []database.CommentLike
-			_ = global.DB.Where("user_id = ? AND comment_id IN ? AND deleted_at IS NULL", currentUserUUID, childIDs).Find(&likes)
+			_ = global.DB.Where("user_id = (?) AND comment_id IN (?) AND deleted_at IS NULL", currentUserUUID, childIDs).Find(&likes)
 			for _, l := range likes {
 				subLikedMap[l.CommentID] = true
 			}
@@ -223,7 +231,7 @@ func ListChildComments(parentCommentID uint, pageNum, pageSize int, currentUserU
 
 	var users []database.User
 	userMap := make(map[string]database.User)
-	if err := global.DB.Where("uuid IN ?", userIDs).Find(&users).Error; err == nil {
+	if err := global.DB.Where("uuid IN (?)", userIDs).Find(&users).Error; err == nil {
 		for _, u := range users {
 			userMap[u.UUID] = u
 		}
@@ -233,7 +241,7 @@ func ListChildComments(parentCommentID uint, pageNum, pageSize int, currentUserU
 	likedMap := make(map[uint]bool)
 	if currentUserUUID != "" {
 		var likes []database.CommentLike
-		_ = global.DB.Where("user_id = ? AND comment_id IN ? AND deleted_at IS NULL", currentUserUUID, commentIDs).Find(&likes)
+		_ = global.DB.Where("user_id = ? AND comment_id IN (?) AND deleted_at IS NULL", currentUserUUID, commentIDs).Find(&likes)
 		for _, l := range likes {
 			likedMap[l.CommentID] = true
 		}

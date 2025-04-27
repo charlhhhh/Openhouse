@@ -30,6 +30,12 @@ func InitMySQL() {
 		&database.User{},
 		&database.AuthAccount{},
 		&database.VerifyCode{},
+		&database.Post{},
+		&database.PostComment{},
+		&database.UserPostLike{},
+		&database.UserFollow{},
+		&database.UserPostFavorite{},
+		&database.CommentLike{},
 	)
 	// 检查数据库连接是否存在, 好像没啥用
 	err = global.DB.DB().Ping()
