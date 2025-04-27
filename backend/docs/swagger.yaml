@@ -1,4 +1,11 @@
 definitions:
+  response.GetVerifyCodeQ:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
   response.Response:
     properties:
       code:
@@ -71,10 +78,49 @@ definitions:
 info:
   contact: {}
 paths:
-  /api/v1/auth/email_login:
+  /api/v1/auth/email/send:
     post:
       consumes:
       - application/json
+      description: 用户点击"获取验证码"按钮，系统向用户提供的邮箱发送6位验证码，用户需要在申请表单中填入验证码才可以成功完成身份验证，否则不应该可以提交申请。验证码时限为10分钟，超时无效
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.GetVerifyCodeQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"msg": "邮件发送成功","status": 200}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg": "数据格式错误", "status": 400}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg": "没有该用户", "status": 401}'
+          schema:
+            type: string
+        "402":
+          description: '{"msg": "验证码存储失败","status": 402}'
+          schema:
+            type: string
+        "403":
+          description: '{"msg": "发送邮件失败","status": 403}'
+          schema:
+            type: string
+      summary: 获取申请验证码
+      tags:
+      - Auth
+  /api/v1/auth/email/verify:
+    post:
+      consumes:
+      - application/json
+      description: 验证邮箱验证码是否正确,如果正确则登录或注册用户
       parameters:
       - description: 邮箱+验证码
         in: body
@@ -94,7 +140,7 @@ paths:
                 data:
                   $ref: '#/definitions/service.AuthResult'
               type: object
-      summary: 邮箱验证码登录
+      summary: 邮箱验证码验证
       tags:
       - Auth
   /api/v1/auth/github_callback:
@@ -147,7 +193,7 @@ paths:
       summary: Google登录回调
       tags:
       - Auth
-  /api/v1/profile:
+  /api/v1/user/profile:
     get:
       consumes:
       - application/json
@@ -163,6 +209,8 @@ paths:
                 data:
                   $ref: '#/definitions/service.ProfileResponse'
               type: object
+      security:
+      - ApiKeyAuth: []
       summary: 获取用户Profile
       tags:
       - Profile
@@ -183,6 +231,8 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
       summary: 更新用户Profile（部分字段）
       tags:
       - Profile
@@ -207,4 +257,10 @@ paths:
       summary: 测试前后端联通性
       tags:
       - 测试
+securityDefinitions:
+  ApiKeyAuth:
+    description: JWT Token
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

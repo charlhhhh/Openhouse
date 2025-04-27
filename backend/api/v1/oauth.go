@@ -27,41 +27,10 @@ type GoogleLoginRequest struct {
 	Code string `form:"code" binding:"required"`
 }
 
-// EmailLogin
-// @Summary 邮箱验证码登录
-// @Tags Auth
-// @Accept json
-// @Produce json
-// @Param data body EmailLoginRequest true "邮箱+验证码"
-// @Success 200 {object} response.Response{data=service.AuthResult}
-// @Router /api/v1/auth/email_login [post]
-func EmailLogin(c *gin.Context) {
-	var req EmailLoginRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误", c)
-		return
-	}
-
-	// 这里应验证验证码是否正确（假设通过）
-	authInput := service.AuthInput{
-		Provider:    service.ProviderEmail,
-		ProviderID:  req.Email,
-		DisplayName: req.Email,
-		AvatarURL:   "", // 邮箱没头像
-	}
-
-	result, err := service.LoginOrRegister(authInput)
-	if err != nil {
-		response.FailWithMessage(err.Error(), c)
-		return
-	}
-	response.OkWithData(result, c)
-}
-
 // SendVerifyEmail 获取验证码
-// @Summary     获取申请验证码 Vera
+// @Summary     获取申请验证码
 // @Description 用户点击"获取验证码"按钮，系统向用户提供的邮箱发送6位验证码，用户需要在申请表单中填入验证码才可以成功完成身份验证，否则不应该可以提交申请。验证码时限为10分钟，超时无效
-// @Tags        管理
+// @Tags        Auth
 // @Param       data body response.GetVerifyCodeQ true "data"
 // @Accept      json
 // @Produce     json
@@ -70,7 +39,7 @@ func EmailLogin(c *gin.Context) {
 // @Failure     401 {string} json "{"msg": "没有该用户", "status": 401}"
 // @Failure     402 {string} json "{"msg": "验证码存储失败","status": 402}"
 // @Failure     403 {string} json "{"msg": "发送邮件失败","status": 403}"
-// @Router      /application/code [POST]
+// @Router      /api/v1/auth/email/send [post]
 func SendVerifyEmail(c *gin.Context) {
 	var d response.GetVerifyCodeQ
 	if err := c.ShouldBind(&d); err != nil {
@@ -97,16 +66,16 @@ func SendVerifyEmail(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"msg": "邮件发送成功", "status": 200})
 }
 
-// EmailVerifyCodeCheck
+// EmailLogin
 // @Summary 邮箱验证码验证
-// @Description 验证邮箱验证码是否正确
+// @Description 验证邮箱验证码是否正确,如果正确则登录或注册用户
 // @Tags Auth
 // @Accept json
 // @Produce json
 // @Param data body EmailLoginRequest true "邮箱+验证码"
 // @Success 200 {object} response.Response{data=service.AuthResult}
-// @Router /api/v1/auth/email_verify_code_check [post]
-func EmailVerifyCodeCheck(c *gin.Context) {
+// @Router /api/v1/auth/email/verify [post]
+func EmailLogin(c *gin.Context) {
 	var req EmailLoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		response.FailWithMessage("参数错误", c)
@@ -170,9 +139,9 @@ func GitHubCallback(c *gin.Context) {
 		return
 	}
 
-	// 这里可以设置一个重定向URL，跳转到前端页面,测试时
-	redirectURL := fmt.Sprintf("http://localhost:5173/#/oauth_success?token=%s", result.Token)
-	// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/#/oauth_success?token=%s", result.Token)
+	// 设置一个重定向URL，跳转到前端页面,本地测试
+	redirectURL := fmt.Sprintf("http://localhost:5173/oauth_success?token=%s", result.Token)
+	// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/oauth_success?token=%s", result.Token)
 	c.Redirect(http.StatusFound, redirectURL)
 }
 

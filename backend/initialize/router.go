@@ -17,7 +17,7 @@ func SetupRouter(r *gin.Engine) {
 
 	docs.SwaggerInfo.Title = "Openhouse backend doc"
 	docs.SwaggerInfo.Version = "v1"
-	docs.SwaggerInfo.BasePath = "/api/v1"
+	// docs.SwaggerInfo.BasePath = "/api/v1"
 	docs.SwaggerInfo.Schemes = []string{"http", "https"}
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
@@ -28,14 +28,15 @@ func SetupRouter(r *gin.Engine) {
 	{
 		auth := apiV1.Group("/auth")
 		{
-			auth.POST("/email", v1.EmailLogin)
+			auth.POST("/email/verify", v1.EmailLogin)
+			auth.POST("/email/send", v1.SendVerifyEmail)
 			auth.GET("/github/callback", v1.GitHubCallback)
 		}
 
 		user := apiV1.Group("/user").Use(middleware.JWTAuthMiddleware())
 		{
 			user.GET("/profile", v1.GetProfile)
-			user.PUT("/profile", v1.UpdateProfile)
+			user.POST("/profile", v1.UpdateProfile)
 			// user.POST("/bind/getbindinfo", v1.GetBindInfo)
 			// user.POST("/bind/github", v1.BindGitHub)
 			// user.POST("/bind/google", v1.BindGoogle)
