@@ -122,41 +122,60 @@ func FavoritePost(userUUID string, postID uint) error {
 		return errors.New("帖子不存在")
 	}
 
-	var favorite database.UserPostFavorite
-	// 如果已经收藏，提示无效
-	err := global.DB.
+	// 查询是否存在记录
+	var fav database.UserPostFavorite
+	err := global.DB.Unscoped().
 		Where("user_id = ? AND post_id = ?", userUUID, postID).
-		First(&favorite).Error
+		First(&fav).Error
 
 	if err == nil {
-		// 已经存在记录，检查是否软删除
-		if favorite.DeletedAt.Valid {
-			// 恢复收藏
-			return global.DB.Model(&favorite).Update("deleted_at", nil).Error
+		if fav.DeletedAt.Valid {
+			// 恢复已删除记录
+			if err := global.DB.Model(&fav).Update("deleted_at", nil).Error; err != nil {
+				return err
+			}
+		} else {
+			return errors.New("不能重复收藏")
 		}
-		return errors.New("请勿重复收藏")
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
+		newFav := database.UserPostFavorite{
+			UserID: userUUID,
+			PostID: postID,
+		}
+		if err := global.DB.Create(&newFav).Error; err != nil {
+			return err
+		}
+	} else {
+		return err
 	}
 
-	// 插入新收藏
-	newFav := database.UserPostFavorite{
-		UserID: userUUID,
-		PostID: postID,
-	}
-	return global.DB.Create(&newFav).Error
+	// 收藏数 +1
+	return global.DB.Model(&database.Post{}).
+		Where("id = ?", postID).
+		UpdateColumn("favorite_number", gorm.Expr("favorite_number + 1")).Error
 }
 
 // UnfavoritePost 取消收藏帖子
 func UnfavoritePost(userUUID string, postID uint) error {
-	var favorite database.UserPostFavorite
+	var fav database.UserPostFavorite
 	err := global.DB.
 		Where("user_id = ? AND post_id = ? AND deleted_at IS NULL", userUUID, postID).
-		First(&favorite).Error
+		First(&fav).Error
 
 	if err != nil {
-		return errors.New("未收藏该帖子")
+		return errors.New("尚未收藏该帖子")
 	}
 
-	return global.DB.Delete(&favorite).Error
+	if err := global.DB.Delete(&fav).Error; err != nil {
+		return err
+	}
+
+	// 收藏数 -1（最小为 0）
+	return global.DB.Exec(`
+		UPDATE posts
+		SET favorite_number = GREATEST(favorite_number - 1, 0)
+		WHERE id = ?
+	`, postID).Error
 }
 
 // ListFavoritePosts 查询用户收藏的帖子

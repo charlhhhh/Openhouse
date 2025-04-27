@@ -61,19 +61,20 @@ func ConvertPostModelWithUser(post database.Post, currentUserUUID string) respon
 	}
 
 	return response.PostInfo{
-		PostID:        post.ID,
-		AuthorUUID:    post.AuthorUUID,
-		Title:         post.Title,
-		Content:       post.Content,
-		ImageURLs:     imageURLs,
-		CreateDate:    post.CreateDate,
-		StarNumber:    post.StarNumber,
-		ViewNumber:    post.ViewNumber,
-		CommentNumber: post.CommentNumber,
+		PostID:         post.ID,
+		AuthorUUID:     post.AuthorUUID,
+		Title:          post.Title,
+		Content:        post.Content,
+		ImageURLs:      imageURLs,
+		CreateDate:     post.CreateDate,
+		StarNumber:     post.StarNumber,
+		FavoriteNumber: post.FavoriteNumber,
+		ViewNumber:     post.ViewNumber,
+		CommentNumber:  post.CommentNumber,
 
 		// 用户信息字段
 		Username:    author.Username,
-		IntroShort:  author.IntroShort,
+		IntroLong:   author.IntroLong,
 		AvatarURL:   author.AvatarURL,
 		IsFollowing: isFollow,
 	}

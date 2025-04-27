@@ -31,6 +31,12 @@ func FollowUser(c *gin.Context) {
 		response.FailWithMessage("未登录或者未授权", c)
 		return
 	}
+
+	if userUUID == req.FollowedUUID {
+		response.FailWithMessage("不能关注自己", c)
+		return
+	}
+
 	if err := service.FollowUser(userUUID, req.FollowedUUID); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -48,7 +54,7 @@ func FollowUser(c *gin.Context) {
 // @Failure 400 {object} response.Response
 // @Failure 401 {object} response.Response
 // @Security ApiKeyAuth
-// @Router /api/v1/users/unfollow [post]
+// @Router /api/v1/user/unfollow [post]
 func UnfollowUser(c *gin.Context) {
 	var req request.FollowRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -61,6 +67,7 @@ func UnfollowUser(c *gin.Context) {
 		response.FailWithMessage("未登录或者未授权", c)
 		return
 	}
+
 	if err := service.UnfollowUser(userUUID, req.FollowedUUID); err != nil {
 		response.FailWithMessage(err.Error(), c)
 		return
@@ -78,7 +85,7 @@ func UnfollowUser(c *gin.Context) {
 // @Failure 400 {object} response.Response
 // @Failure 401 {object} response.Response
 // @Security ApiKeyAuth
-// @Router /api/v1/users/following [post]
+// @Router /api/v1/user/following [post]
 func FollowedList(c *gin.Context) {
 	var req request.FollowListRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -109,7 +116,7 @@ func FollowedList(c *gin.Context) {
 // @Failure 400 {object} response.Response
 // @Failure 401 {object} response.Response
 // @Security ApiKeyAuth
-// @Router /api/v1/users/followers [post]
+// @Router /api/v1/user/followers [post]
 func FollowersList(c *gin.Context) {
 	var req request.FollowListRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -139,7 +146,7 @@ func FollowersList(c *gin.Context) {
 // @Failure 401 {object} response.Response
 // @Failure 500 {object} response.Response
 // @Security ApiKeyAuth
-// @Router /api/v1/users/follow/count [post]
+// @Router /api/v1/user/follow/count [post]
 func FollowCount(c *gin.Context) {
 	userUUID := c.MustGet("uuid").(string)
 
@@ -167,7 +174,7 @@ func FollowCount(c *gin.Context) {
 // @Success 200 {object} response.Response{data=response.FollowStatusResponse}
 // @Failure 400 {object} response.Response
 // @Security ApiKeyAuth
-// @Router /api/v1/users/follow/status [post]
+// @Router /api/v1/user/follow/status [post]
 func FollowStatus(c *gin.Context) {
 	var req request.FollowStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -199,7 +206,7 @@ func FollowStatus(c *gin.Context) {
 // @Success 200 {object} response.Response{data=response.PostListResponse}
 // @Failure 400 {object} response.Response
 // @Security ApiKeyAuth
-// @Router /api/v1/users/following/posts [post]
+// @Router /api/v1/user/following/posts [post]
 func FollowedPosts(c *gin.Context) {
 	var req request.ListPostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

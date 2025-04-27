@@ -64,10 +64,14 @@ func SetupRouter(r *gin.Engine) {
 			postsAuth.POST("/detail", v1.PostDetail)
 		}
 
-		// posts := apiV1.Group("/posts")
-		// {
-
-		// }
+		commentsAuth := apiV1.Group("/comments").Use(middleware.JWTAuthMiddleware())
+		{
+			commentsAuth.POST("/list", v1.ListComments)    // 一级评论列表
+			commentsAuth.POST("/replies", v1.ListReplies)  // 子评论分页加载
+			commentsAuth.POST("/create", v1.CreateComment) // 创建评论
+			commentsAuth.POST("/like", v1.LikeComment)     // 点赞评论
+			commentsAuth.POST("/unlike", v1.UnlikeComment) // 取消点赞
+		}
 	}
 }
 

@@ -206,6 +206,289 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/comments/create": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "创建一级评论或子评论",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论 Comments"
+                ],
+                "summary": "创建评论",
+                "parameters": [
+                    {
+                        "description": "评论请求体",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.CreateCommentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "评论成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未登录",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/comments/like": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论 Comments"
+                ],
+                "summary": "点赞评论",
+                "parameters": [
+                    {
+                        "description": "点赞请求体",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.LikeCommentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "点赞成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/comments/list": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "获取某个帖子的一级评论（分页、排序）并返回每条评论的前三条子评论（按时间升序）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论 Comments"
+                ],
+                "summary": "获取评论列表（一级）",
+                "parameters": [
+                    {
+                        "description": "帖子ID + 分页参数 + 排序",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.ListCommentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.CommentInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/comments/replies": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "分页加载某条评论下的子评论（按时间升序）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论 Comments"
+                ],
+                "summary": "获取子评论",
+                "parameters": [
+                    {
+                        "description": "comment_id + 分页参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.ListReplyRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.CommentInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/comments/unlike": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "评论 Comments"
+                ],
+                "summary": "取消点赞评论",
+                "parameters": [
+                    {
+                        "description": "取消点赞请求体",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.LikeCommentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "取消点赞成功",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/posts/create": {
             "post": {
                 "security": [
@@ -340,6 +623,11 @@ const docTemplate = `{
         },
         "/api/v1/posts/detail": {
             "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
                 "description": "根据 post_id 获取一条帖子详情 + 是否点赞/收藏",
                 "consumes": [
                     "application/json"
@@ -825,6 +1113,299 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/user/follow/count": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户 User"
+                ],
+                "summary": "获取关注/粉丝统计",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.FollowCountResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/follow/status": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户 User"
+                ],
+                "summary": "是否关注某用户",
+                "parameters": [
+                    {
+                        "description": "目标用户UUID",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.FollowStatusRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.FollowStatusResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/followers": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户 User"
+                ],
+                "summary": "获取粉丝列表",
+                "parameters": [
+                    {
+                        "description": "分页",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.FollowListRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.FollowedUserInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/following": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户 User"
+                ],
+                "summary": "获取关注列表",
+                "parameters": [
+                    {
+                        "description": "分页",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.FollowListRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.FollowedUserInfo"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/user/following/posts": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "用户 User"
+                ],
+                "summary": "获取关注用户的动态流",
+                "parameters": [
+                    {
+                        "description": "分页参数",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.ListPostRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.PostListResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user/profile": {
             "get": {
                 "security": [
@@ -900,7 +1481,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/users/follow": {
+        "/api/v1/user/unfollow": {
             "post": {
                 "security": [
                     {
@@ -916,10 +1497,10 @@ const docTemplate = `{
                 "tags": [
                     "用户 User"
                 ],
-                "summary": "关注用户",
+                "summary": "取消关注",
                 "parameters": [
                     {
-                        "description": "关注对象UUID",
+                        "description": "取消关注对象UUID",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -950,7 +1531,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/users/follow/count": {
+        "/api/v1/users/follow": {
             "post": {
                 "security": [
                     {
@@ -966,303 +1547,10 @@ const docTemplate = `{
                 "tags": [
                     "用户 User"
                 ],
-                "summary": "获取关注/粉丝统计",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.FollowCountResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/users/follow/status": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户 User"
-                ],
-                "summary": "是否关注某用户",
+                "summary": "关注用户",
                 "parameters": [
                     {
-                        "description": "目标用户UUID",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.FollowStatusRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.FollowStatusResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/users/followers": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户 User"
-                ],
-                "summary": "获取粉丝列表",
-                "parameters": [
-                    {
-                        "description": "分页",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.FollowListRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/response.FollowedUserInfo"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/users/following": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户 User"
-                ],
-                "summary": "获取关注列表",
-                "parameters": [
-                    {
-                        "description": "分页",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.FollowListRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "type": "array",
-                                            "items": {
-                                                "$ref": "#/definitions/response.FollowedUserInfo"
-                                            }
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/users/following/posts": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户 User"
-                ],
-                "summary": "获取关注用户的动态流",
-                "parameters": [
-                    {
-                        "description": "分页参数",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.ListPostRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.PostListResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/users/unfollow": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "用户 User"
-                ],
-                "summary": "取消关注",
-                "parameters": [
-                    {
-                        "description": "取消关注对象UUID",
+                        "description": "关注对象UUID",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -1327,6 +1615,27 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "request.CreateCommentRequest": {
+            "type": "object",
+            "required": [
+                "content",
+                "post_id"
+            ],
+            "properties": {
+                "comment_id": {
+                    "description": "可选，若为 null 表示一级评论",
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "minLength": 1
+                },
+                "post_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "request.CreatePostRequest": {
             "type": "object",
             "required": [
@@ -1415,6 +1724,17 @@ const docTemplate = `{
                 }
             }
         },
+        "request.LikeCommentRequest": {
+            "type": "object",
+            "required": [
+                "comment_id"
+            ],
+            "properties": {
+                "comment_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "request.LikePostRequest": {
             "type": "object",
             "required": [
@@ -1423,6 +1743,35 @@ const docTemplate = `{
             "properties": {
                 "post_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "request.ListCommentRequest": {
+            "type": "object",
+            "required": [
+                "page_num",
+                "page_size",
+                "post_id"
+            ],
+            "properties": {
+                "page_num": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "page_size": {
+                    "type": "integer",
+                    "maximum": 50,
+                    "minimum": 1
+                },
+                "post_id": {
+                    "type": "integer"
+                },
+                "sort_by": {
+                    "type": "string",
+                    "enum": [
+                        "time",
+                        "likes"
+                    ]
                 }
             }
         },
@@ -1454,6 +1803,31 @@ const docTemplate = `{
                 }
             }
         },
+        "request.ListReplyRequest": {
+            "type": "object",
+            "required": [
+                "comment_id",
+                "page_num",
+                "page_size"
+            ],
+            "properties": {
+                "comment_id": {
+                    "description": "父评论 ID",
+                    "type": "integer"
+                },
+                "page_num": {
+                    "description": "页码",
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "page_size": {
+                    "description": "每页条数，前端默认每次传 5",
+                    "type": "integer",
+                    "maximum": 50,
+                    "minimum": 1
+                }
+            }
+        },
         "request.PostDetailRequest": {
             "type": "object",
             "required": [
@@ -1462,6 +1836,53 @@ const docTemplate = `{
             "properties": {
                 "post_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "response.CommentInfo": {
+            "type": "object",
+            "properties": {
+                "author_uuid": {
+                    "description": "评论用户信息",
+                    "type": "string"
+                },
+                "avatar_url": {
+                    "type": "string"
+                },
+                "comment_id": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "create_time": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_liked": {
+                    "description": "当前用户是否点赞",
+                    "type": "boolean"
+                },
+                "like_number": {
+                    "type": "integer"
+                },
+                "post_id": {
+                    "type": "integer"
+                },
+                "replies": {
+                    "description": "子评论信息",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.CommentInfo"
+                    }
+                },
+                "replies_more_count": {
+                    "type": "integer"
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
@@ -1529,13 +1950,16 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
+                "favorite_number": {
+                    "type": "integer"
+                },
                 "image_urls": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
-                "intro_short": {
+                "intro_long": {
                     "type": "string"
                 },
                 "is_favorited": {
@@ -1583,13 +2007,16 @@ const docTemplate = `{
                 "create_date": {
                     "type": "string"
                 },
+                "favorite_number": {
+                    "type": "integer"
+                },
                 "image_urls": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
                 },
-                "intro_short": {
+                "intro_long": {
                     "type": "string"
                 },
                 "is_following": {

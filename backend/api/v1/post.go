@@ -354,6 +354,7 @@ func UnstarPost(c *gin.Context) {
 // @Success 200 {object} response.Response{data=response.PostDetailResponse}
 // @Failure 400 {object} response.Response
 // @Failure 404 {object} response.Response
+// @Security ApiKeyAuth
 // @Router /api/v1/posts/detail [post]
 func PostDetail(c *gin.Context) {
 	var req request.PostDetailRequest
