@@ -1,32 +1,4 @@
 definitions:
-  database.User:
-    properties:
-      avatar_url:
-        type: string
-      coin:
-        type: integer
-      created_at:
-        description: 创建时间
-        type: string
-      gender:
-        description: 可选 Male/Female/Other
-        type: string
-      intro_long:
-        description: 个人简介
-        type: string
-      intro_short:
-        description: 个人简介 格言
-        type: string
-      is_verified:
-        description: 是否已认证教育邮箱
-        type: boolean
-      username:
-        description: 用户名
-        type: string
-      uuid:
-        description: 用户唯一标识
-        type: string
-    type: object
   response.Response:
     properties:
       code:
@@ -39,8 +11,52 @@ definitions:
     properties:
       token:
         type: string
-      user:
-        $ref: '#/definitions/database.User'
+    type: object
+  service.ProfileResponse:
+    properties:
+      avatar_url:
+        type: string
+      coin:
+        type: integer
+      gender:
+        type: string
+      intro_long:
+        type: string
+      intro_short:
+        type: string
+      is_verified:
+        type: boolean
+      research_area:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
+      uuid:
+        type: string
+    type: object
+  service.UpdateProfileInput:
+    properties:
+      avatar_url:
+        type: string
+      gender:
+        type: string
+      intro_long:
+        type: string
+      intro_short:
+        type: string
+      is_verified:
+        type: boolean
+      research_area:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
     type: object
   v1.EmailLoginRequest:
     properties:
@@ -103,9 +119,73 @@ paths:
                 data:
                   $ref: '#/definitions/service.AuthResult'
               type: object
-      summary: GitHub登录回调
+      summary: GitHub登录回调, 前端不调用该API
       tags:
       - Auth
+  /api/v1/auth/google_callback:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: Google回调Code
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.AuthResult'
+              type: object
+      summary: Google登录回调
+      tags:
+      - Auth
+  /api/v1/profile:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.ProfileResponse'
+              type: object
+      summary: 获取用户Profile
+      tags:
+      - Profile
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 需要更新的字段
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateProfileInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: 更新用户Profile（部分字段）
+      tags:
+      - Profile
   /test:
     get:
       consumes:

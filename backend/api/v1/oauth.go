@@ -4,7 +4,9 @@ import (
 	"OpenHouse/model/response"
 	"OpenHouse/service"
 	"fmt"
+	"math/rand"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -56,8 +58,93 @@ func EmailLogin(c *gin.Context) {
 	response.OkWithData(result, c)
 }
 
+// SendVerifyEmail 获取验证码
+// @Summary     获取申请验证码 Vera
+// @Description 用户点击"获取验证码"按钮，系统向用户提供的邮箱发送6位验证码，用户需要在申请表单中填入验证码才可以成功完成身份验证，否则不应该可以提交申请。验证码时限为10分钟，超时无效
+// @Tags        管理
+// @Param       data body response.GetVerifyCodeQ true "data"
+// @Accept      json
+// @Produce     json
+// @Success     200 {string} json "{"msg": "邮件发送成功","status": 200}"
+// @Failure     400 {string} json "{"msg": "数据格式错误", "status": 400}"
+// @Failure     401 {string} json "{"msg": "没有该用户", "status": 401}"
+// @Failure     402 {string} json "{"msg": "验证码存储失败","status": 402}"
+// @Failure     403 {string} json "{"msg": "发送邮件失败","status": 403}"
+// @Router      /application/code [POST]
+func SendVerifyEmail(c *gin.Context) {
+	var d response.GetVerifyCodeQ
+	if err := c.ShouldBind(&d); err != nil {
+		c.JSON(400, gin.H{"msg": "数据格式错误", "status": 400})
+		return
+	}
+	email := d.Email
+	code := ""
+	for i := 0; i < 6; i++ {
+		code += strconv.Itoa(rand.Int() % 10)
+	}
+	fmt.Println(code)
+	err := service.CreateVerifyCodeRecode(code, email)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{"msg": "验证码存储失败", "status": 402})
+		return
+	}
+
+	err = service.SendVerifyCode(email, code)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "发送邮件失败", "status": 403})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"msg": "邮件发送成功", "status": 200})
+}
+
+// EmailVerifyCodeCheck
+// @Summary 邮箱验证码验证
+// @Description 验证邮箱验证码是否正确
+// @Tags Auth
+// @Accept json
+// @Produce json
+// @Param data body EmailLoginRequest true "邮箱+验证码"
+// @Success 200 {object} response.Response{data=service.AuthResult}
+// @Router /api/v1/auth/email_verify_code_check [post]
+func EmailVerifyCodeCheck(c *gin.Context) {
+	var req EmailLoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.FailWithMessage("参数错误", c)
+		return
+	}
+
+	// 检查验证码是否正确
+	// prase code to int
+	code, err := strconv.Atoi(req.Code)
+	if err != nil {
+		response.FailWithMessage("验证码格式错误", c)
+		return
+	}
+	rec, notFound := service.CheckVerifyCode(0, code, req.Email)
+	if notFound {
+		response.FailWithMessage("验证码错误或已过期", c)
+		return
+	}
+
+	authInput := service.AuthInput{
+		Provider:    service.ProviderEmail,
+		ProviderID:  rec.Email,
+		DisplayName: rec.Email,
+		AvatarURL:   "", // 邮箱没头像
+		UUID:        "",
+	}
+
+	result, err := service.LoginOrRegister(authInput)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
+	response.OkWithData(result, c)
+}
+
 // GitHubCallback
-// @Summary GitHub登录回调
+// @Summary GitHub登录回调, 前端不调用该API
+// Github登录时，直接跳转: https://github.com/login/oauth/authorize?scope=user:email&client_id=Ov23liKlSNhwhBevQPD7
 // @Tags Auth
 // @Accept json
 // @Produce json
@@ -83,8 +170,9 @@ func GitHubCallback(c *gin.Context) {
 		return
 	}
 
-	// 这里可以设置一个重定向URL，跳转到前端页面
-	redirectURL := fmt.Sprintf("http://openhouse.horik.cn/#/oauth_success?token=%s", result.Token)
+	// 这里可以设置一个重定向URL，跳转到前端页面,测试时
+	redirectURL := fmt.Sprintf("http://localhost:5173/#/oauth_success?token=%s", result.Token)
+	// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/#/oauth_success?token=%s", result.Token)
 	c.Redirect(http.StatusFound, redirectURL)
 }
 

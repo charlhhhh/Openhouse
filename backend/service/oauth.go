@@ -4,7 +4,10 @@ import (
 	"OpenHouse/global"
 	"OpenHouse/model/database"
 	"bytes"
+	"fmt"
 	"io"
+	"log"
+	"strconv"
 	"time"
 
 	"encoding/json"
@@ -14,6 +17,8 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"gopkg.in/gomail.v2"
+	"gorm.io/gorm"
 )
 
 // AuthProvider 定义支持的第三方登录方式
@@ -31,11 +36,11 @@ type AuthInput struct {
 	ProviderID  string // 比如邮箱地址 / GitHub userID / Google sub
 	DisplayName string
 	AvatarURL   string
+	UUID        string // 用户UUID
 }
 
 // AuthResult 返回登录结果
 type AuthResult struct {
-	User  database.User
 	Token string
 }
 
@@ -54,6 +59,75 @@ func GenerateJWT(uuid string) (string, error) {
 		return "", err
 	}
 	return tokenString, nil
+}
+
+// SendEmailCode 发送验证码到邮箱
+func SendMail(mailTo []string, subject string, body string) error {
+	mailConn := map[string]string{
+		"user": global.VP.GetString("smtp.username"),
+		"pass": global.VP.GetString("smtp.password"),
+		"host": global.VP.GetString("smtp.host"),
+		"port": global.VP.GetString("smtp.port"),
+	}
+
+	port, _ := strconv.Atoi(mailConn["port"]) //转换端口类型为int
+
+	m := gomail.NewMessage()
+
+	m.SetHeader("From", m.FormatAddress(mailConn["user"], "OpenHouse")) //这种方式可以添加别名，即“XX官方”
+	m.SetHeader("To", mailTo...)                                        //发送给多个用户
+	m.SetHeader("Subject", subject)                                     //设置邮件主题
+	m.SetBody("text/html", body)                                        //设置邮件正文
+
+	d := gomail.NewDialer(mailConn["host"], port, mailConn["user"], mailConn["pass"])
+
+	err := d.DialAndSend(m)
+	return err
+}
+
+func SendVerifyCode(email string, code string) (err error) {
+	subject := "来自 OpenHouse 的申请验证码"
+	// 邮件正文
+	mailTo := []string{
+		email,
+	}
+	body := "尊敬的用户您好，欢迎使用 OpenHouse 学术交流平台，您的申请验证码是:\n"
+	body += code + "\n"
+
+	err = SendMail(mailTo, subject, body)
+	if err != nil {
+		log.Println(err)
+		fmt.Println("send code fail")
+		//panic(err)
+		return err
+	}
+	fmt.Println("send code successfully")
+	return nil
+}
+
+func CreateVerifyCodeRecode(code string, email string) (err error) {
+	rec := database.VerifyCode{
+		Code:    code,
+		Email:   email,
+		GenTime: time.Now(),
+	}
+	if err = global.DB.Create(&rec).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func CheckVerifyCode(userID uint64, code int, email string) (rec database.VerifyCode, notFound bool) {
+	rec = database.VerifyCode{}
+	err := global.DB.Where("code = ? AND email = ?", code, email).First(&rec).Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		return rec, true
+	} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
+		panic(err)
+	} else {
+		// todo 检查验证码是否过期
+		return rec, false
+	}
 }
 
 // getGitHubToken 获取GitHub的access_token
@@ -141,6 +215,7 @@ func GetGitHubUserInfo(code string) (AuthInput, error) {
 		ProviderID:  user.Login,
 		DisplayName: user.Login,
 		AvatarURL:   user.AvatarURL,
+		UUID:        "",
 	}, nil
 }
 
@@ -148,17 +223,50 @@ func GetGitHubUserInfo(code string) (AuthInput, error) {
 func LoginOrRegister(input AuthInput) (AuthResult, error) {
 	var auth database.AuthAccount
 
+	// 先查找是否已有UUID,如果存在UUID，说明是已绑定的用户正在进行额外的绑定
+	if input.UUID != "" {
+		err := global.DB.Where("profile_uuid = ?", input.UUID).First(&auth).Error
+		if err == nil {
+			// 如果已绑定，查找用户，增加绑定的第三方账号认证信息
+			fmt.Println("已绑定的用户UUID:", auth.ProfileUUID)
+			var user database.User
+			if err := global.DB.Where("uuid = ?", auth.ProfileUUID).First(&user).Error; err != nil {
+				return AuthResult{}, errors.New("Error: user not found")
+			}
+			newAuth := database.AuthAccount{
+				ProfileUUID: input.UUID,
+				Provider:    string(input.Provider),
+				ProviderID:  input.ProviderID,
+			}
+			// 检查是否已存在相同的绑定
+			existingAuth := database.AuthAccount{}
+			err = global.DB.Where("provider = ? AND provider_id = ?", input.Provider, input.ProviderID).First(&existingAuth).Error
+			if err == nil {
+				// 如果已存在相同的绑定，返回错误
+				return AuthResult{}, errors.New("Error: already bound to this account")
+			}
+			// 如果不存在相同的绑定，进行绑定
+			if err := global.DB.Create(&newAuth).Error; err != nil {
+				return AuthResult{}, errors.New("Error: auth account creation failed")
+			}
+			// 生成JWT
+			token, _ := GenerateJWT(user.UUID)
+			return AuthResult{Token: token}, nil
+		}
+	}
+
 	// 先查找是否已有绑定的第三方账号
 	err := global.DB.Where("provider = ? AND provider_id = ?", input.Provider, input.ProviderID).First(&auth).Error
 	if err == nil {
 		// 如果已绑定，查找用户
+		fmt.Println("已绑定的用户UUID:", auth.ProfileUUID)
 		var user database.User
 		if err := global.DB.Where("uuid = ?", auth.ProfileUUID).First(&user).Error; err != nil {
 			return AuthResult{}, errors.New("Error: user not found")
 		}
 		// 生成JWT
 		token, _ := GenerateJWT(user.UUID)
-		return AuthResult{User: user, Token: token}, nil
+		return AuthResult{Token: token}, nil
 	}
 
 	// 若没有绑定，进行注册
@@ -172,6 +280,7 @@ func LoginOrRegister(input AuthInput) (AuthResult, error) {
 		Gender:     "Other", // 默认设置为Other，实际可以根据情况修改
 		Coin:       0,
 	}
+	println("新用户UUID:", newUser.UUID)
 
 	if err := global.DB.Create(&newUser).Error; err != nil {
 		return AuthResult{}, errors.New("Error: user creation failed")
@@ -190,5 +299,5 @@ func LoginOrRegister(input AuthInput) (AuthResult, error) {
 
 	// 生成JWT
 	token, _ := GenerateJWT(newUser.UUID)
-	return AuthResult{User: newUser, Token: token}, nil
+	return AuthResult{Token: token}, nil
 }

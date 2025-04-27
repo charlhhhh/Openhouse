@@ -36,8 +36,9 @@ func SetupRouter(r *gin.Engine) {
 		{
 			user.GET("/profile", v1.GetProfile)
 			user.PUT("/profile", v1.UpdateProfile)
-			user.POST("/avatar", v1.UploadAvatar)
-
+			// user.POST("/bind/getbindinfo", v1.GetBindInfo)
+			// user.POST("/bind/github", v1.BindGitHub)
+			// user.POST("/bind/google", v1.BindGoogle)
 			// user.POST("/bind/email", v1.BindEmail)
 		}
 	}

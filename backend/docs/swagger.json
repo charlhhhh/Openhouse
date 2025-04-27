@@ -60,7 +60,7 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "GitHub登录回调",
+                "summary": "GitHub登录回调, 前端不调用该API",
                 "parameters": [
                     {
                         "type": "string",
@@ -87,6 +87,114 @@
                                     }
                                 }
                             ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/google_callback": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Google登录回调",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Google回调Code",
+                        "name": "code",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/service.AuthResult"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/profile": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "获取用户Profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/service.ProfileResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Profile"
+                ],
+                "summary": "更新用户Profile（部分字段）",
+                "parameters": [
+                    {
+                        "description": "需要更新的字段",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/service.UpdateProfileInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
                         }
                     }
                 }
@@ -126,45 +234,6 @@
         }
     },
     "definitions": {
-        "database.User": {
-            "type": "object",
-            "properties": {
-                "avatar_url": {
-                    "type": "string"
-                },
-                "coin": {
-                    "type": "integer"
-                },
-                "created_at": {
-                    "description": "创建时间",
-                    "type": "string"
-                },
-                "gender": {
-                    "description": "可选 Male/Female/Other",
-                    "type": "string"
-                },
-                "intro_long": {
-                    "description": "个人简介",
-                    "type": "string"
-                },
-                "intro_short": {
-                    "description": "个人简介 格言",
-                    "type": "string"
-                },
-                "is_verified": {
-                    "description": "是否已认证教育邮箱",
-                    "type": "boolean"
-                },
-                "username": {
-                    "description": "用户名",
-                    "type": "string"
-                },
-                "uuid": {
-                    "description": "用户唯一标识",
-                    "type": "string"
-                }
-            }
-        },
         "response.Response": {
             "type": "object",
             "properties": {
@@ -182,9 +251,76 @@
             "properties": {
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "service.ProfileResponse": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
                 },
-                "user": {
-                    "$ref": "#/definitions/database.User"
+                "coin": {
+                    "type": "integer"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "intro_long": {
+                    "type": "string"
+                },
+                "intro_short": {
+                    "type": "string"
+                },
+                "is_verified": {
+                    "type": "boolean"
+                },
+                "research_area": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "username": {
+                    "type": "string"
+                },
+                "uuid": {
+                    "type": "string"
+                }
+            }
+        },
+        "service.UpdateProfileInput": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "intro_long": {
+                    "type": "string"
+                },
+                "intro_short": {
+                    "type": "string"
+                },
+                "is_verified": {
+                    "type": "boolean"
+                },
+                "research_area": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "username": {
+                    "type": "string"
                 }
             }
         },
