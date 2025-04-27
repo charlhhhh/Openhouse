@@ -7,6 +7,7 @@ import Account from './pages/account';
 import Sage from './pages/sage';
 import Following from './pages/following';
 import CreatePost from './pages/createPost';
+import OAuthCallback from './pages/oauth/OAuthCallback';
 
 const routes: RouteObject[] = [
   {
@@ -40,6 +41,10 @@ const routes: RouteObject[] = [
       {
         path: '/createPost',
         element: <CreatePost />,
+      },
+      {
+        path: '/oauth_success',
+        element: <OAuthCallback />,
       },
     ],
   },

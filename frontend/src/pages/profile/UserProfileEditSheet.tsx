@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Input, Button, message, Upload, Radio, Form } from 'antd';
-import { supabase } from '../../supabase/client';
 import { CloseOutlined, UploadOutlined } from "@ant-design/icons";
 import type { UploadProps } from 'antd';
 import type { RcFile } from 'antd/es/upload/interface';
+import { supabase } from '../../supabase/client';
+import { authService } from '../../services/auth';
 
 interface UserProfileEditSheetProps {
     visible: boolean;
@@ -32,7 +33,13 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
 
     useEffect(() => {
         if (visible && initialData) {
-            form.setFieldsValue(initialData);
+            form.setFieldsValue({
+                display_name: initialData.display_name,
+                intro: initialData.intro,
+                gender: initialData.gender,
+                research_area: initialData.research_area
+            });
+            setAvatarPreview(initialData.avatar_url || '');
         }
     }, [visible, initialData, form]);
 
@@ -41,77 +48,25 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
             setIsSubmitting(true);
             const values = await form.validateFields();
 
-            // 获取当前用户会话
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.user) {
-                message.error('用户未登录');
-                return;
-            }
-
-            let avatarUrl = initialData?.avatar_url;
-
-            // 如果有新的头像文件，先上传头像
-            if (avatarFile) {
-                const fileName = `${session.user.id}_${Date.now()}_${avatarFile.name}`;
-                const { data: uploadData, error: uploadError } = await supabase.storage
-                    .from('posts-images')
-                    .upload(fileName, avatarFile);
-
-                if (uploadError) {
-                    message.error('头像上传失败');
-                    return;
-                }
-
-                if (uploadData) {
-                    // 构建完整的公共访问URL
-                    const { data } = supabase.storage
-                        .from('posts-images')
-                        .getPublicUrl(uploadData.path);
-
-                    avatarUrl = data.publicUrl;
-                    // 立即更新预览图
-                    setAvatarPreview(avatarUrl);
-                }
-            }
-
-            // 准备要更新的用户数据
-            const profileData = {
-                avatar_url: avatarUrl,
-                display_name: values.display_name,
-                intro: values.intro,
+            // 构建请求参数
+            const updateData = {
+                username: values.display_name,
+                intro_long: values.intro,
                 gender: values.gender,
                 research_area: values.research_area,
+                avatar_url: avatarPreview || initialData?.avatar_url
             };
 
-            // 检查用户是否已有个人信息
-            const { data: existingProfile } = await supabase
-                .from('profiles')
-                .select('id')
-                .eq('id', session.user.id)
-                .single();
+            // 使用 authService 发送更新请求
+            const response = await authService.updateUserProfile(updateData);
 
-            let result;
-            if (existingProfile) {
-                // 更新现有个人信息
-                result = await supabase
-                    .from('profiles')
-                    .update(profileData)
-                    .eq('id', session.user.id);
+            if (response.code === 0) {
+                message.success('个人信息更新成功');
+                onClose();
             } else {
-                // 创建新的个人信息
-                result = await supabase
-                    .from('profiles')
-                    .insert({ id: session.user.id, ...profileData });
+                message.error(response.message || '更新失败');
             }
-
-            if (result.error) {
-                throw result.error;
-            }
-
-            message.success('个人信息更新成功');
-            onClose();
         } catch (error) {
-            console.error('更新个人信息失败:', error);
             message.error('更新个人信息失败');
         } finally {
             setIsSubmitting(false);
@@ -120,8 +75,6 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
 
     // 处理头像上传
     const handleAvatarChange: UploadProps['onChange'] = async (info) => {
-        console.log("handleAvatarChange", info);
-
         try {
             if (!info.file || !(info.file instanceof File)) {
                 return;
@@ -137,41 +90,30 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
             };
             reader.readAsDataURL(file);
 
-            // 获取当前用户会话
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.user) {
-                message.error('用户未登录');
-                return;
-            }
-
-            // 立即上传头像
-            const fileName = `${session.user.id}_${Date.now()}_${file.name}`;
+            // 上传到 Supabase Storage
+            const fileName = `${file.name}`;
             const { data: uploadData, error: uploadError } = await supabase.storage
                 .from('posts-images')
                 .upload(fileName, file);
 
             if (uploadError) {
-                message.error('头像上传失败');
+                message.error(`头像上传失败: ${uploadError.message}`);
                 return;
             }
 
             if (uploadData) {
-                console.log('上传成功:', uploadData);
                 // 构建完整的公共访问URL
                 const { data } = supabase.storage
                     .from('posts-images')
                     .getPublicUrl(uploadData.path);
 
                 const publicUrl = data.publicUrl;
-                console.log('公共访问URL:', publicUrl);
-
                 // 更新预览图为上传后的URL
                 setAvatarPreview(publicUrl);
                 setAvatarFile(file as RcFile);
                 message.success('头像上传成功');
             }
         } catch (error) {
-            console.error('头像上传失败:', error);
             message.error('头像上传失败');
         } finally {
             setIsSubmitting(false);
@@ -180,7 +122,6 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
 
     // 阻止文件自动上传
     const beforeUpload = (file: RcFile) => {
-        // 这里可以添加文件类型和大小的检查
         const isImage = file.type.startsWith('image/');
         if (!isImage) {
             message.error('只能上传图片文件！');

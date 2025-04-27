@@ -1,7 +1,7 @@
 .home-container {
     min-height: 100vh;
-    background: #F7F2ECCC;
     padding: 24px 68px;
+    max-width: 1200px;
 }
 
 .home-content {
