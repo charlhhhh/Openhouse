@@ -31,6 +31,7 @@ func SetupRouter(r *gin.Engine) {
 			auth.POST("/email/verify", v1.EmailLogin)
 			auth.POST("/email/send", v1.SendVerifyEmail)
 			auth.GET("/github/callback", v1.GitHubCallback)
+			auth.GET("/google/callback", v1.GoogleCallback)
 		}
 
 		user := apiV1.Group("/user").Use(middleware.JWTAuthMiddleware())

@@ -468,7 +468,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: Google回调Code
+      - description: Google 回调 code
         in: query
         name: code
         required: true
@@ -476,16 +476,11 @@ paths:
       produces:
       - application/json
       responses:
-        "200":
-          description: OK
+        "302":
+          description: 跳转至前端 oauth_success 页面
           schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/service.AuthResult'
-              type: object
-      summary: Google登录回调
+            type: string
+      summary: Google 登录回调，前端不调用该接口
       tags:
       - Auth
   /api/v1/comments/create:

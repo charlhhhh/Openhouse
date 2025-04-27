@@ -15,13 +15,17 @@ require (
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
 	github.com/swaggo/gin-swagger v1.5.1
 	github.com/swaggo/swag v1.8.8
+	golang.org/x/oauth2 v0.0.0-20220411215720-9780585627b5
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gorm.io/datatypes v1.2.5
 	gorm.io/gorm v1.25.11
 )
 
 require (
+	cloud.google.com/go/compute v1.6.1 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
+	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gorm.io/driver/mysql v1.5.6 // indirect
 )

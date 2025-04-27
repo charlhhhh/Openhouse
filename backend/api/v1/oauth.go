@@ -147,33 +147,34 @@ func GitHubCallback(c *gin.Context) {
 }
 
 // GoogleCallback
-// @Summary Google登录回调
+// @Summary Google 登录回调，前端不调用该接口
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param code query string true "Google回调Code"
-// @Success 200 {object} response.Response{data=service.AuthResult}
+// @Param code query string true "Google 回调 code"
+// @Success 302 {string} string "跳转至前端 oauth_success 页面"
 // @Router /api/v1/auth/google_callback [get]
 func GoogleCallback(c *gin.Context) {
-	// var req GoogleLoginRequest
-	// if err := c.ShouldBindQuery(&req); err != nil {
-	// 	response.FailWithMessage("参数错误", c)
-	// 	return
-	// }
+	code := c.Query("code")
+	if code == "" {
+		response.FailWithMessage("缺少 code 参数", c)
+		return
+	}
 
-	// authInput, err := service.GetGoogleUserInfo(req.Code)
-	// if err != nil {
-	// 	response.FailWithMessage("Google认证失败", c)
-	// 	return
-	// }
+	authInput, err := service.GetGoogleUserInfo(code)
+	if err != nil {
+		response.FailWithMessage("Google 认证失败："+err.Error(), c)
+		return
+	}
 
-	// result, err := service.LoginOrRegister(authInput)
-	// if err != nil {
-	// 	response.FailWithMessage(err.Error(), c)
-	// 	return
-	// }
+	result, err := service.LoginOrRegister(authInput)
+	if err != nil {
+		response.FailWithMessage(err.Error(), c)
+		return
+	}
 
-	// // 这里可以设置一个重定向URL，跳转到前端页面
-	// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/#/oauth_success?token=%s", result.Token)
-	// c.Redirect(http.StatusFound, redirectURL)
+	redirectURL := fmt.Sprintf("http://localhost:5173/#/oauth_success?token=%s", result.Token)
+	// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/oauth_success?token=%s", result.Token)
+
+	c.Redirect(http.StatusFound, redirectURL)
 }

@@ -5,7 +5,6 @@ import (
 	"OpenHouse/model/database"
 	"OpenHouse/model/response"
 	"errors"
-	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -106,7 +105,6 @@ func ListComments(postID uint, pageNum, pageSize int, sortBy string, currentUser
 			userMap[u.UUID] = u
 		}
 	}
-	fmt.Println("一级评论作者信息:", userMap)
 
 	// 查询当前用户对一级评论的点赞
 	likedMap := make(map[uint]bool)

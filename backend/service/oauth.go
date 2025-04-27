@@ -4,6 +4,7 @@ import (
 	"OpenHouse/global"
 	"OpenHouse/model/database"
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -17,6 +18,8 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 	"gopkg.in/gomail.v2"
 	"gorm.io/gorm"
 )
@@ -217,6 +220,72 @@ func GetGitHubUserInfo(code string) (AuthInput, error) {
 		ProviderID:  user.Login,
 		DisplayName: user.Login,
 		AvatarURL:   user.AvatarURL,
+		UUID:        "",
+	}, nil
+}
+
+// getGoogleToken 使用 code 获取 access_token
+func getGoogleToken(code string) (*oauth2.Token, error) {
+	var googleOAuthConf = &oauth2.Config{
+		ClientID:     global.VP.GetString("oauth.google_client_id"),
+		ClientSecret: global.VP.GetString("oauth.google_client_secret"),
+		RedirectURL:  global.VP.GetString("oauth.google_redirect_uri"),
+		Scopes: []string{
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile",
+		},
+		Endpoint: google.Endpoint,
+	}
+	token, err := googleOAuthConf.Exchange(context.Background(), code)
+	if err != nil {
+		return nil, errors.Wrap(err, "获取 Google token 失败")
+	}
+	return token, nil
+}
+
+// GetGoogleUserInfo 获取 Google 用户信息并构造 AuthInput
+func GetGoogleUserInfo(code string) (AuthInput, error) {
+	token, err := getGoogleToken(code)
+	if err != nil {
+		return AuthInput{}, err
+	}
+	var googleOAuthConf = &oauth2.Config{
+		ClientID:     global.VP.GetString("oauth.google_client_id"),
+		ClientSecret: global.VP.GetString("oauth.google_client_secret"),
+		RedirectURL:  global.VP.GetString("oauth.google_redirect_uri"),
+		Scopes: []string{
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile",
+		},
+		Endpoint: google.Endpoint,
+	}
+
+	client := googleOAuthConf.Client(context.Background(), token)
+
+	res, err := client.Get("https://www.googleapis.com/oauth2/v3/userinfo")
+	if err != nil {
+		return AuthInput{}, errors.Wrap(err, "获取用户信息失败")
+	}
+	defer res.Body.Close()
+
+	var user struct {
+		Sub     string `json:"sub"`
+		Email   string `json:"email"`
+		Name    string `json:"name"`
+		Picture string `json:"picture"`
+	}
+
+	if err := json.NewDecoder(res.Body).Decode(&user); err != nil {
+		return AuthInput{}, errors.Wrap(err, "解析用户信息失败")
+	}
+
+	fmt.Println("Google用户信息:", user.Sub, user.Email, user.Name, user.Picture)
+
+	return AuthInput{
+		Provider:    ProviderGoogle,
+		ProviderID:  user.Sub,
+		DisplayName: user.Name,
+		AvatarURL:   user.Picture,
 		UUID:        "",
 	}, nil
 }
