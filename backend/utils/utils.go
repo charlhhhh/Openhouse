@@ -1,6 +1,12 @@
 package utils
 
 import (
+<<<<<<< HEAD
+=======
+	"OpenHouse/global"
+	"OpenHouse/model/database"
+	"OpenHouse/model/response"
+>>>>>>> 2c63c65... [feat] follow related impl
 	"crypto/md5"
 	"encoding/hex"
 	"os"
@@ -34,5 +40,43 @@ func CloseFile(file *os.File) {
 	err := file.Close()
 	if err != nil {
 		return
+	}
+}
+
+func ConvertPostModelWithUser(post database.Post, currentUserUUID string) response.PostInfo {
+	var imageURLs []string
+	_ = json.Unmarshal(post.ImageURLs, &imageURLs)
+
+	// 查作者信息
+	var author database.User
+	_ = global.DB.First(&author, "uuid = ?", post.AuthorUUID)
+
+	// 是否关注
+	isFollow := false
+	if currentUserUUID != "" && currentUserUUID != post.AuthorUUID {
+		var relation database.UserFollow
+		if err := global.DB.
+			Where("user_id = ? AND follow_id = ? AND deleted_at IS NULL", currentUserUUID, post.AuthorUUID).
+			First(&relation).Error; err == nil {
+			isFollow = true
+		}
+	}
+
+	return response.PostInfo{
+		PostID:        post.ID,
+		AuthorUUID:    post.AuthorUUID,
+		Title:         post.Title,
+		Content:       post.Content,
+		ImageURLs:     imageURLs,
+		CreateDate:    post.CreateDate,
+		StarNumber:    post.StarNumber,
+		ViewNumber:    post.ViewNumber,
+		CommentNumber: post.CommentNumber,
+
+		// 用户信息字段
+		Username:    author.Username,
+		IntroShort:  author.IntroShort,
+		AvatarURL:   author.AvatarURL,
+		IsFollowing: isFollow,
 	}
 }

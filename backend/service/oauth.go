@@ -86,13 +86,15 @@ func SendMail(mailTo []string, subject string, body string) error {
 }
 
 func SendVerifyCode(email string, code string) (err error) {
-	subject := "来自 OpenHouse 的申请验证码"
+	subject := "Your OpenHouse Verification Code"
 	// 邮件正文
 	mailTo := []string{
 		email,
 	}
-	body := "尊敬的用户您好，欢迎使用 OpenHouse 学术交流平台，您的申请验证码是:\n"
-	body += code + "\n"
+	body := "Hi,\n\n"
+	body += "Your verification code is: " + code + "\n\n"
+	body += "This code will expire in 10min. Please enter it in the application to verify your email.\n\n"
+	body += "If you did not request this code, please ignore this email.\n\n"
 
 	err = SendMail(mailTo, subject, body)
 	if err != nil {

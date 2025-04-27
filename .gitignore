@@ -9,6 +9,7 @@ frontend/yarn-debug.log*
 frontend/pnpm-debug.log*
 frontend/lerna-debug.log*
 frontend/*.local
+frontend/pnpm-lock.yaml
 
 # Optional: editor config in frontend
 frontend/.vscode/

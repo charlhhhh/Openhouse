@@ -41,6 +41,13 @@ func SetupRouter(r *gin.Engine) {
 			// user.POST("/bind/github", v1.BindGitHub)
 			// user.POST("/bind/google", v1.BindGoogle)
 			// user.POST("/bind/email", v1.BindEmail)
+			user.POST("/follow", v1.FollowUser)
+			user.POST("/unfollow", v1.UnfollowUser)
+			user.POST("/following", v1.FollowedList)
+			user.POST("/followers", v1.FollowersList)
+			user.POST("/follow/count", v1.FollowCount)
+			user.POST("/follow/status", v1.FollowStatus)
+			user.POST("/following/posts", v1.FollowedPosts)
 		}
 	}
 }
