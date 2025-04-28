@@ -26,12 +26,18 @@ func SetupRouter(r *gin.Engine) {
 
 	apiV1 := r.Group("/api/v1/")
 	{
+
 		auth := apiV1.Group("/auth").Use(middleware.JWTAuthMiddlewareOptional())
 		{
 			auth.POST("/email/verify", v1.EmailLogin)
 			auth.POST("/email/send", v1.SendVerifyEmail)
 			auth.GET("/github/callback", v1.GitHubCallback)
 			auth.GET("/google/callback", v1.GoogleCallback)
+		}
+
+		media := apiV1.Group("/media").Use(middleware.JWTAuthMiddleware())
+		{
+			media.POST("/upload", v1.UploadFile)
 		}
 
 		user := apiV1.Group("/user").Use(middleware.JWTAuthMiddleware())

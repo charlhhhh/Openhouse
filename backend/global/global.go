@@ -9,3 +9,11 @@ var (
 	DB *gorm.DB
 	VP *viper.Viper
 )
+
+var OSSConfig = struct {
+	Endpoint        string
+	AccessKeyID     string
+	AccessKeySecret string
+	Bucket          string
+	Dir             string
+}{}

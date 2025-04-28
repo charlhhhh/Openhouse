@@ -3,6 +3,7 @@ module OpenHouse
 go 1.18
 
 require (
+	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.8.1
 	github.com/golang-jwt/jwt v3.2.2+incompatible
@@ -25,6 +26,7 @@ require (
 	cloud.google.com/go/compute v1.6.1 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gorm.io/driver/mysql v1.5.6 // indirect

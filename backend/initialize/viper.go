@@ -19,6 +19,8 @@ func InitViper() (err error) {
 	}
 	v.Set("root_path", "./")
 
+	_ = viper.UnmarshalKey("oss", &global.OSSConfig)
+
 	global.VP = v
 	return err
 }
