@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { userSession } from '../utils/UserSession';
 import type { MenuProps } from 'antd';
 import { supabase } from '../supabase/client';
+import { authService } from '../services/auth';
 
 const TopBarContainer = styled.div`
   height: 88px;
@@ -138,23 +139,16 @@ interface TopBarProps {
 }
 
 export default function TopBar({ onShowLogin }: TopBarProps) {
-    const [session, setSession] = useState<any>(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
-        });
-
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setSession(session);
-        });
-
-        return () => subscription.unsubscribe();
+        // 检查登录状态
+        setIsLoggedIn(authService.isLoggedIn());
     }, []);
 
-    const handleAccountClick = async () => {
-        if (!session) {
+    const handleAccountClick = () => {
+        if (!isLoggedIn) {
             onShowLogin();
         } else {
             navigate('/account');
@@ -162,8 +156,13 @@ export default function TopBar({ onShowLogin }: TopBarProps) {
     };
 
     const handleLogout = async () => {
-        await supabase.auth.signOut();
+        authService.clearToken();
+        setIsLoggedIn(false);
         navigate('/');
+    };
+
+    const handlePostClick = () => {
+        navigate('/createPost');
     };
 
     const accountMenuItems: MenuProps['items'] = [
@@ -185,8 +184,8 @@ export default function TopBar({ onShowLogin }: TopBarProps) {
             </SearchContainer>
             <ButtonGroup>
                 <NotificationButton icon={<BellOutlined style={{ fontSize: '20px' }} />} />
-                <PostButton>+Post</PostButton>
-                {session ? (
+                <PostButton onClick={handlePostClick}>+Post</PostButton>
+                {isLoggedIn ? (
                     <StyledDropdown
                         menu={{ items: accountMenuItems }}
                         trigger={['hover']}

@@ -6,6 +6,9 @@ import FindPartner from './pages/find';
 import Account from './pages/account';
 import Sage from './pages/sage';
 import Following from './pages/following';
+import CreatePost from './pages/createPost';
+import OAuthCallback from './pages/oauth/OAuthCallback';
+import SavedTopics from './pages/savedTopics';
 
 const routes: RouteObject[] = [
   {
@@ -13,33 +16,47 @@ const routes: RouteObject[] = [
     element: <Root />,
     children: [
       {
-        path: '/',
+        index: true,
         element: <Home />,
       },
       {
-        path: '/login',
+        path: 'login',
         element: <Login />,
       },
       {
-        path: '/sage',
+        path: 'sage',
         element: <Sage />,
       },
       {
-        path: '/findPartner',
+        path: 'findPartner',
         element: <FindPartner />,
       },
       {
-        path: '/account',
+        path: 'account',
         element: <Account />,
       },
       {
-        path: '/following',
+        path: 'following',
         element: <Following />,
+      },
+      {
+        path: 'createPost',
+        element: <CreatePost />,
+      },
+      {
+        path: 'oauth_success',
+        element: <OAuthCallback />,
+      },
+      {
+        path: 'savedTopics',
+        element: <SavedTopics />,
       },
     ],
   },
 ];
 
-const router = createBrowserRouter(routes);
+const router = createBrowserRouter(routes, {
+  basename: '/'
+});
 
 export default router; 

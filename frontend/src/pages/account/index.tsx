@@ -14,13 +14,12 @@ import { supabase } from '../../supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useLoginSheet } from '../../pages/login/LoginSheet';
 import { UserProfileEditSheet } from '../../pages/profile/UserProfileEditSheet';
+import { EditPostSheet } from '../../pages/post/EditPostSheet';
+import { DeleteConfirmAlert } from '../../components/DeleteConfirmAlert';
 
-
-interface Post {
-    id: string;
-    title: string;
-    date: string;
-}
+import { authService } from '../../services/auth';
+import { Post } from '../home/types';
+import { postService } from '../../services/post';
 
 interface ContributionDay {
     date: string;
@@ -75,12 +74,45 @@ const generateContributionData = (): ContributionDay[] => {
     return data;
 };
 
-export default function Account() {
+
+type Gender = 'male' | 'female' | undefined;
+
+interface UserInfo {
+    avatar: string;
+    nickname: string;
+    coins: number;
+    id: string;
+    bio: string;
+    gender: Gender;
+    followers: number;
+    followings: number;
+    isVerified: boolean;
+    contributions: number;
+    researchArea?: string;
+}
+
+const Account: React.FC = () => {
     const navigate = useNavigate();
     const { setVisible } = useLoginSheet();
-    const [userInfo, setUserInfo] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [editSheetVisible, setEditSheetVisible] = useState(false);
+    const [editPostSheetVisible, setEditPostSheetVisible] = useState(false);
+    const [selectedPost, setSelectedPost] = useState<any>(null);
+    const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+    const [postToDelete, setPostToDelete] = useState<string | null>(null);
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [userInfo, setUserInfo] = useState<UserInfo>({
+        avatar: '/default-avatar.png',
+        nickname: 'User',
+        coins: 0,
+        id: '',
+        bio: '',
+        gender: undefined,
+        followers: 0,
+        followings: 0,
+        isVerified: false,
+        contributions: 0,
+    });
 
     useEffect(() => {
         checkAuth();
@@ -88,57 +120,45 @@ export default function Account() {
 
     const checkAuth = async () => {
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
+            // 检查是否已登录
+            if (!authService.isLoggedIn()) {
                 navigate('/');
                 setVisible(true);
                 return;
             }
 
-            const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
+            // 获取用户信息
+            console.log('获取用户信息');
+            const response = await authService.getUserProfile();
 
-            // 设置用户信息，如果没有 profile 或获取失败则使用默认值
-            const defaultNickname = session.user.email?.split('@')[0] || 'User';
-            setUserInfo({
-                avatar: profile?.avatar_url || '/default-avatar.png',
-                nickname: profile?.nickname || defaultNickname,
-                coins: profile?.coins || 0,
-                id: session.user.id,
-                bio: profile?.bio || '',
-                gender: profile?.gender,
-                followers: profile?.followers_count || 0,
-                followings: profile?.following_count || 0,
-                isVerified: profile?.is_verified || false,
-                contributions: profile?.contributions || 0,
-            });
+            if (response.code === 0 && response.data) {
+                const profile = response.data;
+                // 将后端返回的性别值转换为组件期望的类型
+                const gender: Gender = profile.gender === 'male' || profile.gender === 'female'
+                    ? profile.gender
+                    : undefined;
 
-            if (profileError && profileError.code !== 'PGRST116') {
-                message.warning('获取用户信息失败，显示默认信息');
-            }
-        } catch (error) {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                const defaultNickname = session.user.email?.split('@')[0] || 'User';
                 setUserInfo({
-                    avatar: '/default-avatar.png',
-                    nickname: defaultNickname,
-                    coins: 0,
-                    id: session.user.id,
-                    bio: '',
-                    gender: null,
+                    avatar: profile.avatar_url || '/default-avatar.png',
+                    nickname: profile.username,
+                    coins: profile.coin,
+                    id: profile.uuid,
+                    bio: profile.intro_short || profile.intro_long || '',
+                    gender,
                     followers: 0,
                     followings: 0,
-                    isVerified: false,
+                    isVerified: profile.is_verified,
                     contributions: 0,
+                    researchArea: profile.research_area
                 });
-                message.warning('获取用户信息失败，显示默认信息');
             } else {
-                message.error('发生错误，请稍后重试');
+                message.error(response.message || '获取用户信息失败');
             }
+        } catch (error) {
+            message.error('获取用户信息失败，请重新登录');
+            // 清除token并跳转到首页
+            authService.clearToken();
+            navigate('/');
         } finally {
             setLoading(false);
         }
@@ -152,6 +172,71 @@ export default function Account() {
         setEditSheetVisible(false);
         // 重新加载用户信息
         checkAuth();
+
+    };
+
+    const handleEdit = (post: any) => {
+        setSelectedPost(post);
+        setEditPostSheetVisible(true);
+    };
+
+    const handleEditPostClose = async () => {
+        setEditPostSheetVisible(false);
+        setSelectedPost(null);
+        fetchMyPosts();
+    };
+
+    const handleDelete = async (postId: number) => {
+        setPostToDelete(String(postId));
+        setDeleteConfirmVisible(true);
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteConfirmVisible(false);
+        setPostToDelete(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!postToDelete) return;
+        try {
+            // TODO: 调用删除帖子接口
+            await postService.deletePost(Number(postToDelete));
+            message.success('帖子已删除');
+            fetchMyPosts();
+        } catch (error) {
+            message.error('删除失败');
+        } finally {
+            setDeleteConfirmVisible(false);
+            setPostToDelete(null);
+        }
+    };
+
+    const fetchMyPosts = async () => {
+        setLoading(true);
+        try {
+            const response = await authService.getMyPosts({
+                page_num: 1,
+                page_size: 50,
+                sort_order: 'desc'  // 按时间倒序，最新的在前面
+            });
+            if (response.code === 0 && response.data.list) {
+                setPosts(response.data.list);
+            }
+        } catch (error) {
+            console.error('获取历史帖子失败:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchMyPosts();
+    }, []);
+
+    // 处理内容截断
+    const truncateContent = (content: string, maxLength: number = 100) => {
+        if (content.length <= maxLength) return content;
+        return content.substring(0, maxLength) + '...';
     };
 
     if (loading) {
@@ -162,23 +247,7 @@ export default function Account() {
         return null;
     }
 
-    const posts: Post[] = [
-        {
-            id: '1',
-            title: 'content dsdadasdasdsadbalbabla',
-            date: '2024-03-20',
-        },
-    ];
-
     const contributionData = generateContributionData();
-
-    const handleEdit = (postId: string) => {
-        console.log('编辑帖子:', postId);
-    };
-
-    const handleDelete = (postId: string) => {
-        console.log('删除帖子:', postId);
-    };
 
     return (
         <div className={styles.container}>
@@ -253,40 +322,42 @@ export default function Account() {
                 </div>
             </div>
 
-            {/* Activities Section */}
+            {/* History Activities Section */}
             <div className={styles.section}>
                 <div className={styles.activitiesSection}>
-                    <h2>Activities</h2>
+                    <h2>History Activities</h2>
                     {posts.length > 0 ? (
                         <>
-                            <p>最近发帖时间: {posts[0].date}</p>
+                            <p>最近发帖时间: {new Date(posts[0].create_date).toLocaleString()}</p>
                             <div className={styles.postHistory}>
                                 {posts.map((post) => (
-                                    <div key={post.id} className={styles.postCard}>
+                                    <div key={post.post_id} className={styles.postCard}>
                                         <div className={styles.postHeader}>
-                                            <h3>Post History</h3>
+                                            <h3>{post.title || '无标题'}</h3>
                                             <div className={styles.postActions}>
                                                 <button
-                                                    onClick={() => handleEdit(post.id)}
+                                                    onClick={() => handleEdit(post)}
                                                     className={styles.actionButton}
                                                 >
                                                     <EditOutlined />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(post.id)}
+                                                    onClick={() => handleDelete(post.post_id)}
                                                     className={styles.actionButton}
                                                 >
                                                     <DeleteOutlined />
                                                 </button>
                                             </div>
                                         </div>
-                                        <p>{post.title}</p>
+                                        <p className={styles.postContent}>
+                                            {truncateContent(post.content)}
+                                        </p>
                                     </div>
                                 ))}
                             </div>
                         </>
                     ) : (
-                        <p>Empty</p>
+                        <p>暂无发帖记录</p>
                     )}
                 </div>
             </div>
@@ -300,9 +371,27 @@ export default function Account() {
                     display_name: userInfo?.nickname,
                     intro: userInfo?.bio,
                     gender: userInfo?.gender,
-                    research_area: userInfo?.research_area,
+                    research_area: userInfo?.researchArea,
                 }}
+            />
+
+            {/* Edit Post Sheet */}
+            {selectedPost && (
+                <EditPostSheet
+                    visible={editPostSheetVisible}
+                    onClose={handleEditPostClose}
+                    post={selectedPost}
+                />
+            )}
+
+            {/* Delete Confirm Alert */}
+            <DeleteConfirmAlert
+                visible={deleteConfirmVisible}
+                onCancel={handleDeleteCancel}
+                onConfirm={handleConfirmDelete}
             />
         </div>
     );
-} 
+};
+
+export default Account; 

@@ -13,6 +13,7 @@ frontend/*.local
 # Optional: editor config in frontend
 frontend/.vscode/
 frontend/.idea/
+node_modules/
 
 # === BACKEND ===
 backend/venv/

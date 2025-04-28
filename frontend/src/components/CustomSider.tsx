@@ -11,8 +11,11 @@ const StyledSider = styled(Sider)`
   background: #fff !important;
   height: 100vh;
   width: 340px;
-  position: relative;
+  position: fixed;
+  left: 0;
+  top: 0;
   overflow: visible;
+  z-index: 200;
 `;
 
 const DecorationImage = styled.div`
@@ -126,23 +129,28 @@ const menuItems: MenuItem[] = [
         icon: '/menu_items_home.svg'
     },
     {
-        key: '/following',
+        key: 'following',
         label: 'Following',
         icon: '/menu_items_following.svg'
     },
     {
-        key: '/sage',
+        key: 'savedTopics',
+        label: 'Saved Topics',
+        icon: '/menu_items_saved.svg'
+    },
+    {
+        key: 'sage',
         label: 'Sage AI',
         icon: '/menu_items_sage.svg',
         highlight: 'AI'
     },
     {
-        key: '/findPartner',
+        key: 'findPartner',
         label: 'Find Your Partner',
         icon: '/menu_items_partner.svg'
     },
     {
-        key: '/account',
+        key: 'account',
         label: 'Account',
         icon: '/menu_items_account.svg'
     }
