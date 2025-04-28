@@ -200,7 +200,7 @@ export const CommentPanel: React.FC<CommentPanelProps> = ({ postId }) => {
                     onClick={() => handleReplyClick(comment.id)}
                 >
                     <img src="/icon_comment.svg" className="action-icon" />
-                    <span className="action-text">回复</span>
+                    <span className="action-text">Reply</span>
                 </Button>
             </div>
             {replyingTo === comment.id && (
@@ -208,7 +208,7 @@ export const CommentPanel: React.FC<CommentPanelProps> = ({ postId }) => {
                     <div className="reply-input-container">
                         <Input
                             className="comment-input"
-                            placeholder="回复评论..."
+                            placeholder={`Reply To ${comment.username}`}
                             value={commentContent}
                             onChange={e => setCommentContent(e.target.value)}
                             onPressEnter={handleSubmitComment}
