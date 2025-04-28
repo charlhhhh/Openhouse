@@ -4,6 +4,7 @@ import (
 	"OpenHouse/model/request"
 	"OpenHouse/model/response"
 	"OpenHouse/service"
+	"fmt"
 
 	"OpenHouse/utils"
 
@@ -45,6 +46,40 @@ func CreatePost(c *gin.Context) {
 
 	postInfo := utils.ConvertPostModelWithUser(post, userUUID)
 	response.OkWithData(postInfo, c)
+}
+
+// UpdatePost 更新帖子
+// @Summary 更新帖子
+// @Description 用户更新帖子内容（可附带最多3张图）
+// @Tags 帖子 Posts
+// @Accept json
+// @Produce json
+// @Param data body request.UpdatePostRequest true "帖子内容与图片"
+// @Success 200 {object} response.Response{data=response.PostInfo}
+// @Failure 400 {object} response.Response "请求参数错误"
+// @Failure 401 {object} response.Response "未授权"
+// @Failure 500 {object} response.Response "服务器内部错误"
+// @Security ApiKeyAuth
+// @Router /api/v1/posts/update [post]
+func UpdatePost(c *gin.Context) {
+	var req request.UpdatePostRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		response.FailWithMessage("参数错误："+err.Error(), c)
+		return
+	}
+
+	userUUID := c.MustGet("uuid").(string)
+	if userUUID == "" {
+		response.FailWithMessage("未登录或者未授权", c)
+		return
+	}
+
+	if err := service.UpdatePost(userUUID, req); err != nil {
+		response.FailWithMessage("修改失败："+err.Error(), c)
+		return
+	}
+
+	response.OkWithMessage("修改成功", c)
 }
 
 // ListPosts 获取帖子列表
@@ -184,6 +219,7 @@ func FavoritePost(c *gin.Context) {
 		response.FailWithMessage("参数错误："+err.Error(), c)
 		return
 	}
+	fmt.Println("req PostID:", req.PostID)
 
 	userUUID := c.MustGet("uuid").(string)
 

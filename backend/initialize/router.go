@@ -26,7 +26,7 @@ func SetupRouter(r *gin.Engine) {
 
 	apiV1 := r.Group("/api/v1/")
 	{
-		auth := apiV1.Group("/auth")
+		auth := apiV1.Group("/auth").Use(middleware.JWTAuthMiddlewareOptional())
 		{
 			auth.POST("/email/verify", v1.EmailLogin)
 			auth.POST("/email/send", v1.SendVerifyEmail)
@@ -38,7 +38,6 @@ func SetupRouter(r *gin.Engine) {
 		{
 			user.GET("/profile", v1.GetProfile)
 			user.POST("/profile", v1.UpdateProfile)
-			// user.POST("/bind/getbindinfo", v1.GetBindInfo)
 			// user.POST("/bind/github", v1.BindGitHub)
 			// user.POST("/bind/google", v1.BindGoogle)
 			// user.POST("/bind/email", v1.BindEmail)
@@ -54,6 +53,7 @@ func SetupRouter(r *gin.Engine) {
 		postsAuth := apiV1.Group("/posts").Use(middleware.JWTAuthMiddleware())
 		{
 			postsAuth.POST("/create", v1.CreatePost)
+			postsAuth.POST("/update", v1.UpdatePost)
 			postsAuth.POST("/mypostlist", v1.ListMyPosts)
 			postsAuth.POST("/delete", v1.DeletePost)
 			postsAuth.POST("/favorite", v1.FavoritePost)

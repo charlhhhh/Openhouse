@@ -39,12 +39,16 @@ type AuthInput struct {
 	ProviderID  string // 比如邮箱地址 / GitHub userID / Google sub
 	DisplayName string
 	AvatarURL   string
-	UUID        string // 用户UUID
 }
 
 // AuthResult 返回登录结果
 type AuthResult struct {
 	Token string
+}
+
+// BindAccountResult 绑定账号结果
+type BindAccountResult struct {
+	Result string
 }
 
 // GenerateJWT 生成JWT Token
@@ -220,7 +224,6 @@ func GetGitHubUserInfo(code string) (AuthInput, error) {
 		ProviderID:  user.Login,
 		DisplayName: user.Login,
 		AvatarURL:   user.AvatarURL,
-		UUID:        "",
 	}, nil
 }
 
@@ -286,45 +289,55 @@ func GetGoogleUserInfo(code string) (AuthInput, error) {
 		ProviderID:  user.Sub,
 		DisplayName: user.Name,
 		AvatarURL:   user.Picture,
-		UUID:        "",
 	}, nil
+}
+
+func BindAccount(input AuthInput, uuid string) (BindAccountResult, error) {
+	if uuid == "" {
+		return BindAccountResult{}, errors.New("Error: UUID not found")
+	}
+
+	// 1. 检查该第三方账号是否已绑定其他用户
+	var existing database.AuthAccount
+	err := global.DB.Where("provider = ? AND provider_id = ?", input.Provider, input.ProviderID).First(&existing).Error
+	if err == nil {
+		// 如果已存在绑定且不是当前用户
+		if existing.ProfileUUID != uuid {
+			return BindAccountResult{Result: "duplicate_bind"}, errors.New("Error: this account is already bound to another user")
+		}
+		// 如果已绑定当前用户 → 直接返回
+		return BindAccountResult{Result: "already_bound"}, nil
+	}
+
+	// 2. 创建绑定关系
+	bind := database.AuthAccount{
+		ProfileUUID: uuid,
+		Provider:    string(input.Provider),
+		ProviderID:  input.ProviderID,
+	}
+	if err := global.DB.Create(&bind).Error; err != nil {
+		return BindAccountResult{Result: "bind_failed"}, errors.Wrap(err, "Error: creating bind record failed")
+	}
+
+	// 3. 更新用户表中的绑定标志位
+	field := map[AuthProvider]string{
+		ProviderEmail:  "is_email_bound",
+		ProviderGitHub: "is_github_bound",
+		ProviderGoogle: "is_google_bound",
+	}[input.Provider]
+
+	if field != "" {
+		_ = global.DB.Model(&database.User{}).
+			Where("uuid = ?", uuid).
+			Update(field, true).Error
+	}
+
+	return BindAccountResult{Result: "success_bind"}, nil
 }
 
 // LoginOrRegister 登录或注册
 func LoginOrRegister(input AuthInput) (AuthResult, error) {
 	var auth database.AuthAccount
-
-	// 先查找是否已有UUID,如果存在UUID，说明是已绑定的用户正在进行额外的绑定
-	if input.UUID != "" {
-		err := global.DB.Where("profile_uuid = ?", input.UUID).First(&auth).Error
-		if err == nil {
-			// 如果已绑定，查找用户，增加绑定的第三方账号认证信息
-			fmt.Println("已绑定的用户UUID:", auth.ProfileUUID)
-			var user database.User
-			if err := global.DB.Where("uuid = ?", auth.ProfileUUID).First(&user).Error; err != nil {
-				return AuthResult{}, errors.New("Error: user not found")
-			}
-			newAuth := database.AuthAccount{
-				ProfileUUID: input.UUID,
-				Provider:    string(input.Provider),
-				ProviderID:  input.ProviderID,
-			}
-			// 检查是否已存在相同的绑定
-			existingAuth := database.AuthAccount{}
-			err = global.DB.Where("provider = ? AND provider_id = ?", input.Provider, input.ProviderID).First(&existingAuth).Error
-			if err == nil {
-				// 如果已存在相同的绑定，返回错误
-				return AuthResult{}, errors.New("Error: already bound to this account")
-			}
-			// 如果不存在相同的绑定，进行绑定
-			if err := global.DB.Create(&newAuth).Error; err != nil {
-				return AuthResult{}, errors.New("Error: auth account creation failed")
-			}
-			// 生成JWT
-			token, _ := GenerateJWT(user.UUID)
-			return AuthResult{Token: token}, nil
-		}
-	}
 
 	// 先查找是否已有绑定的第三方账号
 	err := global.DB.Where("provider = ? AND provider_id = ?", input.Provider, input.ProviderID).First(&auth).Error

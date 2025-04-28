@@ -7,17 +7,20 @@ import (
 )
 
 type User struct {
-	UUID         string         `gorm:"primaryKey" json:"uuid"`
-	CreatedAt    time.Time      `json:"created_at"`
-	IsVerified   bool           `json:"is_verified"`
-	Username     string         `json:"username"`
-	Gender       string         `json:"gender"`
-	AvatarURL    string         `json:"avatar_url"`
-	IntroShort   string         `json:"intro_short"`
-	IntroLong    string         `json:"intro_long"`
-	Coin         int            `json:"coin"`
-	Tags         datatypes.JSON `json:"tags"`          // Tags存为JSON类型
-	ResearchArea string         `json:"research_area"` // 研究领域
+	UUID          string         `gorm:"primaryKey" json:"uuid"`
+	CreatedAt     time.Time      `json:"created_at"`
+	IsVerified    bool           `json:"is_verified"`
+	Username      string         `json:"username"`
+	Gender        string         `json:"gender"`
+	AvatarURL     string         `json:"avatar_url"`
+	IntroShort    string         `json:"intro_short"`
+	IntroLong     string         `json:"intro_long"`
+	Coin          int            `json:"coin"`
+	Tags          datatypes.JSON `json:"tags"`          // Tags存为JSON类型
+	ResearchArea  string         `json:"research_area"` // 研究领域
+	IsEmailBound  bool           `gorm:"default:false" json:"is_email_bound"`
+	IsGitHubBound bool           `gorm:"default:false" json:"is_github_bound"`
+	IsGoogleBound bool           `gorm:"default:false" json:"is_google_bound"`
 }
 
 // AuthAccount 表结构

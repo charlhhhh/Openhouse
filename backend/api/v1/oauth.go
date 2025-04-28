@@ -69,6 +69,7 @@ func SendVerifyEmail(c *gin.Context) {
 // EmailLogin
 // @Summary 邮箱验证码验证
 // @Description 验证邮箱验证码是否正确,如果正确则登录或注册用户
+// @Description 如果用户已经注册，则绑定邮箱到当前用户
 // @Tags Auth
 // @Accept json
 // @Produce json
@@ -100,7 +101,19 @@ func EmailLogin(c *gin.Context) {
 		ProviderID:  rec.Email,
 		DisplayName: rec.Email,
 		AvatarURL:   "", // 邮箱没头像
-		UUID:        "",
+	}
+
+	// 尝试解析当前登录用户 UUID（从 JWT 中）
+	userUUID, _ := c.Get("uuid")
+	if userUUIDStr, ok := userUUID.(string); ok {
+		fmt.Println("已注册用户进行邮箱认证，UUID:", userUUIDStr)
+		bindresult, err := service.BindAccount(authInput, userUUIDStr)
+		if err != nil {
+			response.FailWithMessage(err.Error(), c)
+			return
+		}
+		response.OkWithData(bindresult, c)
+		return
 	}
 
 	result, err := service.LoginOrRegister(authInput)
@@ -113,6 +126,9 @@ func EmailLogin(c *gin.Context) {
 
 // GitHubCallback
 // @Summary GitHub登录回调, 前端不调用该API
+// @Description 用户在GitHub登录后，GitHub会回调该接口，并传递code参数
+// @Description 该接口会使用code参数获取用户信息，并进行登录或注册
+// @Description 如果用户已经注册，则绑定GitHub账号到当前用户
 // Github登录时，直接跳转: https://github.com/login/oauth/authorize?scope=user:email&client_id=Ov23liKlSNhwhBevQPD7
 // @Tags Auth
 // @Accept json
@@ -133,6 +149,17 @@ func GitHubCallback(c *gin.Context) {
 		return
 	}
 
+	// 尝试解析当前登录用户 UUID（从 JWT 中）
+	userUUID, _ := c.Get("uuid")
+	if userUUIDStr, ok := userUUID.(string); ok {
+		fmt.Println("已注册用户进行Github认证，UUID:", userUUIDStr)
+		bindresult, _ := service.BindAccount(authInput, userUUIDStr)
+		redirectURL := fmt.Sprintf("http://localhost:5173/#/bind_success?result=%s", bindresult.Result)
+		// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/bind_success?result=%s", bindresult.Result)
+		c.Redirect(http.StatusFound, redirectURL)
+		return
+	}
+
 	result, err := service.LoginOrRegister(authInput)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -148,6 +175,11 @@ func GitHubCallback(c *gin.Context) {
 
 // GoogleCallback
 // @Summary Google 登录回调，前端不调用该接口
+// @Description 用户在Google登录后，Google会回调该接口，并传递code参数
+// @Description 该接口会使用code参数获取用户信息，并进行登录或注册
+// @Description 如果用户已经注册，则绑定Google账号到当前用户
+// @Description 如果用户没有注册，则进行注册
+// @Description 如果用户已经注册，则绑定Google账号到当前用户
 // @Tags Auth
 // @Accept json
 // @Produce json
@@ -167,9 +199,27 @@ func GoogleCallback(c *gin.Context) {
 		return
 	}
 
+	// 尝试解析当前登录用户 UUID（从 JWT 中）
+
+	userUUID, _ := c.Get("uuid")
+	if userUUIDStr, ok := userUUID.(string); ok {
+		fmt.Println("已注册用户进行Google认证，UUID:", userUUIDStr)
+		bindresult, _ := service.BindAccount(authInput, userUUIDStr)
+		redirectURL := fmt.Sprintf("http://localhost:5173/#/bind_success?result=%s", bindresult.Result)
+		// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/bind_success?result=%s", bindresult.Result)
+		c.Redirect(http.StatusFound, redirectURL)
+		return
+	}
+
+	// 如果没有解析到用户UUID，说明是新用户，进行注册
 	result, err := service.LoginOrRegister(authInput)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
+		return
+	}
+
+	if userUUID == nil {
+		response.OkWithData(result, c)
 		return
 	}
 

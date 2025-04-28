@@ -5,12 +5,19 @@ import (
 	"OpenHouse/model/database"
 	"OpenHouse/model/response"
 	"errors"
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
 )
 
 func CreateComment(userUUID string, postID uint, commentID *uint, content string) error {
+	// 检查帖子是否存在
+	var post database.Post
+	if err := global.DB.First(&post, postID).Error; err != nil {
+		return errors.New("帖子不存在")
+	}
+
 	comment := database.PostComment{
 		PostID:     postID,
 		CommentID:  commentID,
@@ -21,10 +28,24 @@ func CreateComment(userUUID string, postID uint, commentID *uint, content string
 	if err := global.DB.Create(&comment).Error; err != nil {
 		return err
 	}
+
+	if err := global.DB.Model(&database.Post{}).
+		Where("id = ?", postID).
+		Select("comment_number").
+		Updates(database.Post{CommentNumber: post.CommentNumber + 1}).Error; err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func LikeComment(userUUID string, commentID uint) error {
+	// 检查评论是否存在
+	var comment database.PostComment
+	if err := global.DB.First(&comment, commentID).Error; err != nil {
+		return errors.New("评论不存在")
+	}
+
 	var like database.CommentLike
 	err := global.DB.
 		Where("user_id = ? AND comment_id = ?", userUUID, commentID).
@@ -43,12 +64,24 @@ func LikeComment(userUUID string, commentID uint) error {
 	if err := global.DB.Create(&like).Error; err != nil {
 		return err
 	}
-	return global.DB.Model(&database.PostComment{}).
+
+	// 更新评论点赞数
+	if err := global.DB.Model(&database.PostComment{}).
 		Where("id = ?", commentID).
-		UpdateColumn("like_number", gorm.Expr("like_number + 1")).Error
+		Select("like_number").
+		Updates(database.PostComment{LikeNumber: comment.LikeNumber + 1}).Error; err != nil {
+		return errors.New("更新点赞数失败")
+	}
+	return nil
 }
 
 func UnlikeComment(userUUID string, commentID uint) error {
+	// 检查评论是否存在
+	var comment database.PostComment
+	if err := global.DB.First(&comment, commentID).Error; err != nil {
+		return errors.New("评论不存在")
+	}
+
 	var like database.CommentLike
 	err := global.DB.
 		Where("user_id = ? AND comment_id = ? AND deleted_at IS NULL", userUUID, commentID).
@@ -59,9 +92,14 @@ func UnlikeComment(userUUID string, commentID uint) error {
 	if err := global.DB.Delete(&like).Error; err != nil {
 		return err
 	}
-	return global.DB.Model(&database.PostComment{}).
+	// 同步更新点赞数
+	if err := global.DB.Model(&database.PostComment{}).
 		Where("id = ?", commentID).
-		UpdateColumn("like_number", gorm.Expr("like_number - 1")).Error
+		Select("like_number").
+		Updates(database.PostComment{LikeNumber: comment.LikeNumber - 1}).Error; err != nil {
+		return errors.New("更新点赞数失败")
+	}
+	return nil
 }
 
 // ListComments 查询某个帖子的一级评论 + 默认前 3 条子评论
@@ -197,6 +235,7 @@ func ListComments(postID uint, pageNum, pageSize int, sortBy string, currentUser
 		})
 	}
 
+	fmt.Println(result)
 	return result, total, nil
 }
 
@@ -210,6 +249,7 @@ func ListChildComments(parentCommentID uint, pageNum, pageSize int, currentUserU
 	if err := db.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}
+	fmt.Println("子评论总数：", total)
 
 	// 查询分页数据
 	if err := db.Order("create_time asc").

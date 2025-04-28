@@ -192,7 +192,7 @@ func ListFollowedPosts(userUUID string, pageNum, pageSize int, sortOrder string)
 	var posts []database.Post
 	var total int64
 
-	db := global.DB.Model(&database.Post{}).Where("author_uuid IN ?", followUUIDs)
+	db := global.DB.Model(&database.Post{}).Where("author_uuid IN (?)", followUUIDs)
 	if err := db.Count(&total).Error; err != nil {
 		return nil, 0, err
 	}

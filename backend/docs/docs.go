@@ -1101,6 +1101,75 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/posts/update": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "用户更新帖子内容（可附带最多3张图）",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "帖子 Posts"
+                ],
+                "summary": "更新帖子",
+                "parameters": [
+                    {
+                        "description": "帖子内容与图片",
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/request.UpdatePostRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.PostInfo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "请求参数错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "401": {
+                        "description": "未授权",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    },
+                    "500": {
+                        "description": "服务器内部错误",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/user/follow/count": {
             "post": {
                 "security": [
@@ -1824,6 +1893,37 @@ const docTemplate = `{
             "properties": {
                 "post_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "request.UpdatePostRequest": {
+            "type": "object",
+            "required": [
+                "content",
+                "post_id",
+                "title"
+            ],
+            "properties": {
+                "content": {
+                    "description": "帖子内容",
+                    "type": "string"
+                },
+                "image_urls": {
+                    "description": "最多3张图片，每张是合法 URL",
+                    "type": "array",
+                    "maxItems": 3,
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "post_id": {
+                    "description": "帖子 ID",
+                    "type": "integer"
+                },
+                "title": {
+                    "description": "帖子标题 100 字符以内",
+                    "type": "string",
+                    "maxLength": 100
                 }
             }
         },

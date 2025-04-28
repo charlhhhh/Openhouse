@@ -156,6 +156,29 @@ definitions:
     required:
     - post_id
     type: object
+  request.UpdatePostRequest:
+    properties:
+      content:
+        description: 帖子内容
+        type: string
+      image_urls:
+        description: 最多3张图片，每张是合法 URL
+        items:
+          type: string
+        maxItems: 3
+        type: array
+      post_id:
+        description: 帖子 ID
+        type: integer
+      title:
+        description: 帖子标题 100 字符以内
+        maxLength: 100
+        type: string
+    required:
+    - content
+    - post_id
+    - title
+    type: object
   response.CommentInfo:
     properties:
       author_uuid:
@@ -1034,6 +1057,47 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 取消点赞
+      tags:
+      - 帖子 Posts
+  /api/v1/posts/update:
+    post:
+      consumes:
+      - application/json
+      description: 用户更新帖子内容（可附带最多3张图）
+      parameters:
+      - description: 帖子内容与图片
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.PostInfo'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新帖子
       tags:
       - 帖子 Posts
   /api/v1/user/follow/count:
