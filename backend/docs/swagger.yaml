@@ -1,0 +1,1464 @@
+definitions:
+  request.CreateCommentRequest:
+    properties:
+      comment_id:
+        description: 可选，若为 null 表示一级评论
+        type: integer
+      content:
+        maxLength: 500
+        minLength: 1
+        type: string
+      post_id:
+        type: integer
+    required:
+    - content
+    - post_id
+    type: object
+  request.CreatePostRequest:
+    properties:
+      content:
+        description: 帖子内容
+        type: string
+      image_urls:
+        description: 最多3张图片，每张是合法 URL
+        items:
+          type: string
+        maxItems: 3
+        type: array
+      title:
+        description: 帖子标题 100 字符以内
+        maxLength: 100
+        type: string
+    required:
+    - content
+    - title
+    type: object
+  request.DeletePostRequest:
+    properties:
+      post_id:
+        type: integer
+    required:
+    - post_id
+    type: object
+  request.FavoritePostRequest:
+    properties:
+      post_id:
+        type: integer
+    required:
+    - post_id
+    type: object
+  request.FollowListRequest:
+    properties:
+      page_num:
+        minimum: 1
+        type: integer
+      page_size:
+        maximum: 50
+        minimum: 1
+        type: integer
+    required:
+    - page_num
+    - page_size
+    type: object
+  request.FollowRequest:
+    properties:
+      followed_uuid:
+        type: string
+    required:
+    - followed_uuid
+    type: object
+  request.FollowStatusRequest:
+    properties:
+      target_uuid:
+        type: string
+    required:
+    - target_uuid
+    type: object
+  request.LikeCommentRequest:
+    properties:
+      comment_id:
+        type: integer
+    required:
+    - comment_id
+    type: object
+  request.LikePostRequest:
+    properties:
+      post_id:
+        type: integer
+    required:
+    - post_id
+    type: object
+  request.ListCommentRequest:
+    properties:
+      page_num:
+        minimum: 1
+        type: integer
+      page_size:
+        maximum: 50
+        minimum: 1
+        type: integer
+      post_id:
+        type: integer
+      sort_by:
+        enum:
+        - time
+        - likes
+        type: string
+    required:
+    - page_num
+    - page_size
+    - post_id
+    type: object
+  request.ListPostRequest:
+    properties:
+      page_num:
+        description: 页码
+        minimum: 1
+        type: integer
+      page_size:
+        description: 每页条数
+        maximum: 50
+        minimum: 1
+        type: integer
+      sort_order:
+        description: 时间排序 asc / desc（默认 desc）
+        enum:
+        - asc
+        - desc
+        type: string
+    required:
+    - page_num
+    - page_size
+    type: object
+  request.ListReplyRequest:
+    properties:
+      comment_id:
+        description: 父评论 ID
+        type: integer
+      page_num:
+        description: 页码
+        minimum: 1
+        type: integer
+      page_size:
+        description: 每页条数，前端默认每次传 5
+        maximum: 50
+        minimum: 1
+        type: integer
+    required:
+    - comment_id
+    - page_num
+    - page_size
+    type: object
+  request.PostDetailRequest:
+    properties:
+      post_id:
+        type: integer
+    required:
+    - post_id
+    type: object
+  request.UpdatePostRequest:
+    properties:
+      content:
+        description: 帖子内容
+        type: string
+      image_urls:
+        description: 最多3张图片，每张是合法 URL
+        items:
+          type: string
+        maxItems: 3
+        type: array
+      post_id:
+        description: 帖子 ID
+        type: integer
+      title:
+        description: 帖子标题 100 字符以内
+        maxLength: 100
+        type: string
+    required:
+    - content
+    - post_id
+    - title
+    type: object
+  response.CommentInfo:
+    properties:
+      author_uuid:
+        description: 评论用户信息
+        type: string
+      avatar_url:
+        type: string
+      comment_id:
+        type: integer
+      content:
+        type: string
+      create_time:
+        type: string
+      id:
+        type: integer
+      is_liked:
+        description: 当前用户是否点赞
+        type: boolean
+      like_number:
+        type: integer
+      post_id:
+        type: integer
+      replies:
+        description: 子评论信息
+        items:
+          $ref: '#/definitions/response.CommentInfo'
+        type: array
+      replies_more_count:
+        type: integer
+      username:
+        type: string
+    type: object
+  response.FollowCountResponse:
+    properties:
+      follower_count:
+        description: 关注我的人
+        type: integer
+      following_count:
+        description: 我关注的人
+        type: integer
+    type: object
+  response.FollowStatusResponse:
+    properties:
+      is_following:
+        type: boolean
+    type: object
+  response.FollowedUserInfo:
+    properties:
+      avatar_url:
+        type: string
+      username:
+        type: string
+      uuid:
+        type: string
+    type: object
+  response.GetVerifyCodeQ:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  response.PostDetailResponse:
+    properties:
+      author_uuid:
+        type: string
+      avatar_url:
+        type: string
+      comment_number:
+        type: integer
+      content:
+        type: string
+      create_date:
+        type: string
+      favorite_number:
+        type: integer
+      image_urls:
+        items:
+          type: string
+        type: array
+      intro_long:
+        type: string
+      is_favorited:
+        type: boolean
+      is_following:
+        type: boolean
+      is_liked:
+        type: boolean
+      post_id:
+        type: integer
+      star_number:
+        type: integer
+      title:
+        type: string
+      username:
+        description: 新增发帖用户信息字段
+        type: string
+      view_number:
+        type: integer
+    type: object
+  response.PostInfo:
+    properties:
+      author_uuid:
+        type: string
+      avatar_url:
+        type: string
+      comment_number:
+        type: integer
+      content:
+        type: string
+      create_date:
+        type: string
+      favorite_number:
+        type: integer
+      image_urls:
+        items:
+          type: string
+        type: array
+      intro_long:
+        type: string
+      is_following:
+        type: boolean
+      post_id:
+        type: integer
+      star_number:
+        type: integer
+      title:
+        type: string
+      username:
+        description: 新增发帖用户信息字段
+        type: string
+      view_number:
+        type: integer
+    type: object
+  response.PostListResponse:
+    properties:
+      list:
+        description: 当前页帖子
+        items:
+          $ref: '#/definitions/response.PostInfo'
+        type: array
+      total:
+        description: 总条数
+        type: integer
+    type: object
+  response.Response:
+    properties:
+      code:
+        type: integer
+      data: {}
+      message:
+        type: string
+    type: object
+  service.AuthResult:
+    properties:
+      token:
+        type: string
+    type: object
+  service.ProfileResponse:
+    properties:
+      avatar_url:
+        type: string
+      coin:
+        type: integer
+      email:
+        type: string
+      gender:
+        type: string
+      intro_long:
+        type: string
+      intro_short:
+        type: string
+      is_email_bound:
+        type: boolean
+      is_github_bound:
+        type: boolean
+      is_google_bound:
+        type: boolean
+      is_verified:
+        type: boolean
+      research_area:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
+      uuid:
+        type: string
+    type: object
+  service.UpdateProfileInput:
+    properties:
+      avatar_url:
+        type: string
+      email:
+        type: string
+      gender:
+        type: string
+      intro_long:
+        type: string
+      intro_short:
+        type: string
+      is_email_bound:
+        type: boolean
+      is_github_bound:
+        type: boolean
+      is_google_bound:
+        type: boolean
+      is_verified:
+        type: boolean
+      research_area:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
+    type: object
+  v1.EmailLoginRequest:
+    properties:
+      code:
+        type: string
+      email:
+        type: string
+    required:
+    - code
+    - email
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/auth/email/send:
+    post:
+      consumes:
+      - application/json
+      description: 用户点击"获取验证码"按钮，系统向用户提供的邮箱发送6位验证码，用户需要在申请表单中填入验证码才可以成功完成身份验证，否则不应该可以提交申请。验证码时限为10分钟，超时无效
+      parameters:
+      - description: data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/response.GetVerifyCodeQ'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"msg": "邮件发送成功","status": 200}'
+          schema:
+            type: string
+        "400":
+          description: '{"msg": "数据格式错误", "status": 400}'
+          schema:
+            type: string
+        "401":
+          description: '{"msg": "没有该用户", "status": 401}'
+          schema:
+            type: string
+        "402":
+          description: '{"msg": "验证码存储失败","status": 402}'
+          schema:
+            type: string
+        "403":
+          description: '{"msg": "发送邮件失败","status": 403}'
+          schema:
+            type: string
+      summary: 获取申请验证码
+      tags:
+      - Auth
+  /api/v1/auth/email/verify:
+    post:
+      consumes:
+      - application/json
+      description: |-
+        验证邮箱验证码是否正确,如果正确则登录或注册用户
+        如果用户已经注册，则绑定邮箱到当前用户
+      parameters:
+      - description: 邮箱+验证码
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/v1.EmailLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.AuthResult'
+              type: object
+      summary: 邮箱验证码验证
+      tags:
+      - Auth
+  /api/v1/auth/github_callback:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        用户在GitHub登录后，GitHub会回调该接口，并传递code参数
+        该接口会使用code参数获取用户信息，并进行登录或注册
+        如果用户已经注册，则绑定GitHub账号到当前用户
+      parameters:
+      - description: GitHub回调Code
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.AuthResult'
+              type: object
+      summary: GitHub登录回调, 前端不调用该API
+      tags:
+      - Auth
+  /api/v1/auth/google_callback:
+    get:
+      consumes:
+      - application/json
+      description: |-
+        用户在Google登录后，Google会回调该接口，并传递code参数
+        该接口会使用code参数获取用户信息，并进行登录或注册
+        如果用户已经注册，则绑定Google账号到当前用户
+        如果用户没有注册，则进行注册
+        如果用户已经注册，则绑定Google账号到当前用户
+      parameters:
+      - description: Google 回调 code
+        in: query
+        name: code
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: 跳转至前端 oauth_success 页面
+          schema:
+            type: string
+      summary: Google 登录回调，前端不调用该接口
+      tags:
+      - Auth
+  /api/v1/comments/create:
+    post:
+      consumes:
+      - application/json
+      description: 创建一级评论或子评论
+      parameters:
+      - description: 评论请求体
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 评论成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未登录
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建评论
+      tags:
+      - 评论 Comments
+  /api/v1/comments/like:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 点赞请求体
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.LikeCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 点赞成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 点赞评论
+      tags:
+      - 评论 Comments
+  /api/v1/comments/list:
+    post:
+      consumes:
+      - application/json
+      description: 获取某个帖子的一级评论（分页、排序）并返回每条评论的前三条子评论（按时间升序）
+      parameters:
+      - description: 帖子ID + 分页参数 + 排序
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ListCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.CommentInfo'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取评论列表（一级）
+      tags:
+      - 评论 Comments
+  /api/v1/comments/replies:
+    post:
+      consumes:
+      - application/json
+      description: 分页加载某条评论下的子评论（按时间升序）
+      parameters:
+      - description: comment_id + 分页参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ListReplyRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.CommentInfo'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取子评论
+      tags:
+      - 评论 Comments
+  /api/v1/comments/unlike:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 取消点赞请求体
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.LikeCommentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 取消点赞成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 取消点赞评论
+      tags:
+      - 评论 Comments
+  /api/v1/media/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传图片文件至 OSS，返回可访问地址
+      parameters:
+      - description: 文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回 OSS 文件 URL
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 上传文件
+      tags:
+      - Media 文件
+  /api/v1/posts/create:
+    post:
+      consumes:
+      - application/json
+      description: 用户创建一条新的帖子（可附带最多3张图）
+      parameters:
+      - description: 帖子内容与图片
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.PostInfo'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 创建帖子
+      tags:
+      - 帖子 Posts
+  /api/v1/posts/delete:
+    post:
+      consumes:
+      - application/json
+      description: 当前用户删除自己发布的帖子
+      parameters:
+      - description: 要删除的帖子ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.DeletePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 删除成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 删除帖子
+      tags:
+      - 帖子 Posts
+  /api/v1/posts/detail:
+    post:
+      consumes:
+      - application/json
+      description: 根据 post_id 获取一条帖子详情 + 是否点赞/收藏
+      parameters:
+      - description: 帖子ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.PostDetailRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.PostDetailResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取帖子详情
+      tags:
+      - 帖子 Posts
+  /api/v1/posts/favorite:
+    post:
+      consumes:
+      - application/json
+      description: 当前用户收藏某个帖子（不能重复）
+      parameters:
+      - description: 帖子ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.FavoritePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 收藏成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 收藏帖子
+      tags:
+      - 帖子 Posts
+  /api/v1/posts/favorites_list:
+    post:
+      consumes:
+      - application/json
+      description: 获取当前用户收藏的帖子（分页、时间排序）
+      parameters:
+      - description: 分页参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ListPostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.PostListResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取收藏的帖子
+      tags:
+      - 帖子 Posts
+  /api/v1/posts/list:
+    post:
+      consumes:
+      - application/json
+      description: 按时间排序获取帖子列表，支持分页
+      parameters:
+      - description: 分页请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ListPostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.PostListResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取帖子列表（分页、排序）
+      tags:
+      - 帖子 Posts
+  /api/v1/posts/mypostlist:
+    post:
+      consumes:
+      - application/json
+      description: 获取当前登录用户发布的帖子（分页 + 时间排序）
+      parameters:
+      - description: 分页请求参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ListPostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.PostListResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取我的帖子列表
+      tags:
+      - 帖子 Posts
+  /api/v1/posts/star:
+    post:
+      consumes:
+      - application/json
+      description: 用户点赞帖子（不能重复）
+      parameters:
+      - description: 帖子ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.LikePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 点赞帖子
+      tags:
+      - 帖子 Posts
+  /api/v1/posts/unfavorite:
+    post:
+      consumes:
+      - application/json
+      description: 当前用户取消对某帖的收藏
+      parameters:
+      - description: 帖子ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.FavoritePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 取消成功
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 取消收藏
+      tags:
+      - 帖子 Posts
+  /api/v1/posts/unstar:
+    post:
+      consumes:
+      - application/json
+      description: 用户取消点赞帖子
+      parameters:
+      - description: 帖子ID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.LikePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 取消点赞
+      tags:
+      - 帖子 Posts
+  /api/v1/posts/update:
+    post:
+      consumes:
+      - application/json
+      description: 用户更新帖子内容（可附带最多3张图）
+      parameters:
+      - description: 帖子内容与图片
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdatePostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.PostInfo'
+              type: object
+        "400":
+          description: 请求参数错误
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: 未授权
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: 服务器内部错误
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新帖子
+      tags:
+      - 帖子 Posts
+  /api/v1/user/follow/count:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.FollowCountResponse'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取关注/粉丝统计
+      tags:
+      - 用户 User
+  /api/v1/user/follow/status:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 目标用户UUID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.FollowStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.FollowStatusResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 是否关注某用户
+      tags:
+      - 用户 User
+  /api/v1/user/followers:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分页
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.FollowListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.FollowedUserInfo'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取粉丝列表
+      tags:
+      - 用户 User
+  /api/v1/user/following:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分页
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.FollowListRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.FollowedUserInfo'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取关注列表
+      tags:
+      - 用户 User
+  /api/v1/user/following/posts:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分页参数
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.ListPostRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.PostListResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 获取关注用户的动态流
+      tags:
+      - 用户 User
+  /api/v1/user/profile:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.ProfileResponse'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取用户Profile
+      tags:
+      - Profile
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 需要更新的字段
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/service.UpdateProfileInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 更新用户Profile（部分字段）
+      tags:
+      - Profile
+  /api/v1/user/unfollow:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 取消关注对象UUID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.FollowRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 取消关注
+      tags:
+      - 用户 User
+  /api/v1/users/follow:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 关注对象UUID
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.FollowRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 关注用户
+      tags:
+      - 用户 User
+  /test:
+    get:
+      consumes:
+      - application/json
+      description: 测试前后端联通性
+      parameters:
+      - description: ping
+        in: query
+        name: data
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"message": "pong", "success": true}'
+          schema:
+            type: string
+      summary: 测试前后端联通性
+      tags:
+      - 测试
+securityDefinitions:
+  ApiKeyAuth:
+    description: JWT Token
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
