@@ -36,7 +36,7 @@ export const CommentPanel: React.FC<CommentPanelProps> = ({ postId }) => {
                 })));
             }
         } catch (error) {
-            message.error('获取评论失败');
+            message.error('Failed to get comments');
         } finally {
             setLoading(false);
         }
@@ -45,24 +45,44 @@ export const CommentPanel: React.FC<CommentPanelProps> = ({ postId }) => {
     useEffect(() => {
         fetchComments();
     }, [postId]);
+    const fetchReplies = async (commentId: number) => {
+        try {
+            const response = await authService.getCommentReplies({
+                comment_id: commentId,
+                page_num: 1,
+                page_size: 50
+            });
+            if (response.data?.list) {
+                setRepliesList(prev => ({
+                    ...prev,
+                    [commentId]: response.data.list
+                }));
+            }
+        } catch (error) {
+            message.error('获取回复失败');
+        }
+    };
 
     const handleSubmitComment = async () => {
         if (!commentContent.trim()) {
-            message.warning('请输入评论内容');
+            message.warning('Please enter a comment');
             return;
         }
 
         try {
             setLoading(true);
             const params = replyingTo
-                ? { comment_id: replyingTo, content: commentContent.trim() }
+                ? { post_id: postId, comment_id: replyingTo, content: commentContent.trim() }
                 : { post_id: postId, content: commentContent.trim() };
 
             await authService.createComment(params);
             message.success('评论成功');
             setCommentContent('');
-            setReplyingTo(null);
+            if (replyingTo) {
+                await fetchReplies(replyingTo);
+            }
             await fetchComments();
+            setReplyingTo(null);
         } catch (error) {
             message.error('评论失败');
         } finally {
@@ -122,21 +142,7 @@ export const CommentPanel: React.FC<CommentPanelProps> = ({ postId }) => {
         }));
 
         if (!repliesList[commentId]) {
-            try {
-                const response = await authService.getCommentReplies({
-                    comment_id: commentId,
-                    page_num: 1,
-                    page_size: 50
-                });
-                if (response.data?.list) {
-                    setRepliesList(prev => ({
-                        ...prev,
-                        [commentId]: response.data.list
-                    }));
-                }
-            } catch (error) {
-                message.error('获取回复失败');
-            }
+            await fetchReplies(commentId);
         }
     };
 
