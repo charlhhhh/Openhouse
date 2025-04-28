@@ -702,6 +702,38 @@ paths:
       summary: 取消点赞评论
       tags:
       - 评论 Comments
+  /api/v1/media/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: 上传图片文件至 OSS，返回可访问地址
+      parameters:
+      - description: 文件
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: 返回 OSS 文件 URL
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 上传文件
+      tags:
+      - Media
   /api/v1/posts/create:
     post:
       consumes:
