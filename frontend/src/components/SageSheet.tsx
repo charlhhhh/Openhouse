@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, Button } from 'antd';
 import styled from 'styled-components';
 import { CloseOutlined } from '@ant-design/icons';
+import NoHighlightButton from './NoHighlightButton';
 
 const SHEET_WIDTH = 480;
 const SHEET_HEIGHT = 486;
@@ -196,6 +197,18 @@ const GetCoinButton = styled(Button)`
         opacity: 0.9;
         background: linear-gradient(96deg, rgba(106, 76, 147, 0.80) 45.49%, rgba(32, 23, 45, 0.80) 99.83%);
         color: #FFF;
+    }
+    &:active,
+    &:focus,
+    &.ant-btn:active,
+    &.ant-btn:focus,
+    &.ant-btn:focus-visible,
+    &:focus-visible {
+        background: linear-gradient(96deg, rgba(106, 76, 147, 0.80) 45.49%, rgba(32, 23, 45, 0.80) 99.83%) !important;
+        color: #FFF !important;
+        box-shadow: none !important;
+        outline: none !important;
+        border: none !important;
     }
 `;
 

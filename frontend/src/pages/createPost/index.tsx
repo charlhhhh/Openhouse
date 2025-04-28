@@ -37,8 +37,8 @@ const { Dragger } = Upload;
 
 const PageContainer = styled.div`
   padding: 24px;
-  width: 100%;
-  max-width: 100%;
+  width: 845px;
+  max-width: 845px;
   display: flex;
   flex-direction: column;
 `;
@@ -89,11 +89,10 @@ const TitleInputContainer = styled.div`
 `;
 
 const StyledTitleInput = styled(Input)`
-  width: 789px;
+  width: 749px;
   height: 54px;
   border-radius: 10px;
   border: 1px solid #000;
-  padding-right: 40px;
 `;
 
 const EditIcon = styled(EditOutlined)`
@@ -118,7 +117,7 @@ interface ContainerProps {
 }
 
 const UploadContainer = styled.div<ContainerProps>`
-  width: 789px;
+  width: 749px;
   height: 209px;
   border-radius: 10px;
   border: 1px solid #000;
@@ -132,7 +131,7 @@ const UploadContainer = styled.div<ContainerProps>`
 
 const ImagePreview = styled.div`
   position: relative;
-  width: calc((789px - 48px) / 3);
+  width: calc((749px - 48px) / 3);
   height: 177px;
   border-radius: 10px;
   overflow: hidden;
@@ -184,7 +183,7 @@ const ImagePreview = styled.div`
 `;
 
 const Placeholder = styled.div`
-  width: calc((789px - 48px) / 3);
+  width: calc((749px - 48px) / 3);
   height: 177px;
   visibility: hidden;
 `;
@@ -195,7 +194,7 @@ interface AddButtonProps {
 }
 
 const AddButton = styled.div<AddButtonProps>`
-  width: ${props => props.$isEmpty ? '50px' : 'calc((789px - 48px) / 3)'};
+  width: ${props => props.$isEmpty ? '50px' : 'calc((749px - 48px) / 3)'};
   height: ${props => props.$isEmpty ? '50px' : '177px'};
   display: flex;
   justify-content: center;
@@ -225,7 +224,7 @@ const UploadContent = styled.div`
 
 const ContentInputContainer = styled.div`
   position: relative;
-  width: 789px;
+  width: 749px;
 `;
 
 const StyledTextArea = styled(TextArea)`

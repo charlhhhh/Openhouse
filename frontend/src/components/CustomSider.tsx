@@ -157,12 +157,12 @@ const menuItems: MenuItem[] = [
 ];
 
 const CustomSider: React.FC = () => {
-    const [sageSheetVisible, setSageSheetVisible] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-
+    const [sageSheetVisible, setSageSheetVisible] = useState(false);
     const handleMenuClick = (key: string) => {
-        if (key === '/sage') {
+        console.log('Navigating to:', key); // 添加日志以便调试
+        if (key === 'sage') {
             setSageSheetVisible(true);
         } else {
             navigate(key);
