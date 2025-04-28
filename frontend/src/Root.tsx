@@ -5,7 +5,7 @@ import { Layout } from "antd";
 import { Content } from "antd/es/layout/layout";
 import { Outlet, useNavigate } from "react-router-dom";
 import LoginSheet from "./pages/login/LoginSheet";
-import { UserProfileCreateSheet } from "./pages/profile/UserLinkAuthSheet";
+import { UserLinkAuthSheet } from "./pages/profile/UserLinkAuthSheet";
 import { userSession } from "./utils/UserSession";
 import CustomSider from "./components/CustomSider";
 import TopBar from './components/TopBar';
@@ -81,7 +81,6 @@ const ScrollableContent = styled(Content)`
 export default function Root() {
   const navigate = useNavigate();
   const [loginModalVisible, setLoginModalVisible] = useState(false);
-  const [profileSheetVisible, setProfileSheetVisible] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const showLoginModal = () => {
@@ -92,9 +91,6 @@ export default function Root() {
     setLoginModalVisible(false);
   };
 
-  const handleProfileSheetClose = () => {
-    setProfileSheetVisible(false);
-  };
 
   return (
     <StyledLayout>
@@ -134,11 +130,6 @@ export default function Root() {
         />
       </Modal>
 
-      {/* 个人资料创建面板 */}
-      <UserProfileCreateSheet
-        visible={profileSheetVisible}
-        onClose={handleProfileSheetClose}
-      />
     </StyledLayout>
   );
 }

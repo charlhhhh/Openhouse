@@ -9,6 +9,7 @@ import Following from './pages/following';
 import CreatePost from './pages/createPost';
 import OAuthCallback from './pages/oauth/OAuthCallback';
 import SavedTopics from './pages/savedTopics';
+import BindSuccess from './pages/oauth/BindSuccess';
 
 const routes: RouteObject[] = [
   {
@@ -51,6 +52,10 @@ const routes: RouteObject[] = [
         path: 'savedTopics',
         element: <SavedTopics />,
       },
+      {
+        path: 'bind_success',
+        element: <BindSuccess />,
+      }
     ],
   },
 ];
