@@ -84,7 +84,7 @@ func EmailLogin(c *gin.Context) {
 	}
 
 	// 检查验证码是否正确
-	// prase code to int
+	// parse code to int
 	code, err := strconv.Atoi(req.Code)
 	if err != nil {
 		response.FailWithMessage("验证码格式错误", c)
@@ -154,7 +154,7 @@ func GitHubCallback(c *gin.Context) {
 	if userUUIDStr, ok := userUUID.(string); ok {
 		fmt.Println("已注册用户进行Github认证，UUID:", userUUIDStr)
 		bindresult, _ := service.BindAccount(authInput, userUUIDStr)
-		redirectURL := fmt.Sprintf("http://localhost:5173/#/bind_success?result=%s", bindresult.Result)
+		redirectURL := fmt.Sprintf("http://localhost:5173/bind_success?result=%s", bindresult.Result)
 		// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/bind_success?result=%s", bindresult.Result)
 		c.Redirect(http.StatusFound, redirectURL)
 		return
@@ -205,7 +205,7 @@ func GoogleCallback(c *gin.Context) {
 	if userUUIDStr, ok := userUUID.(string); ok {
 		fmt.Println("已注册用户进行Google认证，UUID:", userUUIDStr)
 		bindresult, _ := service.BindAccount(authInput, userUUIDStr)
-		redirectURL := fmt.Sprintf("http://localhost:5173/#/bind_success?result=%s", bindresult.Result)
+		redirectURL := fmt.Sprintf("http://localhost:5173/bind_success?result=%s", bindresult.Result)
 		// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/bind_success?result=%s", bindresult.Result)
 		c.Redirect(http.StatusFound, redirectURL)
 		return
@@ -223,7 +223,7 @@ func GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	redirectURL := fmt.Sprintf("http://localhost:5173/#/oauth_success?token=%s", result.Token)
+	redirectURL := fmt.Sprintf("http://localhost:5173/oauth_success?token=%s", result.Token)
 	// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/oauth_success?token=%s", result.Token)
 
 	c.Redirect(http.StatusFound, redirectURL)

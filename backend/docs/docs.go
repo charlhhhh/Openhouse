@@ -76,7 +76,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/email/verify": {
             "post": {
-                "description": "验证邮箱验证码是否正确,如果正确则登录或注册用户",
+                "description": "验证邮箱验证码是否正确,如果正确则登录或注册用户\n如果用户已经注册，则绑定邮箱到当前用户",
                 "consumes": [
                     "application/json"
                 ],
@@ -122,6 +122,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/github_callback": {
             "get": {
+                "description": "用户在GitHub登录后，GitHub会回调该接口，并传递code参数\n该接口会使用code参数获取用户信息，并进行登录或注册\n如果用户已经注册，则绑定GitHub账号到当前用户",
                 "consumes": [
                     "application/json"
                 ],
@@ -165,6 +166,7 @@ const docTemplate = `{
         },
         "/api/v1/auth/google_callback": {
             "get": {
+                "description": "用户在Google登录后，Google会回调该接口，并传递code参数\n该接口会使用code参数获取用户信息，并进行登录或注册\n如果用户已经注册，则绑定Google账号到当前用户\n如果用户没有注册，则进行注册\n如果用户已经注册，则绑定Google账号到当前用户",
                 "consumes": [
                     "application/json"
                 ],
@@ -2182,6 +2184,15 @@ const docTemplate = `{
                 "intro_short": {
                     "type": "string"
                 },
+                "is_email_bound": {
+                    "type": "boolean"
+                },
+                "is_github_bound": {
+                    "type": "boolean"
+                },
+                "is_google_bound": {
+                    "type": "boolean"
+                },
                 "is_verified": {
                     "type": "boolean"
                 },
@@ -2216,6 +2227,15 @@ const docTemplate = `{
                 },
                 "intro_short": {
                     "type": "string"
+                },
+                "is_email_bound": {
+                    "type": "boolean"
+                },
+                "is_github_bound": {
+                    "type": "boolean"
+                },
+                "is_google_bound": {
+                    "type": "boolean"
                 },
                 "is_verified": {
                     "type": "boolean"
