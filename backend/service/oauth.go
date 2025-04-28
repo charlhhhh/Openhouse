@@ -357,6 +357,18 @@ func LoginOrRegister(input AuthInput) (AuthResult, error) {
 		Gender:     "Other", // 默认设置为Other，实际可以根据情况修改
 		Coin:       0,
 	}
+	// 根据AuthInput的Provider设置绑定标志位
+	switch input.Provider {
+	case ProviderEmail:
+		newUser.IsEmailBound = true
+	case ProviderGitHub:
+		newUser.IsGitHubBound = true
+	case ProviderGoogle:
+		newUser.IsGoogleBound = true
+	default:
+		return AuthResult{}, errors.New("Error: unsupported provider")
+	}
+
 	println("新用户UUID:", newUser.UUID)
 
 	if err := global.DB.Create(&newUser).Error; err != nil {
