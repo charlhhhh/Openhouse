@@ -68,12 +68,11 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
         setIsLoading(true);
         try {
             // 发送验证码
-            const response = await authService.sendEmailCode(email);
-            if (response.code === 0) {
-                message.success('验证码已发送到您的邮箱');
-                setShowVerification(true);
-                setShouldStartCountdown(true);
-            }
+            await authService.sendEmailCode(email);
+            message.success('验证码已发送到您的邮箱');
+            setShowVerification(true);
+            setShouldStartCountdown(true);
+
         } catch (error) {
             message.error('发送验证码失败，请稍后重试');
         } finally {

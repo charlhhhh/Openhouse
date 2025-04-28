@@ -11,11 +11,12 @@ import { Image, message } from 'antd';
 import styles from './Account.module.css';
 import ContributionGraph from '../../components/ContributionGraph';
 import { supabase } from '../../supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLoginSheet } from '../../pages/login/LoginSheet';
 import { UserProfileEditSheet } from '../../pages/profile/UserProfileEditSheet';
 import { EditPostSheet } from '../../pages/post/EditPostSheet';
 import { DeleteConfirmAlert } from '../../components/DeleteConfirmAlert';
+import { UserLinkAuthSheet } from '../../pages/profile/UserLinkAuthSheet';
 
 import { authService } from '../../services/auth';
 import { Post } from '../home/types';
@@ -89,10 +90,15 @@ interface UserInfo {
     isVerified: boolean;
     contributions: number;
     researchArea?: string;
+    isEmailBind: boolean;
+    isGithubBind: boolean;
+    isGoogleBind: boolean;
+    email: string;
 }
 
 const Account: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { setVisible } = useLoginSheet();
     const [loading, setLoading] = useState(true);
     const [editSheetVisible, setEditSheetVisible] = useState(false);
@@ -112,11 +118,47 @@ const Account: React.FC = () => {
         followings: 0,
         isVerified: false,
         contributions: 0,
+        isEmailBind: false,
+        isGithubBind: false,
+        isGoogleBind: false,
+        email: '',
     });
+    const [showBindSheet, setShowBindSheet] = useState(false);
 
     useEffect(() => {
         checkAuth();
     }, []);
+
+    // 处理三方认证回调
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const result = params.get('result');
+        if (result) {
+            if (result === 'success') {
+                message.success('绑定成功');
+            } else if (result === 'duplicate_bind') {
+                message.warning('该三方账号已被其他用户绑定');
+            } else if (result === 'already_bound') {
+                message.info('你已绑定该三方账号');
+            } else {
+                message.error('绑定失败');
+            }
+            navigate('/account', { replace: true });
+            checkAuth();
+        }
+    }, [location.search]);
+
+    // 只在首次登录且有未绑定三方时弹窗
+    useEffect(() => {
+        const firstLogin = localStorage.getItem('first_login') === 'true';
+        if (
+            firstLogin &&
+            (!userInfo.isEmailBind || !userInfo.isGithubBind || !userInfo.isGoogleBind)
+        ) {
+            setShowBindSheet(true);
+            localStorage.removeItem('first_login');
+        }
+    }, [userInfo]);
 
     const checkAuth = async () => {
         try {
@@ -147,10 +189,15 @@ const Account: React.FC = () => {
                     gender,
                     followers: 0,
                     followings: 0,
-                    isVerified: profile.is_verified,
+                    isVerified: profile.is_verified || profile.is_email_bound || profile.is_github_bound || profile.is_google_bound,
                     contributions: 0,
-                    researchArea: profile.research_area
+                    email: profile.username,
+                    researchArea: profile.research_area,
+                    isEmailBind: profile.is_email_bound,
+                    isGithubBind: profile.is_github_bound,
+                    isGoogleBind: profile.is_google_bound,
                 });
+                console.log('userInfo', userInfo);
             } else {
                 message.error(response.message || '获取用户信息失败');
             }
@@ -183,7 +230,6 @@ const Account: React.FC = () => {
     const handleEditPostClose = async () => {
         setEditPostSheetVisible(false);
         setSelectedPost(null);
-        fetchMyPosts();
     };
 
     const handleDelete = async (postId: number) => {
@@ -278,9 +324,9 @@ const Account: React.FC = () => {
                                 {userInfo.gender && <ManOutlined className={styles.icon} />}
                                 <span className={styles.userName}>{userInfo.nickname}</span>
                                 <EditOutlined className={styles.editIcon} onClick={handleEditClick} />
-                                <GithubOutlined className={styles.icon} />
-                                <GoogleOutlined className={styles.icon} />
-                                <MailOutlined className={styles.icon} />
+                                {userInfo.isGithubBind && <GithubOutlined className={styles.icon} />}
+                                {userInfo.isGoogleBind && <GoogleOutlined className={styles.icon} />}
+                                {userInfo.isEmailBind && <MailOutlined className={styles.icon} />}
                             </div>
                             <div className={styles.userInfoRow}>
                                 <span className={styles.userInfoText}>{userInfo.coins}</span>
@@ -389,6 +435,16 @@ const Account: React.FC = () => {
                 visible={deleteConfirmVisible}
                 onCancel={handleDeleteCancel}
                 onConfirm={handleConfirmDelete}
+            />
+
+            {/* User Link Auth Sheet */}
+            <UserLinkAuthSheet
+                visible={showBindSheet}
+                onClose={() => setShowBindSheet(false)}
+                email={userInfo.email}
+                isGithubBind={userInfo.isGithubBind}
+                isGoogleBind={userInfo.isGoogleBind}
+                isEmailBind={userInfo.isEmailBind}
             />
         </div>
     );

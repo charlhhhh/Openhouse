@@ -157,6 +157,7 @@ export default function TopBar({ onShowLogin }: TopBarProps) {
 
     const handleLogout = async () => {
         authService.clearToken();
+        userSession.clearSession();
         setIsLoggedIn(false);
         navigate('/');
     };

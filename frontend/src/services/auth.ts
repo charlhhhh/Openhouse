@@ -22,6 +22,9 @@ export interface UserProfile {
     tags: string[];
     username: string;
     uuid: string;
+    is_github_bound: boolean;
+    is_google_bound: boolean;
+    is_email_bound: boolean;
 }
 
 export interface UpdateProfileParams {
@@ -76,6 +79,13 @@ export const authService = {
         console.log('解析到的token:', token);
 
         return token;
+    },
+
+    parseBindSuccessFromUrl: () => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const result = searchParams.get('result');
+        console.log('解析到的绑定结果:', result);
+        return result;
     },
 
     // 获取用户信息

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { message } from 'antd';
 import { authService } from '../../services/auth';
 
-import { userSession } from '../../utils/UserSession';
+
 
 
 // 添加了 processedRef 来跟踪是否已经处理过 token
@@ -16,7 +16,7 @@ import { userSession } from '../../utils/UserSession';
 // 避免重复的导航操作
 // 提供更好的用户体验（失败时导航到登录页面）
 
-export default function OAuthCallback() {
+export default function BindSuccess() {
     const navigate = useNavigate();
     const processedRef = useRef(false);
 
@@ -27,21 +27,14 @@ export default function OAuthCallback() {
         }
 
         // 从URL中解析token
-        const token = authService.parseTokenFromUrl();
+        const result = authService.parseBindSuccessFromUrl();
 
-        if (token) {
+        if (result) {
             // 标记为已处理
-            processedRef.current = true;
-            // 保存token
-            authService.saveToken(token);
-            userSession.setSession(token);
-            message.success('登录成功');
-            // 重定向到首页
-            navigate('/account', { replace: true });
+            navigate(`/account?result=${result}`, { replace: true });
         } else if (!processedRef.current) {
             // 只有在第一次失败时才显示错误消息
-            message.error('登录失败，请重试');
-            navigate('/', { replace: true });
+            navigate('/account', { replace: true });
         }
     }, [navigate]);
 

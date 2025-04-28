@@ -61,13 +61,13 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
             const response = await authService.updateUserProfile(updateData);
 
             if (response.code === 0) {
-                message.success('个人信息更新成功');
+                message.success('Update profile successfully');
                 onClose();
             } else {
-                message.error(response.message || '更新失败');
+                message.error(response.message || 'Fail to update profile');
             }
         } catch (error) {
-            message.error('更新个人信息失败');
+            message.error('Fail to update profile');
         } finally {
             setIsSubmitting(false);
         }
@@ -97,7 +97,7 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
                 .upload(fileName, file);
 
             if (uploadError) {
-                message.error(`头像上传失败: ${uploadError.message}`);
+                message.error(`Fail to upload avatar: ${uploadError.message}`);
                 return;
             }
 
@@ -111,10 +111,10 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
                 // 更新预览图为上传后的URL
                 setAvatarPreview(publicUrl);
                 setAvatarFile(file as RcFile);
-                message.success('头像上传成功');
+                message.success('Upload avatar successfully');
             }
         } catch (error) {
-            message.error('头像上传失败');
+            message.error('Fail to upload avatar');
         } finally {
             setIsSubmitting(false);
         }
@@ -124,12 +124,12 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
     const beforeUpload = (file: RcFile) => {
         const isImage = file.type.startsWith('image/');
         if (!isImage) {
-            message.error('只能上传图片文件！');
+            message.error('Only image files can be uploaded!');
             return false;
         }
         const isLt2M = file.size / 1024 / 1024 < 2;
         if (!isLt2M) {
-            message.error('图片必须小于 2MB！');
+            message.error('The image must be less than 2MB!');
             return false;
         }
         return false; // 返回 false 阻止自动上传
@@ -168,11 +168,11 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
                                 >
                                     <div style={styles.avatarUpload}>
                                         {avatarPreview ? (
-                                            <img src={avatarPreview} alt="头像" style={styles.avatarPreview} />
+                                            <img src={avatarPreview} alt="avator" style={styles.avatarPreview} />
                                         ) : (
                                             <div style={styles.avatarPlaceholder}>
                                                 <UploadOutlined style={{ fontSize: '32px', color: '#6A4C93' }} />
-                                                <span style={{ marginTop: '8px', color: '#6A4C93' }}>上传头像</span>
+                                                <span style={{ marginTop: '8px', color: '#6A4C93' }}>Upload Avatar</span>
                                             </div>
                                         )}
                                     </div>
@@ -181,16 +181,16 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
 
                             {/* 昵称输入 */}
                             <Form.Item
-                                label="昵称"
+                                label="Display Name"
                                 name="display_name"
-                                rules={[{ required: true, message: '请输入昵称' }]}
+                                rules={[{ required: true, message: 'Please enter your display name' }]}
                             >
                                 <Input style={styles.input} />
                             </Form.Item>
 
                             {/* 个人简介输入 */}
                             <Form.Item
-                                label="个人简介"
+                                label="Intro"
                                 name="intro"
                             >
                                 <Input.TextArea style={styles.input} rows={4} />
@@ -198,18 +198,18 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
 
                             {/* 性别选择 */}
                             <Form.Item
-                                label="性别"
+                                label="Gender"
                                 name="gender"
                             >
                                 <Radio.Group>
-                                    <Radio value="male">男</Radio>
-                                    <Radio value="female">女</Radio>
+                                    <Radio value="male">Male</Radio>
+                                    <Radio value="female">Female</Radio>
                                 </Radio.Group>
                             </Form.Item>
 
                             {/* 研究领域输入 */}
                             <Form.Item
-                                label="研究领域"
+                                label="Research Area"
                                 name="research_area"
                             >
                                 <Input style={styles.input} />
@@ -221,7 +221,7 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
                                     onClick={handleSubmit}
                                     loading={isSubmitting}
                                 >
-                                    保存
+                                    Save
                                 </Button>
                             </Form.Item>
                         </Form>
@@ -304,7 +304,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         height: '100%',
     },
     submitButton: {
-        width: '100%',
+        width: '35%',
         height: '48px',
         borderRadius: '8px',
         background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)',
