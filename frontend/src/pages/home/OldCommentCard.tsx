@@ -1,5 +1,5 @@
 import React from 'react';
-import { Avatar, Card, Space, Tag } from 'antd';
+import { Avatar, Card, Space } from 'antd';
 import { Comment } from './types';
 
 interface CommentCardProps {
@@ -13,23 +13,16 @@ export const CommentCard: React.FC<CommentCardProps> = ({ comment }) => {
                 <Space>
                     <Avatar
                         className="user-avatar"
-                        src={comment.author.avatar}
+                        src={comment.avatar_url}
                         size={48}
                     />
                     <div className="user-info">
                         <div className="user-info-container">
-                            <span className="user-name">{comment.author.name}</span>
-                        </div>
-                        <div>
-                            {comment.author.tags.map((tag, index) => (
-                                <Tag key={index} className="user-tag">
-                                    {tag}
-                                </Tag>
-                            ))}
+                            <span className="user-name">{comment.username}</span>
                         </div>
                     </div>
                 </Space>
-                <span className="post-date">{comment.date}</span>
+                <span className="post-date">{comment.create_time}</span>
             </div>
             <p className="post-content">{comment.content}</p>
         </Card>

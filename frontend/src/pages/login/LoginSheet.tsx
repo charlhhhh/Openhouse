@@ -69,7 +69,7 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
         try {
             // 发送验证码
             const response = await authService.sendEmailCode(email);
-            if (response.status === 200) {
+            if (response.code === 0) {
                 message.success('验证码已发送到您的邮箱');
                 setShowVerification(true);
                 setShouldStartCountdown(true);
@@ -86,7 +86,7 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
         try {
             // 重新发送验证码
             const response = await authService.sendEmailCode(email);
-            if (response.status === 200) {
+            if (response.code === 0) {
                 message.success('验证码已重新发送到您的邮箱');
                 setShouldStartCountdown(true);
             }

@@ -3,6 +3,34 @@ import { Input, Upload, Button, message } from 'antd';
 import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import type { RcFile, UploadFile } from 'antd/es/upload';
+import { supabase } from '../../supabase/client';
+import request from '../../utils/request';
+import { useNavigate } from 'react-router-dom';
+import type { AxiosResponse } from 'axios';
+import { uploadImage } from '../../utils/uploadImage';
+
+interface CreatePostResponse {
+  post_id: number;
+  author_uuid: string;
+  title: string;
+  content: string;
+  image_urls: string[];
+  create_date: string;
+  star_number: number;
+  view_number: number;
+  comment_number: number;
+
+}
+
+interface ErrorResponse {
+  code: number;
+  message: string;
+  data: string;
+}
+
+interface UploadedFile extends UploadFile {
+  uploadedUrl?: string;
+}
 
 const { TextArea } = Input;
 const { Dragger } = Upload;
@@ -115,6 +143,20 @@ const ImagePreview = styled.div`
     object-fit: cover;
   }
 
+  .upload-loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+  }
+
   .delete-button {
     position: absolute;
     top: 8px;
@@ -133,6 +175,11 @@ const ImagePreview = styled.div`
     &:hover {
       background: rgba(0, 0, 0, 0.7);
     }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
   }
 `;
 
@@ -144,6 +191,7 @@ const Placeholder = styled.div`
 
 interface AddButtonProps {
   $isEmpty: boolean;
+  disabled?: boolean;
 }
 
 const AddButton = styled.div<AddButtonProps>`
@@ -152,9 +200,10 @@ const AddButton = styled.div<AddButtonProps>`
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   border-radius: 10px;
   border: ${props => props.$isEmpty ? 'none' : '1px dashed #000'};
+  opacity: ${props => props.disabled ? '0.5' : '1'};
 
   img {
     width: 50px;
@@ -162,7 +211,7 @@ const AddButton = styled.div<AddButtonProps>`
   }
 
   &:hover {
-    opacity: 0.8;
+    opacity: ${props => props.disabled ? '0.5' : '0.8'};
     border-color: ${props => props.$isEmpty ? 'transparent' : '#6A4C93'};
   }
 `;
@@ -236,8 +285,11 @@ const MAX_IMAGES = 3;
 const CreatePost: React.FC = () => {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [fileList, setFileList] = useState<UploadedFile[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const uploadRef = useRef<HTMLInputElement>(null);
+  const navigate = useNavigate();
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -250,7 +302,7 @@ const CreatePost: React.FC = () => {
     uploadRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
@@ -259,45 +311,127 @@ const CreatePost: React.FC = () => {
       return;
     }
 
-    const imageFiles = files.filter(file => file.type.startsWith('image/'));
-    if (imageFiles.length !== files.length) {
-      message.error('只能上传图片文件！');
-    }
+    setIsUploading(true);
 
-    const newFileList = [
-      ...fileList,
-      ...imageFiles.map(file => ({
-        uid: Date.now().toString(),
-        name: file.name,
-        originFileObj: file,
-        status: 'done',
-        url: URL.createObjectURL(file),
-      } as UploadFile))
-    ].slice(0, MAX_IMAGES);
+    try {
+      for (const file of files) {
+        if (!file.type.startsWith('image/')) {
+          message.error('只能上传图片文件！');
+          continue;
+        }
 
-    setFileList(newFileList);
-    if (uploadRef.current) {
-      uploadRef.current.value = '';
+        // 创建临时预览
+        const tempFile: UploadedFile = {
+          uid: Date.now().toString(),
+          name: file.name,
+          originFileObj: file as RcFile,
+          status: 'uploading',
+          url: URL.createObjectURL(file),
+          lastModifiedDate: new Date(file.lastModified),
+        };
+
+        setFileList(prev => [...prev, tempFile]);
+
+        // 上传图片
+        const uploadedUrl = await uploadImage(file, {
+          showSuccessMessage: false,
+          onError: (error) => {
+            message.error(`图片 ${file.name} 上传失败: ${error.message || '未知错误'}`);
+          }
+        });
+
+        if (uploadedUrl) {
+          // 更新文件状态为成功
+          setFileList(prev => prev.map(item =>
+            item.uid === tempFile.uid
+              ? { ...item, status: 'done', uploadedUrl }
+              : item
+          ));
+        } else {
+          // 移除上传失败的文件
+          setFileList(prev => prev.filter(item => item.uid !== tempFile.uid));
+        }
+      }
+    } finally {
+      setIsUploading(false);
+      if (uploadRef.current) {
+        uploadRef.current.value = '';
+      }
     }
   };
 
-  const handleSubmit = () => {
-    // TODO: 实现发帖逻辑
-    console.log({
-      title,
-      content,
-      images: fileList
-    });
+  const handleSubmit = async () => {
+    if (!title.trim()) {
+      message.error('请输入标题');
+      return;
+    }
+
+    if (!content.trim()) {
+      message.error('请输入内容');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      // 收集已上传成功的图片URL
+      const validUrls = fileList
+        .filter(file => file.status === 'done' && file.uploadedUrl)
+        .map(file => file.uploadedUrl as string);
+
+      // 创建帖子
+      const { data } = await request.post<CreatePostResponse | ErrorResponse>('/api/v1/posts/create', {
+        title: title.trim(),
+        content: content.trim(),
+        image_urls: validUrls
+      });
+      console.log(data);
+
+      message.success('帖子发布成功');
+      navigate('/'); // 发布成功后跳转到首页
+    } catch (error) {
+      console.error('发布帖子错误:', error);
+      message.error('发布失败，请稍后重试');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleRemove = (file: UploadFile) => {
-    setFileList(fileList.filter(item => item.uid !== file.uid));
+  const handleRemove = async (file: UploadedFile) => {
+    try {
+      // 如果文件已经上传成功，从 Supabase 删除
+      if (file.status === 'done' && file.uploadedUrl) {
+        const fileName = file.uploadedUrl.split('/').pop();
+        if (fileName) {
+          const { error } = await supabase.storage
+            .from('posts-images')
+            .remove([fileName]);
+
+          if (error) {
+            console.error('删除存储图片失败:', error);
+            message.error('删除图片失败，请稍后重试');
+            return;
+          }
+        }
+      }
+
+      // 从预览列表中移除
+      setFileList(prev => prev.filter(item => item.uid !== file.uid));
+
+      // 释放预览URL
+      if (file.url) {
+        URL.revokeObjectURL(file.url);
+      }
+    } catch (error) {
+      console.error('删除图片错误:', error);
+      message.error('删除图片失败，请稍后重试');
+    }
   };
 
   const renderUploadItems = () => {
     if (fileList.length === 0) {
       return (
-        <AddButton $isEmpty={true} onClick={handleAddClick}>
+        <AddButton $isEmpty={true} onClick={handleAddClick} disabled={isUploading}>
           <img src="/post_add.svg" alt="add" />
         </AddButton>
       );
@@ -309,25 +443,36 @@ const CreatePost: React.FC = () => {
     fileList.forEach((file) => {
       items.push(
         <ImagePreview key={file.uid}>
-          <img
-            src={file.url || (file.originFileObj && URL.createObjectURL(file.originFileObj))}
-            alt="preview"
-          />
-          <button className="delete-button" onClick={() => handleRemove(file)}>×</button>
+          <img src={file.url} alt="preview" />
+          {file.status === 'uploading' && (
+            <div className="upload-loading">上传中...</div>
+          )}
+          <button
+            className="delete-button"
+            onClick={() => handleRemove(file)}
+            disabled={isUploading}
+          >
+            ×
+          </button>
         </ImagePreview>
       );
     });
 
-    // 如果图片数量小于最大值，添加加号按钮到已上传图片后面
+    // 如果图片数量小于最大值，添加加号按钮
     if (fileList.length < MAX_IMAGES) {
       items.push(
-        <AddButton key="add-button" $isEmpty={false} onClick={handleAddClick}>
+        <AddButton
+          key="add-button"
+          $isEmpty={false}
+          onClick={handleAddClick}
+          disabled={isUploading}
+        >
           <img src="/post_add.svg" alt="add" />
         </AddButton>
       );
     }
 
-    // 添加占位符到剩余位置
+    // 添加占位符
     while (items.length < MAX_IMAGES) {
       items.push(<Placeholder key={`placeholder-${items.length}`} />);
     }
@@ -382,8 +527,8 @@ const CreatePost: React.FC = () => {
         </Section>
 
         <PostButtonContainer>
-          <PostButton onClick={handleSubmit}>
-            发布
+          <PostButton onClick={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting ? '发布中...' : '发布'}
           </PostButton>
         </PostButtonContainer>
       </Content>

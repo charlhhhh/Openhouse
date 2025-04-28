@@ -1,4 +1,10 @@
 import request from '../utils/request';
+import { Post, PostListParams, PostListResponse, Comment, CommentListResponse, CommentListParams, CommentRepliesParams, CreateCommentParams, CommentResponse } from '../pages/home/types';
+
+interface BaseResponse {
+    code: number;
+    message: string;
+}
 
 export interface EmailVerifyParams {
     email: string;
@@ -30,7 +36,7 @@ export interface UpdateProfileParams {
 
 export const authService = {
     // 发送邮箱验证码
-    sendEmailCode: async (email: string) => {
+    sendEmailCode: async (email: string): Promise<BaseResponse> => {
         return request.post('/api/v1/auth/email/send', { "email": email });
     },
 
@@ -114,5 +120,78 @@ export const authService = {
 
         const data = await response.json();
         return data.url; // 假设返回的数据中包含文件的URL
+    },
+
+    // 获取帖子列表
+    getPostsList: async (params: PostListParams): Promise<PostListResponse> => {
+        try {
+            const response = await request.post<any, PostListResponse>('/api/v1/posts/list', params);
+            return response;
+        } catch (error) {
+            console.error('获取帖子列表失败:', error);
+            return {
+                code: -1,
+                data: {
+                    list: [],
+                    total: 0,
+                },
+                message: '获取失败'
+            };
+        }
+    },
+
+    // 关注用户
+    followUser: async (followedUuid: string): Promise<{
+        code: number;
+        data: string;
+        message: string;
+    }> => {
+        return request.post('/api/v1/user/follow', { followed_uuid: followedUuid });
+    },
+
+    // 取消关注用户
+    unfollowUser: async (followedUuid: string): Promise<{
+        code: number;
+        data: string;
+        message: string;
+    }> => {
+        return request.post('/api/v1/user/unfollow', { followed_uuid: followedUuid });
+    },
+
+    // 获取评论列表
+    getCommentsList: async (params: CommentListParams): Promise<CommentListResponse> => {
+        return request.post('/api/v1/comments/list', params);
+    },
+
+    // 获取评论回复列表
+    getCommentReplies: async (params: CommentRepliesParams): Promise<CommentListResponse> => {
+        return request.post('/api/v1/comments/replies', params);
+    },
+
+    // 创建评论
+    createComment: async (params: CreateCommentParams): Promise<CommentResponse> => {
+        return request.post('/api/v1/comments/create', params);
+    },
+
+    // 点赞评论
+    likeComment: async (commentId: number): Promise<CommentResponse> => {
+        return request.post('/api/v1/comments/like', { comment_id: commentId });
+    },
+
+    // 取消点赞评论
+    unlikeComment: async (commentId: number): Promise<CommentResponse> => {
+        return request.post('/api/v1/comments/unlike', { comment_id: commentId });
+    },
+
+    async getFollowingPosts(params: PostListParams): Promise<PostListResponse> {
+        return request.post('/api/v1/user/following/posts', params);
+    },
+
+    async getFavoritePosts(params: PostListParams): Promise<PostListResponse> {
+        return request.post('/api/v1/posts/favorites_list', params);
+    },
+
+    async getMyPosts(params: PostListParams): Promise<PostListResponse> {
+        return request.post('/api/v1/posts/mypostlist', params);
     }
 }; 

@@ -16,14 +16,10 @@ import { useLoginSheet } from '../../pages/login/LoginSheet';
 import { UserProfileEditSheet } from '../../pages/profile/UserProfileEditSheet';
 import { EditPostSheet } from '../../pages/post/EditPostSheet';
 import { DeleteConfirmAlert } from '../../components/DeleteConfirmAlert';
-import { deletePost } from '../../services/postService';
-import { authService } from '../../services/auth';
 
-interface Post {
-    id: string;
-    title: string;
-    date: string;
-}
+import { authService } from '../../services/auth';
+import { Post } from '../home/types';
+import { postService } from '../../services/post';
 
 interface ContributionDay {
     date: string;
@@ -78,30 +74,6 @@ const generateContributionData = (): ContributionDay[] => {
     return data;
 };
 
-// Mock 帖子数据
-const mockPosts = [
-    {
-        id: '1',
-        userId: 'user123',
-        title: '这是一个测试帖子标题',
-        content: '这是帖子的详细内容，包含了很多有趣的信息...',
-        image_urls: [
-            '/test-image-1.jpg',
-            '/test-image-2.jpg'
-        ],
-        created_at: '2024-03-20',
-        updated_at: '2024-03-20'
-    },
-    {
-        id: '2',
-        userId: 'user123',
-        title: '另一个测试帖子',
-        content: '这是第二个帖子的内容...',
-        image_urls: ['/test-image-3.jpg'],
-        created_at: '2024-03-19',
-        updated_at: '2024-03-19'
-    }
-];
 
 type Gender = 'male' | 'female' | undefined;
 
@@ -119,7 +91,7 @@ interface UserInfo {
     researchArea?: string;
 }
 
-export default function Account() {
+const Account: React.FC = () => {
     const navigate = useNavigate();
     const { setVisible } = useLoginSheet();
     const [loading, setLoading] = useState(true);
@@ -128,7 +100,7 @@ export default function Account() {
     const [selectedPost, setSelectedPost] = useState<any>(null);
     const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
     const [postToDelete, setPostToDelete] = useState<string | null>(null);
-    const [posts, setPosts] = useState(mockPosts);
+    const [posts, setPosts] = useState<Post[]>([]);
     const [userInfo, setUserInfo] = useState<UserInfo>({
         avatar: '/default-avatar.png',
         nickname: 'User',
@@ -200,6 +172,7 @@ export default function Account() {
         setEditSheetVisible(false);
         // 重新加载用户信息
         checkAuth();
+
     };
 
     const handleEdit = (post: any) => {
@@ -207,13 +180,14 @@ export default function Account() {
         setEditPostSheetVisible(true);
     };
 
-    const handleEditPostClose = () => {
+    const handleEditPostClose = async () => {
         setEditPostSheetVisible(false);
         setSelectedPost(null);
+        fetchMyPosts();
     };
 
-    const handleDelete = (postId: string) => {
-        setPostToDelete(postId);
+    const handleDelete = async (postId: number) => {
+        setPostToDelete(String(postId));
         setDeleteConfirmVisible(true);
     };
 
@@ -222,19 +196,47 @@ export default function Account() {
         setPostToDelete(null);
     };
 
-    const handleDeleteConfirm = async () => {
+    const handleConfirmDelete = async () => {
         if (!postToDelete) return;
-
         try {
-            await deletePost(postToDelete);
-            setPosts(posts.filter(post => post.id !== postToDelete));
+            // TODO: 调用删除帖子接口
+            await postService.deletePost(Number(postToDelete));
             message.success('帖子已删除');
+            fetchMyPosts();
         } catch (error) {
-            message.error('删除失败，请稍后重试');
+            message.error('删除失败');
         } finally {
             setDeleteConfirmVisible(false);
             setPostToDelete(null);
         }
+    };
+
+    const fetchMyPosts = async () => {
+        setLoading(true);
+        try {
+            const response = await authService.getMyPosts({
+                page_num: 1,
+                page_size: 50,
+                sort_order: 'desc'  // 按时间倒序，最新的在前面
+            });
+            if (response.code === 0 && response.data.list) {
+                setPosts(response.data.list);
+            }
+        } catch (error) {
+            console.error('获取历史帖子失败:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchMyPosts();
+    }, []);
+
+    // 处理内容截断
+    const truncateContent = (content: string, maxLength: number = 100) => {
+        if (content.length <= maxLength) return content;
+        return content.substring(0, maxLength) + '...';
     };
 
     if (loading) {
@@ -320,18 +322,18 @@ export default function Account() {
                 </div>
             </div>
 
-            {/* Activities Section */}
+            {/* History Activities Section */}
             <div className={styles.section}>
                 <div className={styles.activitiesSection}>
-                    <h2>Activities</h2>
+                    <h2>History Activities</h2>
                     {posts.length > 0 ? (
                         <>
-                            <p>最近发帖时间: {posts[0].created_at}</p>
+                            <p>最近发帖时间: {new Date(posts[0].create_date).toLocaleString()}</p>
                             <div className={styles.postHistory}>
                                 {posts.map((post) => (
-                                    <div key={post.id} className={styles.postCard}>
+                                    <div key={post.post_id} className={styles.postCard}>
                                         <div className={styles.postHeader}>
-                                            <h3>{post.title}</h3>
+                                            <h3>{post.title || '无标题'}</h3>
                                             <div className={styles.postActions}>
                                                 <button
                                                     onClick={() => handleEdit(post)}
@@ -340,20 +342,22 @@ export default function Account() {
                                                     <EditOutlined />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(post.id)}
+                                                    onClick={() => handleDelete(post.post_id)}
                                                     className={styles.actionButton}
                                                 >
                                                     <DeleteOutlined />
                                                 </button>
                                             </div>
                                         </div>
-                                        <p className={styles.postContent}>{post.content}</p>
+                                        <p className={styles.postContent}>
+                                            {truncateContent(post.content)}
+                                        </p>
                                     </div>
                                 ))}
                             </div>
                         </>
                     ) : (
-                        <p>Empty</p>
+                        <p>暂无发帖记录</p>
                     )}
                 </div>
             </div>
@@ -384,8 +388,10 @@ export default function Account() {
             <DeleteConfirmAlert
                 visible={deleteConfirmVisible}
                 onCancel={handleDeleteCancel}
-                onConfirm={handleDeleteConfirm}
+                onConfirm={handleConfirmDelete}
             />
         </div>
     );
-} 
+};
+
+export default Account; 
