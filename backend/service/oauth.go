@@ -39,6 +39,7 @@ type AuthInput struct {
 	ProviderID  string // 比如邮箱地址 / GitHub userID / Google sub
 	DisplayName string
 	AvatarURL   string
+	Email       string
 }
 
 // AuthResult 返回登录结果
@@ -207,6 +208,7 @@ func GetGitHubUserInfo(code string) (AuthInput, error) {
 		AvatarURL string `json:"avatar_url"`
 		Email     string `json:"email"`
 	}
+
 	if err := json.Unmarshal(userBytes, &user); err != nil {
 		return AuthInput{}, errors.Wrap(err, "Error: parsing GitHub user info failed")
 	}
@@ -217,6 +219,7 @@ func GetGitHubUserInfo(code string) (AuthInput, error) {
 		ProviderID:  user.Login,
 		DisplayName: user.Login,
 		AvatarURL:   user.AvatarURL,
+		Email:       user.Email,
 	}, nil
 }
 
@@ -282,6 +285,7 @@ func GetGoogleUserInfo(code string) (AuthInput, error) {
 		ProviderID:  user.Sub,
 		DisplayName: user.Name,
 		AvatarURL:   user.Picture,
+		Email:       user.Email,
 	}, nil
 }
 
@@ -352,6 +356,7 @@ func LoginOrRegister(input AuthInput) (AuthResult, error) {
 		UUID:       newUUID,
 		CreatedAt:  time.Now(),
 		Username:   input.DisplayName,
+		Email:      input.Email,
 		AvatarURL:  input.AvatarURL,
 		IsVerified: false,
 		Gender:     "Other", // 默认设置为Other，实际可以根据情况修改

@@ -11,6 +11,7 @@ type ProfileResponse struct {
 	UUID          string   `json:"uuid"`
 	IsVerified    bool     `json:"is_verified"`
 	Username      string   `json:"username"`
+	Email         string   `json:"email"`
 	Gender        string   `json:"gender"`
 	AvatarURL     string   `json:"avatar_url"`
 	IntroShort    string   `json:"intro_short"`
@@ -39,6 +40,7 @@ func GetProfile(uuid string) (ProfileResponse, error) {
 		UUID:          user.UUID,
 		IsVerified:    user.IsVerified,
 		Username:      user.Username,
+		Email:         user.Email,
 		Gender:        user.Gender,
 		AvatarURL:     user.AvatarURL,
 		IntroShort:    user.IntroShort,
@@ -54,6 +56,7 @@ func GetProfile(uuid string) (ProfileResponse, error) {
 
 type UpdateProfileInput struct {
 	Username      *string   `json:"username,omitempty"`
+	Email         *string   `json:"email,omitempty"`
 	IsVerified    *bool     `json:"is_verified,omitempty"`
 	AvatarURL     *string   `json:"avatar_url,omitempty"`
 	IntroShort    *string   `json:"intro_short,omitempty"`
@@ -72,6 +75,9 @@ func UpdateProfile(uuid string, input UpdateProfileInput) error {
 
 	if input.Username != nil {
 		updates["username"] = *input.Username
+	}
+	if input.Email != nil {
+		updates["email"] = *input.Email
 	}
 	if input.IsVerified != nil {
 		updates["is_verified"] = *input.IsVerified

@@ -101,6 +101,7 @@ func EmailLogin(c *gin.Context) {
 		ProviderID:  rec.Email,
 		DisplayName: rec.Email,
 		AvatarURL:   "", // 邮箱没头像
+		Email:       req.Email,
 	}
 
 	// 尝试解析当前登录用户 UUID（从 JWT 中）

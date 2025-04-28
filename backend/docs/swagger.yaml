@@ -343,6 +343,8 @@ definitions:
         type: string
       coin:
         type: integer
+      email:
+        type: string
       gender:
         type: string
       intro_long:
@@ -371,6 +373,8 @@ definitions:
   service.UpdateProfileInput:
     properties:
       avatar_url:
+        type: string
+      email:
         type: string
       gender:
         type: string
@@ -733,7 +737,7 @@ paths:
       - ApiKeyAuth: []
       summary: 上传文件
       tags:
-      - Media
+      - Media 文件
   /api/v1/posts/create:
     post:
       consumes:

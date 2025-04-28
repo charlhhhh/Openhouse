@@ -494,7 +494,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Media"
+                    "Media 文件"
                 ],
                 "summary": "上传文件",
                 "parameters": [
@@ -2230,6 +2230,9 @@ const docTemplate = `{
                 "coin": {
                     "type": "integer"
                 },
+                "email": {
+                    "type": "string"
+                },
                 "gender": {
                     "type": "string"
                 },
@@ -2272,6 +2275,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "avatar_url": {
+                    "type": "string"
+                },
+                "email": {
                     "type": "string"
                 },
                 "gender": {

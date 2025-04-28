@@ -11,6 +11,7 @@ type User struct {
 	CreatedAt     time.Time      `json:"created_at"`
 	IsVerified    bool           `json:"is_verified"`
 	Username      string         `json:"username"`
+	Email         string         `json:"email"`
 	Gender        string         `json:"gender"`
 	AvatarURL     string         `json:"avatar_url"`
 	IntroShort    string         `json:"intro_short"`

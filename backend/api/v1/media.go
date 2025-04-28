@@ -10,7 +10,7 @@ import (
 // UploadFile 上传文件到阿里云 OSS
 // @Summary 上传文件
 // @Description 上传图片文件至 OSS，返回可访问地址
-// @Tags Media
+// @Tags Media 文件
 // @Security ApiKeyAuth
 // @Accept multipart/form-data
 // @Produce json
