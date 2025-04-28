@@ -11,8 +11,52 @@ import CustomSider from "./components/CustomSider";
 import TopBar from './components/TopBar';
 import { supabase } from "./supabase/client";
 import warning from "antd/es/_util/warning";
+import styled from 'styled-components';
 
 const SHEET_WIDTH = 840;
+
+const StyledLayout = styled(Layout)`
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+`;
+
+const MainLayout = styled(Layout)`
+  position: relative;
+  height: 100vh;
+  margin-left: 340px;
+`;
+
+const FixedTopBar = styled.div`
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 340px;
+  z-index: 100;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+`;
+
+const ScrollableContent = styled(Content)`
+  margin-top: 64px;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  background-color: #F7F2ECCC;
+  padding: 24px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(106, 76, 147, 0.3);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+`;
 
 // supabase.auth.onAuthStateChange(async (event, session) => {
 //   if (event === 'SIGNED_IN' && session) {
@@ -53,14 +97,16 @@ export default function Root() {
   };
 
   return (
-    <Layout className="h-screen w-screen">
+    <StyledLayout>
       <CustomSider />
-      <Layout className="flex-1">
-        <TopBar onShowLogin={showLoginModal} />
-        <Content className="h-full" style={{ marginTop: '8px', backgroundColor: '#F7F2ECCC' }}>
+      <MainLayout>
+        <FixedTopBar>
+          <TopBar onShowLogin={showLoginModal} />
+        </FixedTopBar>
+        <ScrollableContent>
           <Outlet />
-        </Content>
-      </Layout>
+        </ScrollableContent>
+      </MainLayout>
 
       {/* 登录面板 */}
       <Modal
@@ -83,21 +129,7 @@ export default function Root() {
           onLoginSuccess={async () => {
             message.success('onLoginSuccess');
             setLoginModalVisible(false);
-            const session = await supabase.auth.getSession();
-            if (session.data.session) {
-              const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', session.data.session.user.id)
-                .single();
-              if (profileError) {
-                message.warning(profileError.message);
-                return;
-              }
-              if (!profile) {
-                setProfileSheetVisible(true);
-              }
-            }
+            // TODO: 登录成功后，验证三方认证逻辑
           }}
         />
       </Modal>
@@ -107,6 +139,6 @@ export default function Root() {
         visible={profileSheetVisible}
         onClose={handleProfileSheetClose}
       />
-    </Layout>
+    </StyledLayout>
   );
 }

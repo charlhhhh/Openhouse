@@ -11,8 +11,11 @@ const StyledSider = styled(Sider)`
   background: #fff !important;
   height: 100vh;
   width: 340px;
-  position: relative;
+  position: fixed;
+  left: 0;
+  top: 0;
   overflow: visible;
+  z-index: 200;
 `;
 
 const DecorationImage = styled.div`
