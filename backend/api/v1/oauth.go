@@ -154,6 +154,7 @@ func GitHubCallback(c *gin.Context) {
 	if userUUIDStr, ok := userUUID.(string); ok {
 		fmt.Println("已注册用户进行Github认证，UUID:", userUUIDStr)
 		bindresult, _ := service.BindAccount(authInput, userUUIDStr)
+		fmt.Println("bindresult", bindresult)
 		redirectURL := fmt.Sprintf("http://localhost:5173/bind_success?result=%s", bindresult.Result)
 		// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/bind_success?result=%s", bindresult.Result)
 		c.Redirect(http.StatusFound, redirectURL)
@@ -200,7 +201,6 @@ func GoogleCallback(c *gin.Context) {
 	}
 
 	// 尝试解析当前登录用户 UUID（从 JWT 中）
-
 	userUUID, _ := c.Get("uuid")
 	if userUUIDStr, ok := userUUID.(string); ok {
 		fmt.Println("已注册用户进行Google认证，UUID:", userUUIDStr)

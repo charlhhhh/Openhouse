@@ -153,7 +153,6 @@ func getGitHubToken(code string) (string, error) {
 	// POST到GitHub的access_token接口
 	req, err := http.NewRequest("POST", "https://github.com/login/oauth/access_token", bytes.NewBufferString(formData.Encode()))
 	if err != nil {
-		println("创建POST请求失败:", err)
 		return "", errors.Wrap(err, "创建POST请求失败")
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
@@ -161,23 +160,19 @@ func getGitHubToken(code string) (string, error) {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		println("请求GitHub获取access_token失败:", err)
 		return "", errors.Wrap(err, "请求GitHub获取access_token失败")
 	}
 	defer resp.Body.Close()
 	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		println("读取GitHub返回失败:", err)
 		return "", errors.Wrap(err, "读取GitHub返回失败")
 	}
 	var tokenResponse struct {
 		AccessToken string `json:"access_token"`
 	}
 	if err := json.Unmarshal(bodyBytes, &tokenResponse); err != nil {
-		println("解析GitHub返回的token失败:", err)
 		return "", errors.Wrap(err, "解析GitHub返回的token失败")
 	}
-	println("GitHub access_token:", tokenResponse.AccessToken)
 	return tokenResponse.AccessToken, nil
 }
 
@@ -215,8 +210,6 @@ func GetGitHubUserInfo(code string) (AuthInput, error) {
 	if err := json.Unmarshal(userBytes, &user); err != nil {
 		return AuthInput{}, errors.Wrap(err, "Error: parsing GitHub user info failed")
 	}
-
-	print("GitHub用户信息:", user.Login, user.AvatarURL, user.Email)
 
 	// 返回AuthInput给后续注册/登录
 	return AuthInput{
@@ -316,7 +309,7 @@ func BindAccount(input AuthInput, uuid string) (BindAccountResult, error) {
 		ProviderID:  input.ProviderID,
 	}
 	if err := global.DB.Create(&bind).Error; err != nil {
-		return BindAccountResult{Result: "bind_failed"}, errors.Wrap(err, "Error: creating bind record failed")
+		return BindAccountResult{Result: "failed_bind"}, errors.Wrap(err, "Error: creating bind record failed")
 	}
 
 	// 3. 更新用户表中的绑定标志位
