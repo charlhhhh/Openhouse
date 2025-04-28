@@ -4,7 +4,6 @@ import Home from './pages/home';
 import Login from './pages/login';
 import FindPartner from './pages/find';
 import Account from './pages/account';
-import Sage from './pages/sage';
 import Following from './pages/following';
 import CreatePost from './pages/createPost';
 import OAuthCallback from './pages/oauth/OAuthCallback';
@@ -26,7 +25,7 @@ const routes: RouteObject[] = [
       },
       {
         path: 'sage',
-        element: <Sage />,
+        element: <Home />,
       },
       {
         path: 'findPartner',

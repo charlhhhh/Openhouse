@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Avatar, Button, Card, Modal, Space, Tooltip, message } from 'antd';
+import { Avatar, Button, Card, Modal, Space, Tooltip, message, Spin } from 'antd';
 import { Post } from './types';
 import { formatPostDate } from '../../utils/dateFormat';
 import { postService } from '../../services/post';
@@ -30,6 +30,59 @@ const ActionButton = ({ icon, text, onClick, isActive }: {
         )}
     </Button>
 );
+
+const PostImages: React.FC<{ imageUrls: string[]; onImageClick: (url: string) => void }> = ({ imageUrls, onImageClick }) => {
+    const [loadingArr, setLoadingArr] = useState<boolean[]>(imageUrls.map(() => true));
+
+    const handleImageLoad = (idx: number) => {
+        setLoadingArr(arr => {
+            const newArr = [...arr];
+            newArr[idx] = false;
+            return newArr;
+        });
+    };
+
+    return (
+        <div className="post-images">
+            {imageUrls.slice(0, 3).map((image, index) => (
+                <div
+                    key={index}
+                    className="image-container"
+                    style={{ position: 'relative' }}
+                    onClick={() => onImageClick(image)}
+                >
+                    {loadingArr[index] && (
+                        <div
+                            style={{
+                                position: 'absolute',
+                                left: 0, top: 0, right: 0, bottom: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                background: '#F5F7FA',
+                                borderRadius: 8,
+                                zIndex: 1
+                            }}
+                        >
+                            <Spin />
+                        </div>
+                    )}
+                    <img
+                        src={image}
+                        alt=""
+                        style={{
+                            height: '100%',
+                            objectFit: 'scale-down',
+                            borderRadius: '8px',
+                            display: loadingArr[index] ? 'none' : 'block'
+                        }}
+                        onLoad={() => handleImageLoad(index)}
+                    />
+                </div>
+            ))}
+        </div>
+    );
+};
 
 export const PostCard: React.FC<PostCardProps> = ({ post, onPostUpdate }) => {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -123,26 +176,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onPostUpdate }) => {
             <p className="post-content">{post.content}</p>
 
             {post.image_urls && post.image_urls.length > 0 && (
-                <div className="post-images">
-                    {post.image_urls.slice(0, 3).map((image, index) => (
-                        <div
-                            key={index}
-                            className="image-container"
-                            onClick={() => handleImageClick(image)}
-                        >
-                            <img
-                                src={image}
-                                alt=""
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'cover',
-                                    borderRadius: '8px'
-                                }}
-                            />
-                        </div>
-                    ))}
-                </div>
+                <PostImages imageUrls={post.image_urls} onImageClick={handleImageClick} />
             )}
 
             <div className="post-actions">
