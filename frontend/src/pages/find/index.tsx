@@ -261,17 +261,16 @@ export default function FindPartner() {
       console.log('获取用户信息');
       const profile = await authService.getUserProfile();
       if (profile) {
-        setUserProfile({
-          avatar: profile.avatar_url,
-          username: profile.username,
-          intro: profile.intro_long,
-          tags: profile.tags ?? [],
-        });
-        setTags(profile.tags ?? []);
         const matchStatus = profile.match_status
         if (matchStatus === "available") {
           setMatchStatus(MatchStatus.PREPARE);
-
+          setUserProfile({
+            avatar: profile.avatar_url,
+            username: profile.username,
+            intro: profile.intro_long,
+            tags: profile.tags ?? [],
+          });
+          setTags(profile.tags ?? []);
         } else if (matchStatus === "matching") {
           setMatchStatus(MatchStatus.MATCHING);
         } else if (matchStatus === "matched") {
