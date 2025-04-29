@@ -151,6 +151,7 @@ const Account: React.FC = () => {
     // 只在首次登录且有未绑定三方时弹窗
     useEffect(() => {
         const firstLogin = localStorage.getItem('first_login') === 'true';
+        // const firstLogin = true;
         if (
             firstLogin &&
             (!userInfo.isEmailBind || !userInfo.isGithubBind || !userInfo.isGoogleBind)

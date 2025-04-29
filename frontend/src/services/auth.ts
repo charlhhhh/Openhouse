@@ -35,6 +35,13 @@ export interface UpdateProfileParams {
     research_area?: string;
     tags?: string[];
     username?: string;
+    is_email_bound?: boolean;
+    is_github_bound?: boolean;
+    is_google_bound?: boolean;
+}
+
+export interface VerifySchoolEmailParams {
+    email: string;
 }
 
 export const authService = {
@@ -46,6 +53,11 @@ export const authService = {
     // 验证邮箱验证码
     verifyEmailCode: async (params: EmailVerifyParams) => {
         return request.post('/api/v1/auth/email/verify', params);
+    },
+
+    // 绑定学校邮箱
+    verifySchoolEmail: async (params: VerifySchoolEmailParams) => {
+        return request.get('/api/v1/auth/email/academic_check', { params });
     },
 
     // 保存token到localStorage
