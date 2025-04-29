@@ -6,6 +6,7 @@ import { Post, PostListParams } from './types';
 import { SageSheet } from '../../components/SageSheet';
 import { PostCard } from './PostCard';
 import { postService } from '../../services/post';
+import { useNavigate } from 'react-router-dom';
 
 const BannerCard = ({ image, title, tag, onClick }: { image: string; title: string; tag: string; onClick?: () => void }) => (
     <div className="banner-card" onClick={onClick}>
@@ -14,12 +15,13 @@ const BannerCard = ({ image, title, tag, onClick }: { image: string; title: stri
             style={{ backgroundImage: `url(${image})` }}
         >
             <h2 className="banner-title">{title}</h2>
-            <div className="banner-tag">{tag}</div>
+            {/* <div className="banner-tag">{tag}</div> */}
         </div>
     </div>
 );
 
 export default function Home() {
+    const navigate = useNavigate();
     const [sageSheetVisible, setSageSheetVisible] = useState(false);
     const [loading, setLoading] = useState(false);
     const [posts, setPosts] = useState<Post[]>([]);
@@ -29,6 +31,10 @@ export default function Home() {
 
     const handleSageClick = () => {
         setSageSheetVisible(true);
+    };
+
+    const handleFindClick = () => {
+        navigate('/findPartner');
     };
 
     const fetchPosts = async (page: number = 1) => {
@@ -76,8 +82,9 @@ export default function Home() {
                     />
                     <BannerCard
                         image="/banner_find.png"
-                        title="寻找同行"
-                        tag="开始交流"
+                        title="Find Partner"
+                        tag="Start Conversation"
+                        onClick={handleFindClick}
                     />
                 </div>
 

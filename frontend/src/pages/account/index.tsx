@@ -94,13 +94,13 @@ const Account: React.FC = () => {
         const result = params.get('result');
         if (result) {
             if (result === 'success') {
-                message.success('绑定成功');
+                message.success('Bind Success');
             } else if (result === 'duplicate_bind') {
-                message.warning('该三方账号已被其他用户绑定');
+                message.warning('The third-party account has been bound by another user');
             } else if (result === 'already_bound') {
-                message.info('你已绑定该三方账号');
+                message.info('You have already bound the third-party account');
             } else {
-                message.error('绑定失败');
+                message.error('Bind Failed');
             }
             navigate('/account', { replace: true });
             checkAuth();
@@ -130,7 +130,6 @@ const Account: React.FC = () => {
             }
 
             // 获取用户信息
-            console.log('获取用户信息');
             const profile = await authService.getUserProfile();
 
             if (profile) {
@@ -207,10 +206,10 @@ const Account: React.FC = () => {
         try {
             // TODO: 调用删除帖子接口
             await postService.deletePost(Number(postToDelete));
-            message.success('帖子已删除');
+            message.success('Post deleted');
             fetchMyPosts();
         } catch (error) {
-            message.error('删除失败');
+            message.error('Delete Failed');
         } finally {
             setDeleteConfirmVisible(false);
             setPostToDelete(null);
@@ -229,7 +228,7 @@ const Account: React.FC = () => {
                 setPosts(response.data.list);
             }
         } catch (error) {
-            console.error('获取历史帖子失败:', error);
+            console.error('Fail to get history posts:', error);
         } finally {
             setLoading(false);
         }
@@ -280,7 +279,7 @@ const Account: React.FC = () => {
     }, [posts]);
 
     if (loading) {
-        return <div>加载中...</div>;
+        return <div>Loading...</div>;
     }
 
     if (!userInfo) {
@@ -305,7 +304,7 @@ const Account: React.FC = () => {
                                 <div className={styles.verificationBadge}>
                                     <img
                                         src="/profile_verification.svg"
-                                        alt="认证标志"
+                                        alt="Verification Badge"
                                     />
                                 </div>
                             )}
@@ -322,7 +321,7 @@ const Account: React.FC = () => {
                             </div>
                             <div className={styles.userInfoRow}>
                                 <span className={styles.userInfoText}>{userInfo.coins}</span>
-                                <img src="/sage_coin.png" alt="金币" className={styles.coinIcon} />
+                                <img src="/sage_coin.png" alt="Coins" className={styles.coinIcon} />
                             </div>
                             <div className={styles.userInfoRow}>
                                 <span className={styles.userInfoText}>ID: {userInfo.id}</span>
@@ -366,12 +365,12 @@ const Account: React.FC = () => {
                     <h2>History Activities</h2>
                     {posts.length > 0 ? (
                         <>
-                            <p>最近发帖时间: {new Date(posts[0].create_date).toLocaleString()}</p>
+                            <p>Latest post time: {new Date(posts[0].create_date).toLocaleString()}</p>
                             <div className={styles.postHistory}>
                                 {posts.map((post) => (
                                     <div key={post.post_id} className={styles.postCard}>
                                         <div className={styles.postHeader}>
-                                            <h3>{post.title || '无标题'}</h3>
+                                            <h3>{post.title || 'No Title'}</h3>
                                             <div className={styles.postActions}>
                                                 <button
                                                     onClick={() => handleEdit(post)}
@@ -395,7 +394,7 @@ const Account: React.FC = () => {
                             </div>
                         </>
                     ) : (
-                        <p>暂无发帖记录</p>
+                        <p>No posts yet</p>
                     )}
                 </div>
             </div>

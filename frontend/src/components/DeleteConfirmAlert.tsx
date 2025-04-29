@@ -13,8 +13,8 @@ export const DeleteConfirmAlert: React.FC<DeleteConfirmAlertProps> = ({
   visible,
   onCancel,
   onConfirm,
-  title = "确认删除",
-  subtitle = "你确定要删除这个帖子吗？"
+  title = "Confirm Delete",
+  subtitle = "Are you sure you want to delete this post?"
 }) => {
   return (
     <CustomAlert
@@ -24,8 +24,8 @@ export const DeleteConfirmAlert: React.FC<DeleteConfirmAlertProps> = ({
       title={title}
       subtitle={subtitle}
       iconSrc="/post_delete_alert.svg"
-      cancelText="取消"
-      confirmText="确认"
+      cancelText="Cancel"
+      confirmText="Confirm"
     />
   );
 }; 
