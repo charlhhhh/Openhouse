@@ -273,9 +273,17 @@ export default function FindPartner() {
           setMatchStatus(MatchStatus.PREPARE);
 
         } else if (matchStatus === "matching") {
-          setMatchStatus(MatchStatus.MATCHING)
+          setMatchStatus(MatchStatus.MATCHING);
         } else if (matchStatus === "matched") {
-          setMatchStatus(MatchStatus.COMPLETED)
+          try {
+            const res = await authService.getTodayMatch();
+            if (res.code === 0 && res.data && res.data.uuid) {
+              setMatchedUser(res.data);
+              setMatchStatus(MatchStatus.COMPLETED);
+              if (pollingRef.current) clearInterval(pollingRef.current);
+            }
+          } catch (e) { }
+
         } else {
           message.info("Unkown status")
           setMatchStatus(MatchStatus.PREPARE);
