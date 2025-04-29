@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"OpenHouse/model/request"
 	"OpenHouse/model/response"
 	"OpenHouse/service"
 
@@ -8,7 +9,7 @@ import (
 )
 
 // GetProfile
-// @Summary 获取用户Profile
+// @Summary Get user profile
 // @Security ApiKeyAuth
 // @Tags Profile
 // @Accept json
@@ -20,27 +21,27 @@ func GetProfile(c *gin.Context) {
 
 	profile, err := service.GetProfile(uuid)
 	if err != nil {
-		response.FailWithMessage("查询失败", c)
+		response.FailWithMessage("Failed to retrieve profile", c)
 		return
 	}
 	response.OkWithData(profile, c)
 }
 
 // UpdateProfile
-// @Summary 更新用户Profile（部分字段）
+// @Summary Update user profile (partial fields)
 // @Security ApiKeyAuth
 // @Tags Profile
 // @Accept json
 // @Produce json
-// @Param data body service.UpdateProfileInput true "需要更新的字段"
+// @Param data body request.UpdateProfileInput true "Fields to update"
 // @Success 200 {object} response.Response
 // @Router /api/v1/user/profile [post]
 func UpdateProfile(c *gin.Context) {
 	uuid := c.MustGet("uuid").(string)
 
-	var input service.UpdateProfileInput
+	var input request.UpdateProfileInput
 	if err := c.ShouldBindJSON(&input); err != nil {
-		response.FailWithMessage("参数错误", c)
+		response.FailWithMessage("Invalid parameters", c)
 		return
 	}
 
@@ -48,5 +49,5 @@ func UpdateProfile(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	response.Ok(c)
+	response.OkWithMessage("Profile updated successfully", c)
 }

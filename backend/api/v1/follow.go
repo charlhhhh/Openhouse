@@ -8,12 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// FollowUser 关注用户
-// @Summary 关注用户
-// @Tags 用户 User
+// FollowUser Follow a user
+// @Summary Follow a user
+// @Tags User
 // @Accept json
 // @Produce json
-// @Param data body request.FollowRequest true "关注对象UUID"
+// @Param data body request.FollowRequest true "Target user UUID"
 // @Success 200 {object} response.Response
 // @Failure 400 {object} response.Response
 // @Failure 401 {object} response.Response
@@ -22,18 +22,18 @@ import (
 func FollowUser(c *gin.Context) {
 	var req request.FollowRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
 	if userUUID == req.FollowedUUID {
-		response.FailWithMessage("不能关注自己", c)
+		response.FailWithMessage("Cannot follow yourself", c)
 		return
 	}
 
@@ -41,15 +41,15 @@ func FollowUser(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	response.OkWithMessage("关注成功", c)
+	response.OkWithMessage("Followed successfully", c)
 }
 
-// UnfollowUser 取消关注
-// @Summary 取消关注
-// @Tags 用户 User
+// UnfollowUser Unfollow a user
+// @Summary Unfollow a user
+// @Tags User
 // @Accept json
 // @Produce json
-// @Param data body request.FollowRequest true "取消关注对象UUID"
+// @Param data body request.FollowRequest true "Target user UUID"
 // @Success 200 {object} response.Response
 // @Failure 400 {object} response.Response
 // @Failure 401 {object} response.Response
@@ -58,13 +58,13 @@ func FollowUser(c *gin.Context) {
 func UnfollowUser(c *gin.Context) {
 	var req request.FollowRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
@@ -72,15 +72,15 @@ func UnfollowUser(c *gin.Context) {
 		response.FailWithMessage(err.Error(), c)
 		return
 	}
-	response.OkWithMessage("取消关注成功", c)
+	response.OkWithMessage("Unfollowed successfully", c)
 }
 
-// FollowedList 获取我关注的人
-// @Summary 获取关注列表
-// @Tags 用户 User
+// FollowedList Get the list of users I follow
+// @Summary Get following list
+// @Tags User
 // @Accept json
 // @Produce json
-// @Param data body request.FollowListRequest true "分页"
+// @Param data body request.FollowListRequest true "Pagination"
 // @Success 200 {object} response.Response{data=[]response.FollowedUserInfo}
 // @Failure 400 {object} response.Response
 // @Failure 401 {object} response.Response
@@ -89,29 +89,29 @@ func UnfollowUser(c *gin.Context) {
 func FollowedList(c *gin.Context) {
 	var req request.FollowListRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 	list, _, err := service.ListFollowedUsers(userUUID, req.PageNum, req.PageSize)
 	if err != nil {
-		response.FailWithMessage("获取失败："+err.Error(), c)
+		response.FailWithMessage("Failed to retrieve list: "+err.Error(), c)
 		return
 	}
 	response.OkWithData(list, c)
 }
 
-// FollowersList 获取我的粉丝列表
-// @Summary 获取粉丝列表
-// @Tags 用户 User
+// FollowersList Get my followers list
+// @Summary Get followers list
+// @Tags User
 // @Accept json
 // @Produce json
-// @Param data body request.FollowListRequest true "分页"
+// @Param data body request.FollowListRequest true "Pagination"
 // @Success 200 {object} response.Response{data=[]response.FollowedUserInfo}
 // @Failure 400 {object} response.Response
 // @Failure 401 {object} response.Response
@@ -120,26 +120,26 @@ func FollowedList(c *gin.Context) {
 func FollowersList(c *gin.Context) {
 	var req request.FollowListRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 	list, _, err := service.ListFollowers(userUUID, req.PageNum, req.PageSize)
 	if err != nil {
-		response.FailWithMessage("获取粉丝失败："+err.Error(), c)
+		response.FailWithMessage("Failed to retrieve followers: "+err.Error(), c)
 		return
 	}
 	response.OkWithData(list, c)
 }
 
-// FollowCount 获取我的关注和粉丝数量
-// @Summary 获取关注/粉丝统计
-// @Tags 用户 User
+// FollowCount Get the count of my following and followers
+// @Summary Get follow/follower statistics
+// @Tags User
 // @Accept json
 // @Produce json
 // @Success 200 {object} response.Response{data=response.FollowCountResponse}
@@ -151,12 +151,12 @@ func FollowCount(c *gin.Context) {
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 	following, follower, err := service.GetFollowCount(userUUID)
 	if err != nil {
-		response.FailWithMessage("获取关注统计失败："+err.Error(), c)
+		response.FailWithMessage("Failed to retrieve follow statistics: "+err.Error(), c)
 		return
 	}
 	response.OkWithData(response.FollowCountResponse{
@@ -165,12 +165,12 @@ func FollowCount(c *gin.Context) {
 	}, c)
 }
 
-// FollowStatus 判断是否关注某用户
-// @Summary 是否关注某用户
-// @Tags 用户 User
+// FollowStatus Check if following a user
+// @Summary Check follow status
+// @Tags User
 // @Accept json
 // @Produce json
-// @Param data body request.FollowStatusRequest true "目标用户UUID"
+// @Param data body request.FollowStatusRequest true "Target user UUID"
 // @Success 200 {object} response.Response{data=response.FollowStatusResponse}
 // @Failure 400 {object} response.Response
 // @Security ApiKeyAuth
@@ -178,31 +178,31 @@ func FollowCount(c *gin.Context) {
 func FollowStatus(c *gin.Context) {
 	var req request.FollowStatusRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
 	isFollow, err := service.IsFollowing(userUUID, req.TargetUUID)
 	if err != nil {
-		response.FailWithMessage("查询失败："+err.Error(), c)
+		response.FailWithMessage("Failed to check follow status: "+err.Error(), c)
 		return
 	}
 	response.OkWithData(response.FollowStatusResponse{IsFollowing: isFollow}, c)
 }
 
-// FollowedPosts 获取我关注的人的帖子流
-// @Summary 获取关注用户的动态流
-// @Tags 用户 User
+// FollowedPosts Get posts from users I follow
+// @Summary Get followed users' posts
+// @Tags User
 // @Accept json
 // @Produce json
-// @Param data body request.ListPostRequest true "分页参数"
+// @Param data body request.ListPostRequest true "Pagination parameters"
 // @Success 200 {object} response.Response{data=response.PostListResponse}
 // @Failure 400 {object} response.Response
 // @Security ApiKeyAuth
@@ -210,19 +210,20 @@ func FollowStatus(c *gin.Context) {
 func FollowedPosts(c *gin.Context) {
 	var req request.ListPostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
+
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
 	list, total, err := service.ListFollowedPosts(userUUID, req.PageNum, req.PageSize, req.SortOrder)
 	if err != nil {
-		response.FailWithMessage("获取失败："+err.Error(), c)
+		response.FailWithMessage("Failed to retrieve posts: "+err.Error(), c)
 		return
 	}
 	response.OkWithData(response.PostListResponse{

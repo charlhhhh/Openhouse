@@ -1,0 +1,262 @@
+[
+    {
+        "username": "Alice",
+        "intro_short": "专注于多模态学习与视觉语言模型",
+        "research_area": "计算机视觉、多模态表示",
+        "tags": [
+            "CV",
+            "ViT",
+            "LLM",
+            "Vision-Language"
+        ],
+        "post_title": "探索跨模态对齐的新方法",
+        "post_content": "我们最近在多模态学习方向提出了一种改进的注意力机制，用于提升图像与文本之间的对齐效果。"
+    },
+    {
+        "username": "Bob",
+        "intro_short": "研究强化学习在机器人导航中的应用",
+        "research_area": "强化学习、机器人控制",
+        "tags": [
+            "RL",
+            "robotics",
+            "navigation",
+            "policy-gradient"
+        ],
+        "post_title": "基于层次策略的机器人路径规划",
+        "post_content": "我们提出一种层次强化学习策略，能够在复杂环境中有效引导机器人完成导航任务。"
+    },
+    {
+        "username": "Clara",
+        "intro_short": "致力于高效图神经网络的设计",
+        "research_area": "图神经网络、分布式计算",
+        "tags": [
+            "GNN",
+            "GCN",
+            "GraphSAGE",
+            "Scalability"
+        ],
+        "post_title": "提升GNN训练效率的并行化方案",
+        "post_content": "通过图划分与异步通信机制，我们加速了GNN在大规模图上的训练流程。"
+    },
+    {
+        "username": "David",
+        "intro_short": "关注自监督学习在医学影像中的应用",
+        "research_area": "医学图像、自监督学习",
+        "tags": [
+            "Self-supervised",
+            "Medical Imaging",
+            "MRI",
+            "Segmentation"
+        ],
+        "post_title": "自监督预训练提升医学图像分割效果",
+        "post_content": "我们在MRI图像上训练了一种自监督编码器，并显著提高了下游分割任务的性能。"
+    },
+    {
+        "username": "Eva",
+        "intro_short": "主攻自然语言处理与语义表示",
+        "research_area": "NLP、语义理解",
+        "tags": [
+            "NLP",
+            "BERT",
+            "semantic-parsing",
+            "Text2SQL"
+        ],
+        "post_title": "语义解析新框架：统一结构与生成",
+        "post_content": "提出一个融合结构化解码与生成式模型的新框架，用于改进复杂查询任务的语义解析。"
+    },
+    {
+        "username": "Frank",
+        "intro_short": "专注于可解释机器学习方法",
+        "research_area": "可解释AI、模型透明性",
+        "tags": [
+            "Explainable AI",
+            "SHAP",
+            "LIME",
+            "Interpretable Models"
+        ],
+        "post_title": "全局与局部解释的统一建模",
+        "post_content": "我们提出了一种融合全局与局部解释视角的模型分析工具，以提升模型决策可理解性。"
+    },
+    {
+        "username": "Grace",
+        "intro_short": "关注可持续计算与绿色AI",
+        "research_area": "节能算法、模型压缩",
+        "tags": [
+            "Green AI",
+            "Pruning",
+            "Quantization",
+            "Efficiency"
+        ],
+        "post_title": "绿色AI：减碳与计算效率并重",
+        "post_content": "在不显著降低模型性能的前提下，我们通过稀疏训练与量化显著减少了训练能耗。"
+    },
+    {
+        "username": "Henry",
+        "intro_short": "研究联邦学习与隐私保护机制",
+        "research_area": "联邦学习、安全AI",
+        "tags": [
+            "Federated Learning",
+            "Privacy",
+            "DP",
+            "FL-NLP"
+        ],
+        "post_title": "差分隐私在联邦语言模型中的优化",
+        "post_content": "我们优化了差分隐私噪声机制，使得联邦NLP任务在保障隐私的同时仍具有竞争性性能。"
+    },
+    {
+        "username": "Ivy",
+        "intro_short": "致力于跨语言迁移与低资源学习",
+        "research_area": "跨语言模型、低资源语言处理",
+        "tags": [
+            "XLM",
+            "Low-resource",
+            "Transfer Learning",
+            "Multilingual NLP"
+        ],
+        "post_title": "小语种迁移：XLM-R的微调挑战",
+        "post_content": "我们系统分析了XLM-R在小语种上的迁移瓶颈，并提出正则化机制改善泛化效果。"
+    },
+    {
+        "username": "Jack",
+        "intro_short": "研究图优化与三维重建",
+        "research_area": "三维视觉、图优化",
+        "tags": [
+            "SLAM",
+            "Bundle Adjustment",
+            "SfM",
+            "3D Reconstruction"
+        ],
+        "post_title": "稀疏图优化在大规模重建中的应用",
+        "post_content": "我们设计了一种稀疏可扩展图优化框架，用于处理城市级别三维重建任务。"
+    },
+    {
+        "username": "Karen",
+        "intro_short": "专注于AI伦理与公平性研究",
+        "research_area": "AI伦理、公平性、算法偏见",
+        "tags": [
+            "Fairness",
+            "Bias",
+            "Ethics",
+            "Accountability"
+        ],
+        "post_title": "检测与缓解算法偏见的新进展",
+        "post_content": "我们提出一种基于对比学习的偏见检测方法，并在多个基准数据集上验证其有效性。"
+    },
+    {
+        "username": "Leo",
+        "intro_short": "关注深度生成模型的优化训练",
+        "research_area": "生成模型、稳定性优化",
+        "tags": [
+            "Diffusion",
+            "GAN",
+            "VAE",
+            "Stability"
+        ],
+        "post_title": "提升扩散模型训练稳定性的策略",
+        "post_content": "通过梯度范数控制与学习率调度，我们成功缓解了扩散模型的不稳定问题。"
+    },
+    {
+        "username": "Mia",
+        "intro_short": "专注于时间序列建模与预测",
+        "research_area": "时间序列、金融预测",
+        "tags": [
+            "Time Series",
+            "Transformer",
+            "Forecasting",
+            "Finance"
+        ],
+        "post_title": "混合Transformer在金融时间序列预测中的应用",
+        "post_content": "我们提出融合周期性与趋势信息的混合Transformer，提升了市场价格预测准确率。"
+    },
+    {
+        "username": "Noah",
+        "intro_short": "致力于多智能体协作系统研究",
+        "research_area": "多智能体系统、博弈学习",
+        "tags": [
+            "Multi-Agent",
+            "MARL",
+            "Game Theory",
+            "Coordination"
+        ],
+        "post_title": "异质智能体间协作的策略优化",
+        "post_content": "我们开发了一种基于博弈图的优化算法，支持异构智能体在复杂环境中高效协作。"
+    },
+    {
+        "username": "Olivia",
+        "intro_short": "研究对话系统与情感识别",
+        "research_area": "对话系统、情感AI",
+        "tags": [
+            "Chatbot",
+            "Emotion Recognition",
+            "NLP",
+            "Dialogue"
+        ],
+        "post_title": "融合语义与情感的对话生成框架",
+        "post_content": "我们提出了一个融合上下文语义与情感引导的生成模型，提升了对话系统的自然性。"
+    },
+    {
+        "username": "Peter",
+        "intro_short": "关注因果推断与结构学习",
+        "research_area": "因果建模、图结构学习",
+        "tags": [
+            "Causal Inference",
+            "Bayesian Networks",
+            "Do-Calculus",
+            "SCM"
+        ],
+        "post_title": "基于干预数据的因果图学习算法",
+        "post_content": "我们设计了一个结合结构先验与干预观测的图学习方法，增强因果结构识别能力。"
+    },
+    {
+        "username": "Queenie",
+        "intro_short": "研究智能推荐系统与用户建模",
+        "research_area": "推荐系统、用户行为分析",
+        "tags": [
+            "Recommendation",
+            "User Modeling",
+            "CTR",
+            "Graph-based RecSys"
+        ],
+        "post_title": "用户行为图建模提升推荐准确率",
+        "post_content": "通过构建用户行为图并引入图注意机制，我们在多个推荐任务中获得了领先性能。"
+    },
+    {
+        "username": "Ryan",
+        "intro_short": "专注于量化交易与金融信号建模",
+        "research_area": "金融工程、量化模型",
+        "tags": [
+            "Quant",
+            "Finance",
+            "Signal Processing",
+            "Backtesting"
+        ],
+        "post_title": "基于深度信号处理的多因子选股模型",
+        "post_content": "我们融合多尺度信号特征与深度模型，提升了股票因子模型的预测稳定性。"
+    },
+    {
+        "username": "Sophia",
+        "intro_short": "致力于人机交互与可穿戴设备研究",
+        "research_area": "HCI、可穿戴技术",
+        "tags": [
+            "Wearable",
+            "UX",
+            "Sensors",
+            "Interaction"
+        ],
+        "post_title": "可穿戴设备中的无缝交互设计探索",
+        "post_content": "通过设计微交互机制，我们提升了用户与设备间的自然交互体验。"
+    },
+    {
+        "username": "Tom",
+        "intro_short": "关注大语言模型与知识注入技术",
+        "research_area": "大模型、知识增强",
+        "tags": [
+            "LLM",
+            "Knowledge Injection",
+            "Prompt Tuning",
+            "Retrieval-Augmented"
+        ],
+        "post_title": "基于检索增强的大模型问答系统优化",
+        "post_content": "我们构建了一个基于知识库检索的增强模块，有效提升了大模型在事实性问答中的准确率。"
+    }
+]   

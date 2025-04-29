@@ -11,23 +11,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// EmailLoginRequest 邮箱验证码登录请求
+// EmailLoginRequest Email login request
 type EmailLoginRequest struct {
 	Email string `json:"email" binding:"required,email"`
 	Code  string `json:"code" binding:"required"`
 }
 
-// GitHubLoginRequest GitHub登录回调参数
+// GitHubLoginRequest GitHub login callback parameters
 type GitHubLoginRequest struct {
 	Code string `form:"code" binding:"required"`
 }
 
-// GoogleLoginRequest Google登录回调参数
+// GoogleLoginRequest Google login callback parameters
 type GoogleLoginRequest struct {
 	Code string `form:"code" binding:"required"`
 }
 
-// SendVerifyEmail 获取验证码
+// SendVerifyEmail Send verification email
 // @Summary     获取申请验证码
 // @Description 用户点击"获取验证码"按钮，系统向用户提供的邮箱发送6位验证码，用户需要在申请表单中填入验证码才可以成功完成身份验证，否则不应该可以提交申请。验证码时限为10分钟，超时无效
 // @Tags        Auth
@@ -43,7 +43,7 @@ type GoogleLoginRequest struct {
 func SendVerifyEmail(c *gin.Context) {
 	var d response.GetVerifyCodeQ
 	if err := c.ShouldBind(&d); err != nil {
-		c.JSON(400, gin.H{"msg": "数据格式错误", "status": 400})
+		c.JSON(400, gin.H{"msg": "Invalid data format", "status": 400})
 		return
 	}
 	email := d.Email
@@ -54,19 +54,19 @@ func SendVerifyEmail(c *gin.Context) {
 	fmt.Println(code)
 	err := service.CreateVerifyCodeRecode(code, email)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{"msg": "验证码存储失败", "status": 402})
+		c.JSON(http.StatusOK, gin.H{"msg": "Failed to store verification code", "status": 402})
 		return
 	}
 
 	err = service.SendVerifyCode(email, code)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"msg": "发送邮件失败", "status": 403})
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "Failed to send email", "status": 403})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"msg": "邮件发送成功", "status": 200})
+	c.JSON(http.StatusOK, gin.H{"msg": "Email sent successfully", "status": 200})
 }
 
-// EmailLogin
+// EmailLogin Verify email login
 // @Summary 邮箱验证码验证
 // @Description 验证邮箱验证码是否正确,如果正确则登录或注册用户
 // @Description 如果用户已经注册，则绑定邮箱到当前用户
@@ -79,20 +79,18 @@ func SendVerifyEmail(c *gin.Context) {
 func EmailLogin(c *gin.Context) {
 	var req EmailLoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误", c)
+		response.FailWithMessage("Invalid parameters", c)
 		return
 	}
 
-	// 检查验证码是否正确
-	// parse code to int
 	code, err := strconv.Atoi(req.Code)
 	if err != nil {
-		response.FailWithMessage("验证码格式错误", c)
+		response.FailWithMessage("Invalid verification code format", c)
 		return
 	}
 	rec, notFound := service.CheckVerifyCode(0, code, req.Email)
 	if notFound {
-		response.FailWithMessage("验证码错误或已过期", c)
+		response.FailWithMessage("Verification code is incorrect or expired", c)
 		return
 	}
 
@@ -100,14 +98,13 @@ func EmailLogin(c *gin.Context) {
 		Provider:    service.ProviderEmail,
 		ProviderID:  rec.Email,
 		DisplayName: rec.Email,
-		AvatarURL:   "", // 邮箱没头像
+		AvatarURL:   "",
 		Email:       req.Email,
 	}
 
-	// 尝试解析当前登录用户 UUID（从 JWT 中）
 	userUUID, _ := c.Get("uuid")
 	if userUUIDStr, ok := userUUID.(string); ok {
-		fmt.Println("已注册用户进行邮箱认证，UUID:", userUUIDStr)
+		fmt.Println("Registered user binding email, UUID:", userUUIDStr)
 		bindresult, err := service.BindAccount(authInput, userUUIDStr)
 		if err != nil {
 			response.FailWithMessage(err.Error(), c)
@@ -125,7 +122,7 @@ func EmailLogin(c *gin.Context) {
 	response.OkWithData(result, c)
 }
 
-// GitHubCallback
+// GitHubCallback GitHub login callback
 // @Summary GitHub登录回调, 前端不调用该API
 // @Description 用户在GitHub登录后，GitHub会回调该接口，并传递code参数
 // @Description 该接口会使用code参数获取用户信息，并进行登录或注册
@@ -140,24 +137,23 @@ func EmailLogin(c *gin.Context) {
 func GitHubCallback(c *gin.Context) {
 	var req GitHubLoginRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
-		response.FailWithMessage("参数错误", c)
+		response.FailWithMessage("Invalid parameters", c)
 		return
 	}
 
 	authInput, err := service.GetGitHubUserInfo(req.Code)
 	if err != nil {
-		response.FailWithMessage("GitHub认证失败", c)
+		response.FailWithMessage("GitHub authentication failed", c)
 		return
 	}
 
-	// 尝试解析当前登录用户 UUID（从 JWT 中）
 	userUUID, _ := c.Get("uuid")
 	if userUUIDStr, ok := userUUID.(string); ok {
-		fmt.Println("已注册用户进行Github认证，UUID:", userUUIDStr)
+		fmt.Println("Registered user binding GitHub, UUID:", userUUIDStr)
 		bindresult, _ := service.BindAccount(authInput, userUUIDStr)
 		fmt.Println("bindresult", bindresult)
-		redirectURL := fmt.Sprintf("http://localhost:5173/bind_success?result=%s", bindresult.Result)
-		// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/bind_success?result=%s", bindresult.Result)
+		// redirectURL := fmt.Sprintf("http://localhost:5173/bind_success?result=%s", bindresult.Result)
+		redirectURL := fmt.Sprintf("http://openhouse.horik.cn/bind_success?result=%s", bindresult.Result)
 		c.Redirect(http.StatusFound, redirectURL)
 		return
 	}
@@ -168,14 +164,12 @@ func GitHubCallback(c *gin.Context) {
 		return
 	}
 
-	// 设置一个重定向URL，跳转到前端页面,本地测试
-	fmt.Println("result.Token", result.Token)
-	redirectURL := fmt.Sprintf("http://localhost:5173/oauth_success?token=%s", result.Token)
-	// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/oauth_success?token=%s", result.Token)
+	// redirectURL := fmt.Sprintf("http://localhost:5173/oauth_success?token=%s", result.Token)
+	redirectURL := fmt.Sprintf("http://openhouse.horik.cn/oauth_success?token=%s", result.Token)
 	c.Redirect(http.StatusFound, redirectURL)
 }
 
-// GoogleCallback
+// GoogleCallback Google login callback
 // @Summary Google 登录回调，前端不调用该接口
 // @Description 用户在Google登录后，Google会回调该接口，并传递code参数
 // @Description 该接口会使用code参数获取用户信息，并进行登录或注册
@@ -191,28 +185,26 @@ func GitHubCallback(c *gin.Context) {
 func GoogleCallback(c *gin.Context) {
 	code := c.Query("code")
 	if code == "" {
-		response.FailWithMessage("缺少 code 参数", c)
+		response.FailWithMessage("Missing code parameter", c)
 		return
 	}
 
 	authInput, err := service.GetGoogleUserInfo(code)
 	if err != nil {
-		response.FailWithMessage("Google 认证失败："+err.Error(), c)
+		response.FailWithMessage("Google authentication failed: "+err.Error(), c)
 		return
 	}
 
-	// 尝试解析当前登录用户 UUID（从 JWT 中）
 	userUUID, _ := c.Get("uuid")
 	if userUUIDStr, ok := userUUID.(string); ok {
-		fmt.Println("已注册用户进行Google认证，UUID:", userUUIDStr)
+		fmt.Println("Registered user binding Google, UUID:", userUUIDStr)
 		bindresult, _ := service.BindAccount(authInput, userUUIDStr)
-		redirectURL := fmt.Sprintf("http://localhost:5173/bind_success?result=%s", bindresult.Result)
-		// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/bind_success?result=%s", bindresult.Result)
+		// redirectURL := fmt.Sprintf("http://localhost:5173/bind_success?result=%s", bindresult.Result)
+		redirectURL := fmt.Sprintf("http://openhouse.horik.cn/bind_success?result=%s", bindresult.Result)
 		c.Redirect(http.StatusFound, redirectURL)
 		return
 	}
 
-	// 如果没有解析到用户UUID，说明是新用户，进行注册
 	result, err := service.LoginOrRegister(authInput)
 	if err != nil {
 		response.FailWithMessage(err.Error(), c)
@@ -224,8 +216,8 @@ func GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	redirectURL := fmt.Sprintf("http://localhost:5173/oauth_success?token=%s", result.Token)
-	// redirectURL := fmt.Sprintf("http://openhouse.horik.cn/oauth_success?token=%s", result.Token)
+	// redirectURL := fmt.Sprintf("http://localhost:5173/oauth_success?token=%s", result.Token)
+	redirectURL := fmt.Sprintf("http://openhouse.horik.cn/oauth_success?token=%s", result.Token)
 
 	c.Redirect(http.StatusFound, redirectURL)
 }

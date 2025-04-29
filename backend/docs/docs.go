@@ -16,6 +16,50 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/api/v1/auth/email/academic_check": {
+            "get": {
+                "description": "检查邮箱域名是否属于高校",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "检查邮箱域名是否属于高校",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "邮箱地址",
+                        "name": "email",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.CheckEmailDomainResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "{\"msg\": \"邮箱地址格式错误\", \"status\": 400}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "{\"msg\": \"邮箱地址不能为空\", \"status\": 500}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/auth/email/send": {
             "post": {
                 "description": "用户点击\"获取验证码\"按钮，系统向用户提供的邮箱发送6位验证码，用户需要在申请表单中填入验证码才可以成功完成身份验证，否则不应该可以提交申请。验证码时限为10分钟，超时无效",
@@ -479,6 +523,161 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/match/confirm": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Match"
+                ],
+                "summary": "Confirm match",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/match/history": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Match"
+                ],
+                "summary": "Get match history",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/response.MatchHistory"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/match/today": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Match"
+                ],
+                "summary": "Get today's match result",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/response.Response"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/response.MatchUserInfo"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/match/trigger": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Match"
+                ],
+                "summary": "Trigger match calculation for the current user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Match"
+                ],
+                "summary": "Trigger daily match (testing API)",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/media/upload": {
             "post": {
                 "security": [
@@ -486,7 +685,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "上传图片文件至 OSS，返回可访问地址",
+                "description": "Upload image file to OSS and return an accessible URL",
                 "consumes": [
                     "multipart/form-data"
                 ],
@@ -494,13 +693,13 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Media 文件"
+                    "Media File"
                 ],
-                "summary": "上传文件",
+                "summary": "Upload file",
                 "parameters": [
                     {
                         "type": "file",
-                        "description": "文件",
+                        "description": "File",
                         "name": "file",
                         "in": "formData",
                         "required": true
@@ -508,7 +707,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "返回 OSS 文件 URL",
+                        "description": "Return OSS file URL",
                         "schema": {
                             "allOf": [
                                 {
@@ -1241,9 +1440,9 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "用户 User"
+                    "User"
                 ],
-                "summary": "获取关注/粉丝统计",
+                "summary": "Get follow/follower statistics",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1292,12 +1491,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "用户 User"
+                    "User"
                 ],
-                "summary": "是否关注某用户",
+                "summary": "Check follow status",
                 "parameters": [
                     {
-                        "description": "目标用户UUID",
+                        "description": "Target user UUID",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -1348,12 +1547,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "用户 User"
+                    "User"
                 ],
-                "summary": "获取粉丝列表",
+                "summary": "Get followers list",
                 "parameters": [
                     {
-                        "description": "分页",
+                        "description": "Pagination",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -1413,12 +1612,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "用户 User"
+                    "User"
                 ],
-                "summary": "获取关注列表",
+                "summary": "Get following list",
                 "parameters": [
                     {
-                        "description": "分页",
+                        "description": "Pagination",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -1478,12 +1677,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "用户 User"
+                    "User"
                 ],
-                "summary": "获取关注用户的动态流",
+                "summary": "Get followed users' posts",
                 "parameters": [
                     {
-                        "description": "分页参数",
+                        "description": "Pagination parameters",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -1581,7 +1780,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/service.UpdateProfileInput"
+                            "$ref": "#/definitions/request.UpdateProfileInput"
                         }
                     }
                 ],
@@ -1609,12 +1808,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "用户 User"
+                    "User"
                 ],
-                "summary": "取消关注",
+                "summary": "Unfollow a user",
                 "parameters": [
                     {
-                        "description": "取消关注对象UUID",
+                        "description": "Target user UUID",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -1659,12 +1858,12 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "用户 User"
+                    "User"
                 ],
-                "summary": "关注用户",
+                "summary": "Follow a user",
                 "parameters": [
                     {
-                        "description": "关注对象UUID",
+                        "description": "Target user UUID",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -1984,6 +2183,65 @@ const docTemplate = `{
                 }
             }
         },
+        "request.UpdateProfileInput": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "coin": {
+                    "type": "integer"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "intro_long": {
+                    "type": "string"
+                },
+                "intro_short": {
+                    "type": "string"
+                },
+                "is_email_bound": {
+                    "type": "boolean"
+                },
+                "is_github_bound": {
+                    "type": "boolean"
+                },
+                "is_google_bound": {
+                    "type": "boolean"
+                },
+                "is_verified": {
+                    "type": "boolean"
+                },
+                "match_status": {
+                    "description": "\"available\" or \"matching\" or \"matched\"",
+                    "type": "string"
+                },
+                "research_area": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.CheckEmailDomainResponse": {
+            "type": "object",
+            "properties": {
+                "school": {
+                    "type": "string"
+                }
+            }
+        },
         "response.CommentInfo": {
             "type": "object",
             "properties": {
@@ -2073,6 +2331,61 @@ const docTemplate = `{
             ],
             "properties": {
                 "email": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.MatchHistory": {
+            "type": "object",
+            "properties": {
+                "match_date": {
+                    "description": "匹配日期",
+                    "type": "string"
+                },
+                "match_user": {
+                    "description": "匹配用户信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/response.MatchUserInfo"
+                        }
+                    ]
+                }
+            }
+        },
+        "response.MatchUserInfo": {
+            "type": "object",
+            "properties": {
+                "avatar_url": {
+                    "type": "string"
+                },
+                "intro_short": {
+                    "type": "string"
+                },
+                "is_following": {
+                    "description": "当前用户是否已关注",
+                    "type": "boolean"
+                },
+                "llm_comment": {
+                    "description": "LLM 推荐理由",
+                    "type": "string"
+                },
+                "match_score": {
+                    "description": "匹配分数",
+                    "type": "integer"
+                },
+                "research_area": {
+                    "type": "string"
+                },
+                "tags": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "username": {
+                    "type": "string"
+                },
+                "uuid": {
                     "type": "string"
                 }
             }
@@ -2254,6 +2567,10 @@ const docTemplate = `{
                 "is_verified": {
                     "type": "boolean"
                 },
+                "match_status": {
+                    "description": "\"available\" or \"matching\" or \"matched\"",
+                    "type": "string"
+                },
                 "research_area": {
                     "type": "string"
                 },
@@ -2267,50 +2584,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "uuid": {
-                    "type": "string"
-                }
-            }
-        },
-        "service.UpdateProfileInput": {
-            "type": "object",
-            "properties": {
-                "avatar_url": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "gender": {
-                    "type": "string"
-                },
-                "intro_long": {
-                    "type": "string"
-                },
-                "intro_short": {
-                    "type": "string"
-                },
-                "is_email_bound": {
-                    "type": "boolean"
-                },
-                "is_github_bound": {
-                    "type": "boolean"
-                },
-                "is_google_bound": {
-                    "type": "boolean"
-                },
-                "is_verified": {
-                    "type": "boolean"
-                },
-                "research_area": {
-                    "type": "string"
-                },
-                "tags": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "username": {
                     "type": "string"
                 }
             }

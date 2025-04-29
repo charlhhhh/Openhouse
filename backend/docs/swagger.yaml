@@ -179,6 +179,45 @@ definitions:
     - post_id
     - title
     type: object
+  request.UpdateProfileInput:
+    properties:
+      avatar_url:
+        type: string
+      coin:
+        type: integer
+      email:
+        type: string
+      gender:
+        type: string
+      intro_long:
+        type: string
+      intro_short:
+        type: string
+      is_email_bound:
+        type: boolean
+      is_github_bound:
+        type: boolean
+      is_google_bound:
+        type: boolean
+      is_verified:
+        type: boolean
+      match_status:
+        description: '"available" or "matching" or "matched"'
+        type: string
+      research_area:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
+    type: object
+  response.CheckEmailDomainResponse:
+    properties:
+      school:
+        type: string
+    type: object
   response.CommentInfo:
     properties:
       author_uuid:
@@ -240,6 +279,42 @@ definitions:
         type: string
     required:
     - email
+    type: object
+  response.MatchHistory:
+    properties:
+      match_date:
+        description: 匹配日期
+        type: string
+      match_user:
+        allOf:
+        - $ref: '#/definitions/response.MatchUserInfo'
+        description: 匹配用户信息
+    type: object
+  response.MatchUserInfo:
+    properties:
+      avatar_url:
+        type: string
+      intro_short:
+        type: string
+      is_following:
+        description: 当前用户是否已关注
+        type: boolean
+      llm_comment:
+        description: LLM 推荐理由
+        type: string
+      match_score:
+        description: 匹配分数
+        type: integer
+      research_area:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
+      uuid:
+        type: string
     type: object
   response.PostDetailResponse:
     properties:
@@ -359,6 +434,9 @@ definitions:
         type: boolean
       is_verified:
         type: boolean
+      match_status:
+        description: '"available" or "matching" or "matched"'
+        type: string
       research_area:
         type: string
       tags:
@@ -368,35 +446,6 @@ definitions:
       username:
         type: string
       uuid:
-        type: string
-    type: object
-  service.UpdateProfileInput:
-    properties:
-      avatar_url:
-        type: string
-      email:
-        type: string
-      gender:
-        type: string
-      intro_long:
-        type: string
-      intro_short:
-        type: string
-      is_email_bound:
-        type: boolean
-      is_github_bound:
-        type: boolean
-      is_google_bound:
-        type: boolean
-      is_verified:
-        type: boolean
-      research_area:
-        type: string
-      tags:
-        items:
-          type: string
-        type: array
-      username:
         type: string
     type: object
   v1.EmailLoginRequest:
@@ -412,6 +461,35 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/v1/auth/email/academic_check:
+    get:
+      consumes:
+      - application/json
+      description: 检查邮箱域名是否属于高校
+      parameters:
+      - description: 邮箱地址
+        in: query
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.CheckEmailDomainResponse'
+        "400":
+          description: '{"msg": "邮箱地址格式错误", "status": 400}'
+          schema:
+            type: string
+        "500":
+          description: '{"msg": "邮箱地址不能为空", "status": 500}'
+          schema:
+            type: string
+      summary: 检查邮箱域名是否属于高校
+      tags:
+      - Auth
   /api/v1/auth/email/send:
     post:
       consumes:
@@ -706,13 +784,102 @@ paths:
       summary: 取消点赞评论
       tags:
       - 评论 Comments
+  /api/v1/match/confirm:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Confirm match
+      tags:
+      - Match
+  /api/v1/match/history:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.MatchHistory'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get match history
+      tags:
+      - Match
+  /api/v1/match/today:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.MatchUserInfo'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get today's match result
+      tags:
+      - Match
+  /api/v1/match/trigger:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: Trigger match calculation for the current user
+      tags:
+      - Match
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Trigger daily match (testing API)
+      tags:
+      - Match
   /api/v1/media/upload:
     post:
       consumes:
       - multipart/form-data
-      description: 上传图片文件至 OSS，返回可访问地址
+      description: Upload image file to OSS and return an accessible URL
       parameters:
-      - description: 文件
+      - description: File
         in: formData
         name: file
         required: true
@@ -721,7 +888,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 返回 OSS 文件 URL
+          description: Return OSS file URL
           schema:
             allOf:
             - $ref: '#/definitions/response.Response'
@@ -735,9 +902,9 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 上传文件
+      summary: Upload file
       tags:
-      - Media 文件
+      - Media File
   /api/v1/posts/create:
     post:
       consumes:
@@ -1186,15 +1353,15 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 获取关注/粉丝统计
+      summary: Get follow/follower statistics
       tags:
-      - 用户 User
+      - User
   /api/v1/user/follow/status:
     post:
       consumes:
       - application/json
       parameters:
-      - description: 目标用户UUID
+      - description: Target user UUID
         in: body
         name: data
         required: true
@@ -1218,15 +1385,15 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 是否关注某用户
+      summary: Check follow status
       tags:
-      - 用户 User
+      - User
   /api/v1/user/followers:
     post:
       consumes:
       - application/json
       parameters:
-      - description: 分页
+      - description: Pagination
         in: body
         name: data
         required: true
@@ -1256,15 +1423,15 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 获取粉丝列表
+      summary: Get followers list
       tags:
-      - 用户 User
+      - User
   /api/v1/user/following:
     post:
       consumes:
       - application/json
       parameters:
-      - description: 分页
+      - description: Pagination
         in: body
         name: data
         required: true
@@ -1294,15 +1461,15 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 获取关注列表
+      summary: Get following list
       tags:
-      - 用户 User
+      - User
   /api/v1/user/following/posts:
     post:
       consumes:
       - application/json
       parameters:
-      - description: 分页参数
+      - description: Pagination parameters
         in: body
         name: data
         required: true
@@ -1326,9 +1493,9 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 获取关注用户的动态流
+      summary: Get followed users' posts
       tags:
-      - 用户 User
+      - User
   /api/v1/user/profile:
     get:
       consumes:
@@ -1359,7 +1526,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/service.UpdateProfileInput'
+          $ref: '#/definitions/request.UpdateProfileInput'
       produces:
       - application/json
       responses:
@@ -1377,7 +1544,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: 取消关注对象UUID
+      - description: Target user UUID
         in: body
         name: data
         required: true
@@ -1400,15 +1567,15 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 取消关注
+      summary: Unfollow a user
       tags:
-      - 用户 User
+      - User
   /api/v1/users/follow:
     post:
       consumes:
       - application/json
       parameters:
-      - description: 关注对象UUID
+      - description: Target user UUID
         in: body
         name: data
         required: true
@@ -1431,9 +1598,9 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 关注用户
+      summary: Follow a user
       tags:
-      - 用户 User
+      - User
   /test:
     get:
       consumes:

@@ -3,6 +3,7 @@ package service
 import (
 	"OpenHouse/global"
 	"OpenHouse/model/database"
+	"OpenHouse/model/request"
 	"encoding/json"
 	"errors"
 )
@@ -22,6 +23,7 @@ type ProfileResponse struct {
 	IsEmailBound  bool     `json:"is_email_bound"`
 	IsGitHubBound bool     `json:"is_github_bound"`
 	IsGoogleBound bool     `json:"is_google_bound"`
+	MatchStatus   string   `json:"match_status"` // "available" or "matching" or "matched"
 }
 
 // GetProfile 查询用户Profile
@@ -51,26 +53,12 @@ func GetProfile(uuid string) (ProfileResponse, error) {
 		IsEmailBound:  user.IsEmailBound,
 		IsGitHubBound: user.IsGitHubBound,
 		IsGoogleBound: user.IsGoogleBound,
+		MatchStatus:   user.MatchStatus,
 	}, nil
 }
 
-type UpdateProfileInput struct {
-	Username      *string   `json:"username,omitempty"`
-	Email         *string   `json:"email,omitempty"`
-	IsVerified    *bool     `json:"is_verified,omitempty"`
-	AvatarURL     *string   `json:"avatar_url,omitempty"`
-	IntroShort    *string   `json:"intro_short,omitempty"`
-	IntroLong     *string   `json:"intro_long,omitempty"`
-	Gender        *string   `json:"gender,omitempty"`
-	Tags          *[]string `json:"tags,omitempty"`
-	ResearchArea  *string   `json:"research_area,omitempty"`
-	IsEmailBound  *bool     `json:"is_email_bound,omitempty"`
-	IsGitHubBound *bool     `json:"is_github_bound,omitempty"`
-	IsGoogleBound *bool     `json:"is_google_bound,omitempty"`
-}
-
 // UpdateProfile 更新用户Profile（支持部分字段）
-func UpdateProfile(uuid string, input UpdateProfileInput) error {
+func UpdateProfile(uuid string, input request.UpdateProfileInput) error {
 	updates := make(map[string]interface{})
 
 	if input.Username != nil {
@@ -97,6 +85,9 @@ func UpdateProfile(uuid string, input UpdateProfileInput) error {
 	if input.ResearchArea != nil {
 		updates["research_area"] = *input.ResearchArea
 	}
+	if input.Coin != nil {
+		updates["coin"] = *input.Coin
+	}
 	if input.IsEmailBound != nil {
 		updates["is_email_bound"] = *input.IsEmailBound
 	}
@@ -105,6 +96,9 @@ func UpdateProfile(uuid string, input UpdateProfileInput) error {
 	}
 	if input.IsGoogleBound != nil {
 		updates["is_google_bound"] = *input.IsGoogleBound
+	}
+	if input.MatchStatus != nil {
+		updates["match_status"] = *input.MatchStatus
 	}
 
 	if input.Tags != nil {

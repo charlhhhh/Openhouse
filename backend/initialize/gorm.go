@@ -36,6 +36,7 @@ func InitMySQL() {
 		&database.UserFollow{},
 		&database.UserPostFavorite{},
 		&database.CommentLike{},
+		&database.MatchResult{},
 	)
 	// 检查数据库连接是否存在, 好像没啥用
 	err = global.DB.DB().Ping()

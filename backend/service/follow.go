@@ -215,3 +215,17 @@ func ListFollowedPosts(userUUID string, pageNum, pageSize int, sortOrder string)
 	}
 	return result, total, nil
 }
+
+// CheckIsFollowing 判断当前用户是否已关注目标用户
+func CheckIsFollowing(currentUUID, targetUUID string) bool {
+	if currentUUID == targetUUID {
+		return false
+	}
+
+	var relation database.UserFollow
+	err := global.DB.
+		Where("user_id = ? AND follow_id = ? AND deleted_at IS NULL", currentUUID, targetUUID).
+		First(&relation).Error
+
+	return err == nil
+}
