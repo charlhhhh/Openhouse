@@ -7,9 +7,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// MatchTrigger 后台管理触发每日匹配（测试使用，强制立刻执行匹配）
-// @Summary 触发每日匹配（测试使用API）
-// @Tags 匹配 Match
+// MatchTrigger Trigger daily match (for testing purposes)
+// @Summary Trigger daily match (testing API)
+// @Tags Match
 // @Accept json
 // @Produce json
 // @Success 200 {object} response.Response
@@ -17,15 +17,15 @@ import (
 func MatchTrigger(c *gin.Context) {
 	err := service.TriggerDailyMatch()
 	if err != nil {
-		response.FailWithMessage("触发失败: "+err.Error(), c)
+		response.FailWithMessage("Failed to trigger: "+err.Error(), c)
 		return
 	}
-	response.OkWithMessage("匹配任务已执行", c)
+	response.OkWithMessage("Match task executed successfully", c)
 }
 
-// MatchTriggerUser 触发当前用户的匹配计算
-// @Summary 触发当前用户的匹配计算
-// @Tags 匹配 Match
+// MatchTriggerUser Trigger match calculation for the current user
+// @Summary Trigger match calculation for the current user
+// @Tags Match
 // @Security ApiKeyAuth
 // @Accept json
 // @Produce json
@@ -35,21 +35,21 @@ func MatchTriggerUser(c *gin.Context) {
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
 	err := service.TriggerUserMatch(userUUID)
 	if err != nil {
-		response.FailWithMessage("触发失败: "+err.Error(), c)
+		response.FailWithMessage("Failed to trigger: "+err.Error(), c)
 		return
 	}
-	response.OkWithMessage("匹配任务已执行", c)
+	response.OkWithMessage("Match task executed successfully", c)
 }
 
-// MatchToday 查询今日神秘嘉宾
-// @Summary 获取今日匹配结果
-// @Tags 匹配 Match
+// MatchToday Get today's match result
+// @Summary Get today's match result
+// @Tags Match
 // @Security ApiKeyAuth
 // @Accept json
 // @Produce json
@@ -59,7 +59,7 @@ func MatchToday(c *gin.Context) {
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
@@ -77,9 +77,9 @@ func MatchToday(c *gin.Context) {
 	response.OkWithData(info, c)
 }
 
-// MatchConfirm 确认匹配
-// @Summary 确认匹配
-// @Tags 匹配 Match
+// MatchConfirm Confirm match
+// @Summary Confirm match
+// @Tags Match
 // @Security ApiKeyAuth
 // @Accept json
 // @Produce json
@@ -89,7 +89,7 @@ func MatchConfirm(c *gin.Context) {
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
@@ -100,12 +100,12 @@ func MatchConfirm(c *gin.Context) {
 		return
 	}
 
-	response.OkWithMessage("匹配确认成功", c)
+	response.OkWithMessage("Match confirmed successfully", c)
 }
 
-// MatchHistory 查询历史匹配记录
-// @Summary 查询历史匹配记录
-// @Tags 匹配 Match
+// MatchHistory Get match history
+// @Summary Get match history
+// @Tags Match
 // @Security ApiKeyAuth
 // @Accept json
 // @Produce json
@@ -115,7 +115,7 @@ func MatchHistory(c *gin.Context) {
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 

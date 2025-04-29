@@ -13,6 +13,18 @@ import (
 	"time"
 )
 
+func markUserMatchStatus(userUUID string, status string) error {
+	var input request.UpdateProfileInput
+	jsoninfo := `{"match_status": "` + status + `"}`
+	if err := json.Unmarshal([]byte(jsoninfo), &input); err != nil {
+		return errors.New("解析用户信息失败")
+	}
+	if err := UpdateProfile(userUUID, input); err != nil {
+		return errors.New("更新用户信息失败")
+	}
+	return nil
+}
+
 // TriggerDailyMatch 每日批量匹配执行
 func TriggerDailyMatch() error {
 	// Step 1：拉取所有符合条件的用户，match_status = "matching"
@@ -25,8 +37,8 @@ func TriggerDailyMatch() error {
 
 	// 将所有用户的匹配状态更新为 "matched"
 	for i := range users {
-		users[i].MatchStatus = "matched"
-		if err := global.DB.Save(&users[i]).Error; err != nil {
+		// call markUserMatchStatus
+		if err := markUserMatchStatus(users[i].UUID, "matched"); err != nil {
 			return errors.New("更新用户状态失败")
 		}
 	}
@@ -95,8 +107,7 @@ func TriggerUserMatch(userUUID string) error {
 	}
 
 	// 直接触发匹配并返回，更新当前用户的匹配状态为 "matched"
-	user.MatchStatus = "matched"
-	if err := global.DB.Save(&user).Error; err != nil {
+	if err := markUserMatchStatus(user.UUID, "matched"); err != nil {
 		return errors.New("更新用户状态失败")
 	}
 
@@ -319,13 +330,8 @@ func LLMMatchScoreFromPrompt(prompt string) (int, string, error) {
 // ConfirmMatch 确认匹配
 func ConfirmMatch(userUUID string) error {
 	// 调用 UpdateProfile 更新用户信息
-	var input request.UpdateProfileInput
-	jsoninfo := `{"match_status": "matched"}`
-	if err := json.Unmarshal([]byte(jsoninfo), &input); err != nil {
-		return errors.New("解析用户信息失败")
-	}
-	if err := UpdateProfile(userUUID, input); err != nil {
-		return errors.New("更新用户信息失败")
+	if err := markUserMatchStatus(userUUID, "matched"); err != nil {
+		return errors.New("更新用户状态失败")
 	}
 	return nil
 }

@@ -97,6 +97,9 @@ func UpdateProfile(uuid string, input request.UpdateProfileInput) error {
 	if input.IsGoogleBound != nil {
 		updates["is_google_bound"] = *input.IsGoogleBound
 	}
+	if input.MatchStatus != nil {
+		updates["match_status"] = *input.MatchStatus
+	}
 
 	if input.Tags != nil {
 		tagsJSON, err := json.Marshal(input.Tags)

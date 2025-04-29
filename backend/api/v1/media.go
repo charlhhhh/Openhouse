@@ -7,34 +7,34 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// UploadFile 上传文件到阿里云 OSS
-// @Summary 上传文件
-// @Description 上传图片文件至 OSS，返回可访问地址
-// @Tags Media 文件
+// UploadFile Upload file to Aliyun OSS
+// @Summary Upload file
+// @Description Upload image file to OSS and return an accessible URL
+// @Tags Media File
 // @Security ApiKeyAuth
 // @Accept multipart/form-data
 // @Produce json
-// @Param file formData file true "文件"
-// @Success 200 {object} response.Response{data=string} "返回 OSS 文件 URL"
+// @Param file formData file true "File"
+// @Success 200 {object} response.Response{data=string} "Return OSS file URL"
 // @Failure 400 {object} response.Response
 // @Router /api/v1/media/upload [post]
 func UploadFile(c *gin.Context) {
 	file, err := c.FormFile("file")
 	if err != nil {
-		response.FailWithMessage("无法读取上传文件", c)
+		response.FailWithMessage("Failed to read uploaded file", c)
 		return
 	}
 
 	src, err := file.Open()
 	if err != nil {
-		response.FailWithMessage("打开文件失败", c)
+		response.FailWithMessage("Failed to open file", c)
 		return
 	}
 	defer src.Close()
 
 	url, err := utils.UploadToOSS(src, file.Filename)
 	if err != nil {
-		response.FailWithMessage("上传失败: "+err.Error(), c)
+		response.FailWithMessage("Upload failed: "+err.Error(), c)
 		return
 	}
 

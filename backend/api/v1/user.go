@@ -33,7 +33,7 @@ func GetProfile(c *gin.Context) {
 // @Tags Profile
 // @Accept json
 // @Produce json
-// @Param data body service.UpdateProfileInput true "需要更新的字段"
+// @Param data body request.UpdateProfileInput true "需要更新的字段"
 // @Success 200 {object} response.Response
 // @Router /api/v1/user/profile [post]
 func UpdateProfile(c *gin.Context) {

@@ -179,6 +179,40 @@ definitions:
     - post_id
     - title
     type: object
+  request.UpdateProfileInput:
+    properties:
+      avatar_url:
+        type: string
+      coin:
+        type: integer
+      email:
+        type: string
+      gender:
+        type: string
+      intro_long:
+        type: string
+      intro_short:
+        type: string
+      is_email_bound:
+        type: boolean
+      is_github_bound:
+        type: boolean
+      is_google_bound:
+        type: boolean
+      is_verified:
+        type: boolean
+      match_status:
+        description: '"available" or "matching" or "matched"'
+        type: string
+      research_area:
+        type: string
+      tags:
+        items:
+          type: string
+        type: array
+      username:
+        type: string
+    type: object
   response.CheckEmailDomainResponse:
     properties:
       school:
@@ -412,37 +446,6 @@ definitions:
       username:
         type: string
       uuid:
-        type: string
-    type: object
-  service.UpdateProfileInput:
-    properties:
-      avatar_url:
-        type: string
-      coin:
-        type: integer
-      email:
-        type: string
-      gender:
-        type: string
-      intro_long:
-        type: string
-      intro_short:
-        type: string
-      is_email_bound:
-        type: boolean
-      is_github_bound:
-        type: boolean
-      is_google_bound:
-        type: boolean
-      is_verified:
-        type: boolean
-      research_area:
-        type: string
-      tags:
-        items:
-          type: string
-        type: array
-      username:
         type: string
     type: object
   v1.EmailLoginRequest:
@@ -794,9 +797,9 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 确认匹配
+      summary: Confirm match
       tags:
-      - 匹配 Match
+      - Match
   /api/v1/match/history:
     get:
       consumes:
@@ -817,9 +820,9 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-      summary: 查询历史匹配记录
+      summary: Get match history
       tags:
-      - 匹配 Match
+      - Match
   /api/v1/match/today:
     get:
       consumes:
@@ -838,9 +841,9 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-      summary: 获取今日匹配结果
+      summary: Get today's match result
       tags:
-      - 匹配 Match
+      - Match
   /api/v1/match/trigger:
     get:
       consumes:
@@ -854,9 +857,9 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 触发当前用户的匹配计算
+      summary: Trigger match calculation for the current user
       tags:
-      - 匹配 Match
+      - Match
     post:
       consumes:
       - application/json
@@ -867,16 +870,16 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.Response'
-      summary: 触发每日匹配（测试使用API）
+      summary: Trigger daily match (testing API)
       tags:
-      - 匹配 Match
+      - Match
   /api/v1/media/upload:
     post:
       consumes:
       - multipart/form-data
-      description: 上传图片文件至 OSS，返回可访问地址
+      description: Upload image file to OSS and return an accessible URL
       parameters:
-      - description: 文件
+      - description: File
         in: formData
         name: file
         required: true
@@ -885,7 +888,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: 返回 OSS 文件 URL
+          description: Return OSS file URL
           schema:
             allOf:
             - $ref: '#/definitions/response.Response'
@@ -899,9 +902,9 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 上传文件
+      summary: Upload file
       tags:
-      - Media 文件
+      - Media File
   /api/v1/posts/create:
     post:
       consumes:
@@ -1350,15 +1353,15 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 获取关注/粉丝统计
+      summary: Get follow/follower statistics
       tags:
-      - 用户 User
+      - User
   /api/v1/user/follow/status:
     post:
       consumes:
       - application/json
       parameters:
-      - description: 目标用户UUID
+      - description: Target user UUID
         in: body
         name: data
         required: true
@@ -1382,15 +1385,15 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 是否关注某用户
+      summary: Check follow status
       tags:
-      - 用户 User
+      - User
   /api/v1/user/followers:
     post:
       consumes:
       - application/json
       parameters:
-      - description: 分页
+      - description: Pagination
         in: body
         name: data
         required: true
@@ -1420,15 +1423,15 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 获取粉丝列表
+      summary: Get followers list
       tags:
-      - 用户 User
+      - User
   /api/v1/user/following:
     post:
       consumes:
       - application/json
       parameters:
-      - description: 分页
+      - description: Pagination
         in: body
         name: data
         required: true
@@ -1458,15 +1461,15 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 获取关注列表
+      summary: Get following list
       tags:
-      - 用户 User
+      - User
   /api/v1/user/following/posts:
     post:
       consumes:
       - application/json
       parameters:
-      - description: 分页参数
+      - description: Pagination parameters
         in: body
         name: data
         required: true
@@ -1490,9 +1493,9 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 获取关注用户的动态流
+      summary: Get followed users' posts
       tags:
-      - 用户 User
+      - User
   /api/v1/user/profile:
     get:
       consumes:
@@ -1523,7 +1526,7 @@ paths:
         name: data
         required: true
         schema:
-          $ref: '#/definitions/service.UpdateProfileInput'
+          $ref: '#/definitions/request.UpdateProfileInput'
       produces:
       - application/json
       responses:
@@ -1541,7 +1544,7 @@ paths:
       consumes:
       - application/json
       parameters:
-      - description: 取消关注对象UUID
+      - description: Target user UUID
         in: body
         name: data
         required: true
@@ -1564,15 +1567,15 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 取消关注
+      summary: Unfollow a user
       tags:
-      - 用户 User
+      - User
   /api/v1/users/follow:
     post:
       consumes:
       - application/json
       parameters:
-      - description: 关注对象UUID
+      - description: Target user UUID
         in: body
         name: data
         required: true
@@ -1595,9 +1598,9 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 关注用户
+      summary: Follow a user
       tags:
-      - 用户 User
+      - User
   /test:
     get:
       consumes:

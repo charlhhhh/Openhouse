@@ -23,22 +23,21 @@ import (
 func CreateComment(c *gin.Context) {
 	var req request.CreateCommentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Unauthorized or not logged in", c)
 		return
 	}
 
 	if err := service.CreateComment(userUUID, req.PostID, req.CommentID, req.Content); err != nil {
-		response.FailWithMessage("评论失败："+err.Error(), c)
+		response.FailWithMessage("Failed to create comment: "+err.Error(), c)
 		return
 	}
-	response.OkWithMessage("评论成功", c)
-
+	response.OkWithMessage("Comment created successfully", c)
 }
 
 // LikeComment 点赞评论
@@ -55,20 +54,20 @@ func CreateComment(c *gin.Context) {
 func LikeComment(c *gin.Context) {
 	var req request.LikeCommentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Unauthorized or not logged in", c)
 		return
 	}
 	if err := service.LikeComment(userUUID, req.CommentID); err != nil {
-		response.FailWithMessage("点赞失败："+err.Error(), c)
+		response.FailWithMessage("Failed to like comment: "+err.Error(), c)
 		return
 	}
-	response.OkWithMessage("点赞成功", c)
+	response.OkWithMessage("Comment liked successfully", c)
 }
 
 // UnlikeComment 取消点赞
@@ -85,20 +84,20 @@ func LikeComment(c *gin.Context) {
 func UnlikeComment(c *gin.Context) {
 	var req request.LikeCommentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Unauthorized or not logged in", c)
 		return
 	}
 	if err := service.UnlikeComment(userUUID, req.CommentID); err != nil {
-		response.FailWithMessage("取消失败："+err.Error(), c)
+		response.FailWithMessage("Failed to unlike comment: "+err.Error(), c)
 		return
 	}
-	response.OkWithMessage("取消点赞成功", c)
+	response.OkWithMessage("Comment unliked successfully", c)
 }
 
 // ListComments 获取某个帖子的一级评论列表（含默认3条子评论）
@@ -116,20 +115,20 @@ func UnlikeComment(c *gin.Context) {
 func ListComments(c *gin.Context) {
 	var req request.ListCommentRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("请求参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Unauthorized or not logged in", c)
 		return
 	}
 
 	list, total, err := service.ListComments(req.PostID, req.PageNum, req.PageSize, req.SortBy, userUUID)
 	if err != nil {
-		response.FailWithMessage("获取评论失败："+err.Error(), c)
+		response.FailWithMessage("Failed to retrieve comments: "+err.Error(), c)
 		return
 	}
 
@@ -154,20 +153,20 @@ func ListComments(c *gin.Context) {
 func ListReplies(c *gin.Context) {
 	var req request.ListReplyRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("请求参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Unauthorized or not logged in", c)
 		return
 	}
 
 	list, total, err := service.ListChildComments(req.CommentID, req.PageNum, req.PageSize, userUUID)
 	if err != nil {
-		response.FailWithMessage("获取子评论失败："+err.Error(), c)
+		response.FailWithMessage("Failed to retrieve replies: "+err.Error(), c)
 		return
 	}
 
