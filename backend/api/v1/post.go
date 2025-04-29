@@ -11,36 +11,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreatePost 创建帖子
-// @Summary 创建帖子
-// @Description 用户创建一条新的帖子（可附带最多3张图）
-// @Tags 帖子 Posts
-// @Accept json
-// @Produce json
-// @Param data body request.CreatePostRequest true "帖子内容与图片"
-// @Success 200 {object} response.Response{data=response.PostInfo}
-// @Failure 400 {object} response.Response "请求参数错误"
-// @Failure 401 {object} response.Response "未授权"
-// @Failure 500 {object} response.Response "服务器内部错误"
-// @Security ApiKeyAuth
-// @Router /api/v1/posts/create [post]
+// CreatePost Create a new post
 func CreatePost(c *gin.Context) {
 	var req request.CreatePostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("请求参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid request parameters: "+err.Error(), c)
 		return
 	}
 
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
 	post, err := service.CreatePost(userUUID, req.Title, req.Content, req.ImageURLs)
 	if err != nil {
-		response.FailWithMessage("创建帖子失败："+err.Error(), c)
+		response.FailWithMessage("Failed to create post: "+err.Error(), c)
 		return
 	}
 
@@ -48,69 +36,46 @@ func CreatePost(c *gin.Context) {
 	response.OkWithData(postInfo, c)
 }
 
-// UpdatePost 更新帖子
-// @Summary 更新帖子
-// @Description 用户更新帖子内容（可附带最多3张图）
-// @Tags 帖子 Posts
-// @Accept json
-// @Produce json
-// @Param data body request.UpdatePostRequest true "帖子内容与图片"
-// @Success 200 {object} response.Response{data=response.PostInfo}
-// @Failure 400 {object} response.Response "请求参数错误"
-// @Failure 401 {object} response.Response "未授权"
-// @Failure 500 {object} response.Response "服务器内部错误"
-// @Security ApiKeyAuth
-// @Router /api/v1/posts/update [post]
+// UpdatePost Update a post
 func UpdatePost(c *gin.Context) {
 	var req request.UpdatePostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 
 	userUUID := c.MustGet("uuid").(string)
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
 	if err := service.UpdatePost(userUUID, req); err != nil {
-		response.FailWithMessage("修改失败："+err.Error(), c)
+		response.FailWithMessage("Failed to update post: "+err.Error(), c)
 		return
 	}
 
-	response.OkWithMessage("修改成功", c)
+	response.OkWithMessage("Post updated successfully", c)
 }
 
-// ListPosts 获取帖子列表
-// @Summary 获取帖子列表（分页、排序）
-// @Description 按时间排序获取帖子列表，支持分页
-// @Tags 帖子 Posts
-// @Accept json
-// @Produce json
-// @Param data body request.ListPostRequest true "分页请求参数"
-// @Success 200 {object} response.Response{data=response.PostListResponse}
-// @Failure 400 {object} response.Response
-// @Failure 500 {object} response.Response
-// @Security ApiKeyAuth
-// @Router /api/v1/posts/list [post]
+// ListPosts Get a list of posts
 func ListPosts(c *gin.Context) {
 	var req request.ListPostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("请求参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid request parameters: "+err.Error(), c)
 		return
 	}
 
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
 	list, total, err := service.ListPosts(req.PageNum, req.PageSize, req.SortOrder, userUUID)
 	if err != nil {
-		response.FailWithMessage("获取帖子失败："+err.Error(), c)
+		response.FailWithMessage("Failed to retrieve posts: "+err.Error(), c)
 		return
 	}
 
@@ -121,36 +86,24 @@ func ListPosts(c *gin.Context) {
 	response.OkWithData(resp, c)
 }
 
-// ListMyPosts 获取当前用户的帖子
-// @Summary 获取我的帖子列表
-// @Description 获取当前登录用户发布的帖子（分页 + 时间排序）
-// @Tags 帖子 Posts
-// @Accept json
-// @Produce json
-// @Param data body request.ListPostRequest true "分页请求参数"
-// @Success 200 {object} response.Response{data=response.PostListResponse}
-// @Failure 400 {object} response.Response
-// @Failure 401 {object} response.Response
-// @Failure 500 {object} response.Response
-// @Security ApiKeyAuth
-// @Router /api/v1/posts/mypostlist [post]
+// ListMyPosts Get the current user's posts
 func ListMyPosts(c *gin.Context) {
 	var req request.ListPostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("请求参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid request parameters: "+err.Error(), c)
 		return
 	}
 
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
 	list, total, err := service.ListUserPosts(userUUID, req.PageNum, req.PageSize, req.SortOrder, userUUID)
 	if err != nil {
-		response.FailWithMessage("获取帖子失败："+err.Error(), c)
+		response.FailWithMessage("Failed to retrieve posts: "+err.Error(), c)
 		return
 	}
 
@@ -160,63 +113,38 @@ func ListMyPosts(c *gin.Context) {
 	}, c)
 }
 
-// DeletePost 删除帖子
-// @Summary 删除帖子
-// @Description 当前用户删除自己发布的帖子
-// @Tags 帖子 Posts
-// @Accept json
-// @Produce json
-// @Param data body request.DeletePostRequest true "要删除的帖子ID"
-// @Success 200 {object} response.Response "删除成功"
-// @Failure 400 {object} response.Response
-// @Failure 401 {object} response.Response
-// @Failure 403 {object} response.Response
-// @Failure 500 {object} response.Response
-// @Security ApiKeyAuth
-// @Router /api/v1/posts/delete [post]
+// DeletePost Delete a post
 func DeletePost(c *gin.Context) {
 	var req request.DeletePostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
 	if err := service.DeletePost(userUUID, req.PostID); err != nil {
-		if err.Error() == "无权限删除该帖子" {
-			response.FailWithDetailed(nil, "你只能删除自己的帖子", c)
+		if err.Error() == "No permission to delete this post" {
+			response.FailWithDetailed(nil, "You can only delete your own posts", c)
 		} else {
 			response.FailWithMessage(err.Error(), c)
 		}
 		return
 	}
 
-	response.OkWithMessage("删除成功", c)
+	response.OkWithMessage("Post deleted successfully", c)
 }
 
-// FavoritePost 收藏帖子
-// @Summary 收藏帖子
-// @Description 当前用户收藏某个帖子（不能重复）
-// @Tags 帖子 Posts
-// @Accept json
-// @Produce json
-// @Param data body request.FavoritePostRequest true "帖子ID"
-// @Success 200 {object} response.Response "收藏成功"
-// @Failure 400 {object} response.Response
-// @Failure 401 {object} response.Response
-// @Failure 500 {object} response.Response
-// @Security ApiKeyAuth
-// @Router /api/v1/posts/favorite [post]
+// FavoritePost Favorite a post
 func FavoritePost(c *gin.Context) {
 	var req request.FavoritePostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 	fmt.Println("req PostID:", req.PostID)
@@ -224,7 +152,7 @@ func FavoritePost(c *gin.Context) {
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
@@ -233,33 +161,21 @@ func FavoritePost(c *gin.Context) {
 		return
 	}
 
-	response.OkWithMessage("收藏成功", c)
+	response.OkWithMessage("Post favorited successfully", c)
 }
 
-// UnfavoritePost 取消收藏帖子
-// @Summary 取消收藏
-// @Description 当前用户取消对某帖的收藏
-// @Tags 帖子 Posts
-// @Accept json
-// @Produce json
-// @Param data body request.FavoritePostRequest true "帖子ID"
-// @Success 200 {object} response.Response "取消成功"
-// @Failure 400 {object} response.Response
-// @Failure 401 {object} response.Response
-// @Failure 500 {object} response.Response
-// @Security ApiKeyAuth
-// @Router /api/v1/posts/unfavorite [post]
+// UnfavoritePost Unfavorite a post
 func UnfavoritePost(c *gin.Context) {
 	var req request.FavoritePostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid parameters: "+err.Error(), c)
 		return
 	}
 
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 
@@ -268,33 +184,21 @@ func UnfavoritePost(c *gin.Context) {
 		return
 	}
 
-	response.OkWithMessage("取消收藏成功", c)
+	response.OkWithMessage("Post unfavorited successfully", c)
 }
 
-// FavoriteList 获取收藏列表
-// @Summary 获取收藏的帖子
-// @Description 获取当前用户收藏的帖子（分页、时间排序）
-// @Tags 帖子 Posts
-// @Accept json
-// @Produce json
-// @Param data body request.ListPostRequest true "分页参数"
-// @Success 200 {object} response.Response{data=response.PostListResponse}
-// @Failure 400 {object} response.Response
-// @Failure 401 {object} response.Response
-// @Failure 500 {object} response.Response
-// @Security ApiKeyAuth
-// @Router /api/v1/posts/favorites_list [post]
+// FavoriteList Get the list of favorited posts
 func FavoriteList(c *gin.Context) {
 	var req request.ListPostRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		response.FailWithMessage("请求参数错误："+err.Error(), c)
+		response.FailWithMessage("Invalid request parameters: "+err.Error(), c)
 		return
 	}
 
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
-		response.FailWithMessage("未登录或者未授权", c)
+		response.FailWithMessage("Not logged in or unauthorized", c)
 		return
 	}
 

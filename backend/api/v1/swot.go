@@ -8,40 +8,40 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CheckEmailDomain 检查邮箱域名是否属于高校
-// @Summary     检查邮箱域名是否属于高校
-// @Description 检查邮箱域名是否属于高校
+// CheckEmailDomain Check if the email domain belongs to an academic institution
+// @Summary     Check if the email domain belongs to an academic institution
+// @Description Check if the email domain belongs to an academic institution
 // @Tags        Auth
-// @Param       email query string true "邮箱地址"
+// @Param       email query string true "Email address"
 // @Accept      json
 // @Produce     json
 // @Success     200 {object} response.CheckEmailDomainResponse
-// @Failure     400 {string} json "{"msg": "邮箱地址格式错误", "status": 400}"
-// @Failure     500 {string} json "{"msg": "邮箱地址不属于高校", "status": 500}"
-// @Failure     500 {string} json "{"msg": "邮箱地址不能为空", "status": 500}"
+// @Failure     400 {string} json "{"msg": "Invalid email format", "status": 400}"
+// @Failure     500 {string} json "{"msg": "Email does not belong to an academic institution", "status": 500}"
+// @Failure     500 {string} json "{"msg": "Email cannot be empty", "status": 500}"
 // @Router      /api/v1/auth/email/academic_check [GET]
 func CheckEmailDomain(c *gin.Context) {
 	email := c.Query("email")
 	if email == "" {
-		response.FailWithMessage("邮箱地址不能为空", c)
+		response.FailWithMessage("Email cannot be empty", c)
 		return
 	}
 	domain := strings.Split(email, "@")
 	if len(domain) != 2 {
-		response.FailWithMessage("邮箱地址格式错误", c)
+		response.FailWithMessage("Invalid email format", c)
 		return
 	}
 	domain = strings.Split(domain[1], ".")
 	if len(domain) < 2 {
-		response.FailWithMessage("邮箱地址格式错误", c)
+		response.FailWithMessage("Invalid email format", c)
 		return
 	}
-	is_academic := swot.IsAcademic(email)
-	if is_academic {
-		// 返回学校名称
+	isAcademic := swot.IsAcademic(email)
+	if isAcademic {
+		// Return the school name
 		school := swot.GetSchoolName(email)
 		if school == "" {
-			response.FailWithMessage("邮箱地址不属于高校", c)
+			response.FailWithMessage("Email does not belong to an academic institution", c)
 			return
 		}
 		response.OkWithData(response.CheckEmailDomainResponse{
@@ -49,6 +49,6 @@ func CheckEmailDomain(c *gin.Context) {
 		}, c)
 		return
 	}
-	response.FailWithMessage("邮箱地址不属于高校", c)
+	response.FailWithMessage("Email does not belong to an academic institution", c)
 	return
 }
