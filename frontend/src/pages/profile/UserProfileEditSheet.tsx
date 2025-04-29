@@ -3,7 +3,6 @@ import { Modal, Input, Button, message, Upload, Radio, Form } from 'antd';
 import { CloseOutlined, UploadOutlined } from "@ant-design/icons";
 import type { UploadProps } from 'antd';
 import type { RcFile } from 'antd/es/upload/interface';
-import { supabase } from '../../supabase/client';
 import { authService } from '../../services/auth';
 
 interface UserProfileEditSheetProps {
@@ -85,31 +84,13 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
             };
             reader.readAsDataURL(file);
 
-            // 上传到 Supabase Storage
-            const fileName = `${file.name}`;
-            const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('posts-images')
-                .upload(fileName, file);
-
-            if (uploadError) {
-                message.error(`Fail to upload avatar: ${uploadError.message}`);
-                return;
-            }
-
-            if (uploadData) {
-                // 构建完整的公共访问URL
-                const { data } = supabase.storage
-                    .from('posts-images')
-                    .getPublicUrl(uploadData.path);
-
-                const publicUrl = data.publicUrl;
-                // 更新预览图为上传后的URL
-                setAvatarPreview(publicUrl);
-                setAvatarFile(file as RcFile);
-                message.success('Upload avatar successfully');
-            }
-        } catch (error) {
-            message.error('Fail to upload avatar');
+            // 使用authService.uploadImage上传图片到服务器
+            const url = await authService.uploadImage(file);
+            setAvatarPreview(url); // 直接用服务器返回的图片url作为预览
+            setAvatarFile(file as RcFile);
+            message.success('头像上传成功');
+        } catch (error: any) {
+            message.error(error?.message || '头像上传失败');
         } finally {
             setIsSubmitting(false);
         }

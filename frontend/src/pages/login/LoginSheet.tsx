@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Button, Input, Divider, message } from 'antd';
 import { CloseOutlined, MailOutlined, GoogleOutlined, ArrowLeftOutlined, GithubOutlined, AppleOutlined } from '@ant-design/icons';
 import SMSVerifyCodeInput from './SMSVerifyCodeInput';
-import { supabase } from '../../supabase/client';
 import { userSession } from "../../utils/UserSession";
 import { Provider } from '@supabase/supabase-js';
 import { create } from 'zustand';

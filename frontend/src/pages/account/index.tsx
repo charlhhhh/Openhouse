@@ -10,7 +10,6 @@ import {
 import { Image, message } from 'antd';
 import styles from './Account.module.css';
 import ContributionGraph from '../../components/ContributionGraph';
-import { supabase } from '../../supabase/client';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLoginSheet } from '../../pages/login/LoginSheet';
 import { UserProfileEditSheet } from '../../pages/profile/UserProfileEditSheet';

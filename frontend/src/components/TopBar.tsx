@@ -5,7 +5,6 @@ import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { userSession } from '../utils/UserSession';
 import type { MenuProps } from 'antd';
-import { supabase } from '../supabase/client';
 import { authService } from '../services/auth';
 
 const TopBarContainer = styled.div`

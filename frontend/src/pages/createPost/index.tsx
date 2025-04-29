@@ -3,11 +3,10 @@ import { Input, Upload, Button, message } from 'antd';
 import { EditOutlined, PlusOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import type { RcFile, UploadFile } from 'antd/es/upload';
-import { supabase } from '../../supabase/client';
 import request from '../../utils/request';
 import { useNavigate } from 'react-router-dom';
 import type { AxiosResponse } from 'axios';
-import { uploadImage } from '../../utils/uploadImage';
+import { authService } from '../../services/auth';
 
 interface CreatePostResponse {
   post_id: number;
@@ -331,22 +330,17 @@ const CreatePost: React.FC = () => {
 
         setFileList(prev => [...prev, tempFile]);
 
-        // 上传图片
-        const uploadedUrl = await uploadImage(file, {
-          showSuccessMessage: false,
-          onError: (error) => {
-            message.error(`图片 ${file.name} 上传失败: ${error.message || '未知错误'}`);
-          }
-        });
-
-        if (uploadedUrl) {
+        try {
+          // 使用authService.uploadImage上传图片
+          const uploadedUrl = await authService.uploadImage(file);
           // 更新文件状态为成功
           setFileList(prev => prev.map(item =>
             item.uid === tempFile.uid
-              ? { ...item, status: 'done', uploadedUrl }
+              ? { ...item, status: 'done', uploadedUrl, url: uploadedUrl }
               : item
           ));
-        } else {
+        } catch (error: any) {
+          message.error(`图片 ${file.name} 上传失败: ${error?.message || '未知错误'}`);
           // 移除上传失败的文件
           setFileList(prev => prev.filter(item => item.uid !== tempFile.uid));
         }
@@ -398,22 +392,6 @@ const CreatePost: React.FC = () => {
 
   const handleRemove = async (file: UploadedFile) => {
     try {
-      // 如果文件已经上传成功，从 Supabase 删除
-      if (file.status === 'done' && file.uploadedUrl) {
-        const fileName = file.uploadedUrl.split('/').pop();
-        if (fileName) {
-          const { error } = await supabase.storage
-            .from('posts-images')
-            .remove([fileName]);
-
-          if (error) {
-            console.error('删除存储图片失败:', error);
-            message.error('删除图片失败，请稍后重试');
-            return;
-          }
-        }
-      }
-
       // 从预览列表中移除
       setFileList(prev => prev.filter(item => item.uid !== file.uid));
 

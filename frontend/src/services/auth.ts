@@ -143,6 +143,19 @@ export const authService = {
         return data.url; // 假设返回的数据中包含文件的URL
     },
 
+    // 上传图片到OSS
+    uploadImage: async (file: File): Promise<string> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await request.post('/api/v1/media/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        }) as { code: number; data: string; message: string };
+        if (res.code !== 0) {
+            throw new Error(res.message || '图片上传失败');
+        }
+        return res.data;
+    },
+
     // 获取帖子列表
     getPostsList: async (params: PostListParams): Promise<PostListResponse> => {
         try {

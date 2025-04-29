@@ -230,7 +230,7 @@ export default function FindPartner() {
   const [userProfile, setUserProfile] = useState<UserInfo | null>(null);
   const [matchedUser, setMatchedUser] = useState<any>(null);
   const navigate = useNavigate();
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // 处理用户首次交互
   useEffect(() => {
@@ -455,7 +455,7 @@ export default function FindPartner() {
 
   // 监听SUBMITTING动画播放结束后切换为MATCHING
   useEffect(() => {
-    let timer: NodeJS.Timeout | null = null;
+    let timer: ReturnType<typeof setTimeout> | null = null;
     if (matchStatus === MatchStatus.SUBMITTING) {
       timer = setTimeout(() => {
         setMatchStatus(MatchStatus.MATCHING);

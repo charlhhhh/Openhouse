@@ -3,6 +3,7 @@ import { Modal, Button } from 'antd';
 import styled from 'styled-components';
 import { CloseOutlined } from '@ant-design/icons';
 import NoHighlightButton from './NoHighlightButton';
+import { authService } from '../services/auth';
 
 const SHEET_WIDTH = 480;
 const SHEET_HEIGHT = 486;
@@ -237,7 +238,7 @@ export const SageSheet: React.FC<SageSheetProps> = ({ visible, onClose }) => {
     const [drawCoin, setDrawCoin] = useState<number>(1);
     // 轮播文字index
     const [carouselIdx, setCarouselIdx] = useState<number>(0);
-    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // 初始化状态
     useEffect(() => {
