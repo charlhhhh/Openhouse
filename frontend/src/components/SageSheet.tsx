@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Modal, Button } from 'antd';
 import styled from 'styled-components';
 import { CloseOutlined } from '@ant-design/icons';
@@ -213,6 +213,93 @@ const GetCoinButton = styled(Button)`
 `;
 
 export const SageSheet: React.FC<SageSheetProps> = ({ visible, onClose }) => {
+    // 轮播文字数组
+    const carouselTexts = [
+        "The number of gold coins depends on many magic factors, such as how many people you have helped and the mood of the sage at that time.",
+        "All your work can earn you a large amount of gold coins, including associate with academic papers or open-source projects. The sage helps you connect the world.",
+        "As long as we keep moving forward in the pursuit of happiness, we can achieve our goals."
+    ];
+
+    // 获取当天key
+    const getTodayKey = () => {
+        const now = new Date();
+        const y = now.getFullYear();
+        const m = String(now.getMonth() + 1).padStart(2, '0');
+        const d = String(now.getDate()).padStart(2, '0');
+        return `sage_daily_coin_${y}${m}${d}`;
+    };
+
+    // 钱包金币余额
+    const [coin, setCoin] = useState<number>(0);
+    // 今日是否已领取
+    const [claimed, setClaimed] = useState<boolean>(false);
+    // 今日抽中的金币数
+    const [drawCoin, setDrawCoin] = useState<number>(1);
+    // 轮播文字index
+    const [carouselIdx, setCarouselIdx] = useState<number>(0);
+    const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    // 初始化状态
+    useEffect(() => {
+        if (!visible) return;
+        // 获取金币余额
+        const profileStr = localStorage.getItem('user_profile');
+        if (profileStr) {
+            try {
+                const profile = JSON.parse(profileStr);
+                setCoin(profile.coin || 0);
+            } catch { }
+        }
+        // 判断今日是否已领取
+        const todayKey = getTodayKey();
+        const claimedValue = localStorage.getItem(todayKey);
+        if (claimedValue) {
+            setClaimed(true);
+            setDrawCoin(Number(claimedValue));
+        } else {
+            // 未领取，随机抽奖
+            const randomCoin = Math.floor(Math.random() * 5) + 1;
+            setDrawCoin(randomCoin);
+            setClaimed(false);
+        }
+        setCarouselIdx(0);
+    }, [visible]);
+
+    // 轮播逻辑
+    useEffect(() => {
+        if (claimed && visible) {
+            intervalRef.current = setInterval(() => {
+                setCarouselIdx(idx => (idx + 1) % carouselTexts.length);
+            }, 3000);
+        } else {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        }
+        return () => {
+            if (intervalRef.current) clearInterval(intervalRef.current);
+        };
+    }, [claimed, visible]);
+
+    // 领取金币
+    const handleGetCoins = async () => {
+        const todayKey = getTodayKey();
+        localStorage.setItem(todayKey, String(drawCoin));
+        // 更新钱包余额
+        setCoin(c => c + drawCoin);
+        // 更新user_profile缓存
+        const profileStr = localStorage.getItem('user_profile');
+        if (profileStr) {
+            try {
+                const profile = JSON.parse(profileStr);
+                profile.coin = (profile.coin || 0) + drawCoin;
+                await authService.updateUserProfile({
+                    coin: profile.coin
+                });
+                localStorage.setItem('user_profile', JSON.stringify(profile));
+            } catch { }
+        }
+        setClaimed(true);
+    };
+
     return (
         <StyledModal
             open={visible}
@@ -228,23 +315,27 @@ export const SageSheet: React.FC<SageSheetProps> = ({ visible, onClose }) => {
                     <AvatarDecoration>
                         <Avatar />
                     </AvatarDecoration>
-                    <CoinsContainer>
-                        <CoinText>1</CoinText>
-                        <CoinIcon />
-                        <CoinText>!</CoinText>
-                    </CoinsContainer>
+                    {!claimed && (
+                        <CoinsContainer>
+                            <CoinText>{drawCoin}</CoinText>
+                            <CoinIcon />
+                            <CoinText>!</CoinText>
+                        </CoinsContainer>
+                    )}
                     <Description>
-                        The Sage will automatically distribute coins based on your contribution or post.
+                        {claimed ? carouselTexts[carouselIdx] : 'The Sage will automatically distribute coins based on your contribution or post.'}
                     </Description>
                     <Divider />
                     <WalletContainer>
                         <WalletTitle>My Wallet</WalletTitle>
                         <WalletDetailContainer>
-                            <WalletText>2</WalletText>
+                            <WalletText>{coin}</WalletText>
                             <WalletCoin />
                         </WalletDetailContainer>
                     </WalletContainer>
-                    <GetCoinButton>Get Coins</GetCoinButton>
+                    {!claimed && (
+                        <GetCoinButton onClick={handleGetCoins}>Get Coins</GetCoinButton>
+                    )}
                 </Body>
             </SheetContainer>
         </StyledModal>

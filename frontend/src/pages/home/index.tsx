@@ -63,6 +63,9 @@ export default function Home() {
 
     return (
         <div className="home-container">
+            <div className="home-header">
+                <h1 className="home-title">Main Features</h1>
+            </div>
             <div className="home-content">
                 <div className="banner-container">
                     <BannerCard

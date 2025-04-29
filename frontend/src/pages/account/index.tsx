@@ -172,10 +172,9 @@ const Account: React.FC = () => {
 
             // 获取用户信息
             console.log('获取用户信息');
-            const response = await authService.getUserProfile();
+            const profile = await authService.getUserProfile();
 
-            if (response.code === 0 && response.data) {
-                const profile = response.data;
+            if (profile) {
                 // 将后端返回的性别值转换为组件期望的类型
                 const gender: Gender = profile.gender === 'male' || profile.gender === 'female'
                     ? profile.gender
@@ -200,10 +199,11 @@ const Account: React.FC = () => {
                 });
                 console.log('userInfo', userInfo);
             } else {
-                message.error(response.message || '获取用户信息失败');
+                localStorage.removeItem('user_profile');
+                message.error('Fail to load user profile, please login again');
             }
         } catch (error) {
-            message.error('获取用户信息失败，请重新登录');
+            message.error('Fail to load user profile, please login again');
             // 清除token并跳转到首页
             authService.clearToken();
             navigate('/');
