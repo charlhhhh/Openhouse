@@ -10,7 +10,6 @@ import {
 import { Image, message } from 'antd';
 import styles from './Account.module.css';
 import ContributionGraph from '../../components/ContributionGraph';
-import { supabase } from '../../supabase/client';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useLoginSheet } from '../../pages/login/LoginSheet';
 import { UserProfileEditSheet } from '../../pages/profile/UserProfileEditSheet';
@@ -30,51 +29,10 @@ interface ContributionDay {
 
 const getContributionLevel = (count: number): ContributionDay['level'] => {
     if (count === 0) return 'empty';
-    if (count <= 3) return 'good';
-    if (count <= 6) return 'excellent';
+    if (count <= 1) return 'good';
+    if (count <= 3) return 'excellent';
     return 'oh';
 };
-
-const generateContributionData = (): ContributionDay[] => {
-    const data: ContributionDay[] = [];
-    const today = new Date();
-    const oneYearAgo = new Date(today);
-    oneYearAgo.setFullYear(today.getFullYear() - 1);
-
-    // 生成一些活跃的时期
-    const activeWeeks = new Set([
-        12, 13, 14,  // 连续活跃期
-        25, 26,      // 短期活跃
-        38, 39, 40,  // 连续活跃期
-        48           // 单周活跃
-    ]);
-
-    let weekCount = 0;
-    for (let d = new Date(oneYearAgo); d <= today; d.setDate(d.getDate() + 1)) {
-        weekCount = Math.floor((d.getTime() - oneYearAgo.getTime()) / (7 * 24 * 60 * 60 * 1000));
-
-        let count;
-        if (activeWeeks.has(weekCount)) {
-            // 活跃周期内的贡献较多
-            count = Math.floor(Math.random() * 8) + 2;
-        } else if (Math.random() < 0.2) {
-            // 随机的少量贡献
-            count = Math.floor(Math.random() * 3) + 1;
-        } else {
-            // 大多数时间无贡献
-            count = 0;
-        }
-
-        data.push({
-            date: d.toISOString().split('T')[0],
-            count,
-            level: getContributionLevel(count)
-        });
-    }
-
-    return data;
-};
-
 
 type Gender = 'male' | 'female' | undefined;
 
@@ -124,6 +82,7 @@ const Account: React.FC = () => {
         email: '',
     });
     const [showBindSheet, setShowBindSheet] = useState(false);
+    const [contributionData, setContributionData] = useState<ContributionDay[]>([]);
 
     useEffect(() => {
         checkAuth();
@@ -135,13 +94,13 @@ const Account: React.FC = () => {
         const result = params.get('result');
         if (result) {
             if (result === 'success') {
-                message.success('绑定成功');
+                message.success('Bind Success');
             } else if (result === 'duplicate_bind') {
-                message.warning('该三方账号已被其他用户绑定');
+                message.warning('The third-party account has been bound by another user');
             } else if (result === 'already_bound') {
-                message.info('你已绑定该三方账号');
+                message.info('You have already bound the third-party account');
             } else {
-                message.error('绑定失败');
+                message.error('Bind Failed');
             }
             navigate('/account', { replace: true });
             checkAuth();
@@ -151,6 +110,7 @@ const Account: React.FC = () => {
     // 只在首次登录且有未绑定三方时弹窗
     useEffect(() => {
         const firstLogin = localStorage.getItem('first_login') === 'true';
+        // const firstLogin = true;
         if (
             firstLogin &&
             (!userInfo.isEmailBind || !userInfo.isGithubBind || !userInfo.isGoogleBind)
@@ -170,11 +130,9 @@ const Account: React.FC = () => {
             }
 
             // 获取用户信息
-            console.log('获取用户信息');
-            const response = await authService.getUserProfile();
+            const profile = await authService.getUserProfile();
 
-            if (response.code === 0 && response.data) {
-                const profile = response.data;
+            if (profile) {
                 // 将后端返回的性别值转换为组件期望的类型
                 const gender: Gender = profile.gender === 'male' || profile.gender === 'female'
                     ? profile.gender
@@ -199,10 +157,11 @@ const Account: React.FC = () => {
                 });
                 console.log('userInfo', userInfo);
             } else {
-                message.error(response.message || '获取用户信息失败');
+                localStorage.removeItem('user_profile');
+                message.error('Fail to load user profile, please login again');
             }
         } catch (error) {
-            message.error('获取用户信息失败，请重新登录');
+            message.error('Fail to load user profile, please login again');
             // 清除token并跳转到首页
             authService.clearToken();
             navigate('/');
@@ -247,10 +206,10 @@ const Account: React.FC = () => {
         try {
             // TODO: 调用删除帖子接口
             await postService.deletePost(Number(postToDelete));
-            message.success('帖子已删除');
+            message.success('Post deleted');
             fetchMyPosts();
         } catch (error) {
-            message.error('删除失败');
+            message.error('Delete Failed');
         } finally {
             setDeleteConfirmVisible(false);
             setPostToDelete(null);
@@ -269,7 +228,7 @@ const Account: React.FC = () => {
                 setPosts(response.data.list);
             }
         } catch (error) {
-            console.error('获取历史帖子失败:', error);
+            console.error('Fail to get history posts:', error);
         } finally {
             setLoading(false);
         }
@@ -285,15 +244,47 @@ const Account: React.FC = () => {
         return content.substring(0, maxLength) + '...';
     };
 
+    // 监听posts变化，生成贡献数据
+    useEffect(() => {
+        // 统计过去一年每天的发帖数
+        const today = new Date();
+        const oneYearAgo = new Date(today);
+        oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+        // 生成日期字符串数组
+        const dateArr: string[] = [];
+        for (let d = new Date(oneYearAgo); d <= today; d.setDate(d.getDate() + 1)) {
+            dateArr.push(d.toISOString().split('T')[0]);
+        }
+
+        // 统计每一天的发帖数
+        const countMap: Record<string, number> = {};
+        posts.forEach(post => {
+            if (post.create_date) {
+                const dateStr = new Date(post.create_date).toISOString().split('T')[0];
+                countMap[dateStr] = (countMap[dateStr] || 0) + 1;
+            }
+        });
+
+        // 生成贡献数据
+        const data: ContributionDay[] = dateArr.map(date => {
+            const count = countMap[date] || 0;
+            return {
+                date,
+                count,
+                level: getContributionLevel(count)
+            };
+        });
+        setContributionData(data);
+    }, [posts]);
+
     if (loading) {
-        return <div>加载中...</div>;
+        return <div>Loading...</div>;
     }
 
     if (!userInfo) {
         return null;
     }
-
-    const contributionData = generateContributionData();
 
     return (
         <div className={styles.container}>
@@ -313,7 +304,7 @@ const Account: React.FC = () => {
                                 <div className={styles.verificationBadge}>
                                     <img
                                         src="/profile_verification.svg"
-                                        alt="认证标志"
+                                        alt="Verification Badge"
                                     />
                                 </div>
                             )}
@@ -330,7 +321,7 @@ const Account: React.FC = () => {
                             </div>
                             <div className={styles.userInfoRow}>
                                 <span className={styles.userInfoText}>{userInfo.coins}</span>
-                                <img src="/sage_coin.png" alt="金币" className={styles.coinIcon} />
+                                <img src="/sage_coin.png" alt="Coins" className={styles.coinIcon} />
                             </div>
                             <div className={styles.userInfoRow}>
                                 <span className={styles.userInfoText}>ID: {userInfo.id}</span>
@@ -374,12 +365,12 @@ const Account: React.FC = () => {
                     <h2>History Activities</h2>
                     {posts.length > 0 ? (
                         <>
-                            <p>最近发帖时间: {new Date(posts[0].create_date).toLocaleString()}</p>
+                            <p>Latest post time: {new Date(posts[0].create_date).toLocaleString()}</p>
                             <div className={styles.postHistory}>
                                 {posts.map((post) => (
                                     <div key={post.post_id} className={styles.postCard}>
                                         <div className={styles.postHeader}>
-                                            <h3>{post.title || '无标题'}</h3>
+                                            <h3>{post.title || 'No Title'}</h3>
                                             <div className={styles.postActions}>
                                                 <button
                                                     onClick={() => handleEdit(post)}
@@ -403,7 +394,7 @@ const Account: React.FC = () => {
                             </div>
                         </>
                     ) : (
-                        <p>暂无发帖记录</p>
+                        <p>No posts yet</p>
                     )}
                 </div>
             </div>

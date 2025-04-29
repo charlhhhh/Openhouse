@@ -30,10 +30,8 @@ export const UserLinkAuthSheet: React.FC<UserProfileCreateSheetProps> = ({
     isGoogleBind,
     isEmailBind
 }) => {
-    const [nickname, setNickname] = useState('');
-    const [githubUsername, setGithubUsername] = useState('');
-    const [researchAreas, setResearchAreas] = useState('');
-    // const [schoolEmail, setSchoolEmail] = useState('');
+    const [bindEmail, setBindEmail] = useState(isEmailBind);
+    const [schoolEmail] = useState(email);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [createProfileModalVisible, setCreateProfileModalVisible] = useState(true);
     const handleCreateProfileCancel = () => {
@@ -51,28 +49,26 @@ export const UserLinkAuthSheet: React.FC<UserProfileCreateSheetProps> = ({
         window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=1096406563590-dg8skdq3ook05s6hj2s9s41arvhj4l4s.apps.googleusercontent.com&redirect_uri=http://openhouse.horik.cn/api/v1/auth/google/callback&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile+openid&state=${token}`;
     }
 
-    // const handleSchoolEmailBind = async () => {
-    //     setIsSubmitting(true);
-    //     const isAcademic = swot(email);
-    //     console.log('isAcademic', isAcademic);
-    //     if (isAcademic) {
-    //         try {
-    //             await authService.updateUserProfile({
-    //                 is_verified: true,
-    //                 is_email_bound: true,
-    //             })
-    //             message.success('Bind school email successfully');
-    //         } catch (error) {
-    //             message.error('Fail to bind school email');
-    //         } finally {
-    //             message.error('Fail to bind school email, please try again later.');
-    //         }
-    //     } else {
-    //         console.log('不是学术邮箱');
-    //         message.error('You email is not academic, please use your school email to bind.');
-    //     }
-    //     setIsSubmitting(false);
-    // }
+    const handleSchoolEmailBind = async () => {
+        setIsSubmitting(true);
+
+        try {
+            const school = await authService.verifySchoolEmail({
+                email: schoolEmail,
+            });
+            console.log('school', school);
+            await authService.updateUserProfile({
+                is_verified: true,
+                is_email_bound: true,
+            })
+            message.success('Verify school email successfully');
+            setBindEmail(true);
+        } catch (error) {
+            message.error('Fail to verify school email');
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
 
     const handleSkip = () => {
         onClose();
@@ -104,7 +100,7 @@ export const UserLinkAuthSheet: React.FC<UserProfileCreateSheetProps> = ({
                             onClick={handleGithubBind}
                             disabled={isGithubBind}
                         >
-                            {isGithubBind ? 'Bind Github Already' : 'Bind Github Account'}
+                            {isGithubBind ? 'Already Bind Github' : 'Bind Github Account'}
                         </Button>
 
                         <Button
@@ -112,15 +108,15 @@ export const UserLinkAuthSheet: React.FC<UserProfileCreateSheetProps> = ({
                             onClick={handleGoogleBind}
                             disabled={isGoogleBind}
                         >
-                            {isGoogleBind ? 'Bind Google Already' : 'Bind Google Account'}
+                            {isGoogleBind ? 'Already Bind Google' : 'Bind Google Account'}
                         </Button>
 
-                        {/* <Button style={styles.inputContainer}
+                        <Button style={styles.inputContainer}
                             onClick={handleSchoolEmailBind}
-                            disabled={isEmailBind}
+                            disabled={bindEmail}
                         >
-                            {isEmailBind ? '已绑定学校邮箱' : '学校邮箱绑定'}
-                        </Button> */}
+                            {bindEmail ? 'Verified School Email' : 'Verify School Email'}
+                        </Button>
                         <Button style={styles.skipButton}
                             onClick={handleSkip}
                         >
@@ -189,12 +185,6 @@ const styles: { [key: string]: React.CSSProperties } = {
         marginBottom: '8px',
         textAlign: 'center',
     },
-    //     color: #A0A1A5;
-    // font-family: "Open Sans";
-    // font-size: 24px;
-    // font-style: normal;
-    // font-weight: 400;
-    // line-height: normal;
     inputContainer: {
         display: 'flex',
         flexDirection: 'row',

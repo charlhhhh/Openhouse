@@ -3,7 +3,6 @@ import { Modal, Input, Button, message, Upload, Radio, Form } from 'antd';
 import { CloseOutlined, UploadOutlined } from "@ant-design/icons";
 import type { UploadProps } from 'antd';
 import type { RcFile } from 'antd/es/upload/interface';
-import { supabase } from '../../supabase/client';
 import { authService } from '../../services/auth';
 
 interface UserProfileEditSheetProps {
@@ -58,18 +57,13 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
             };
 
             // 使用 authService 发送更新请求
-            const response = await authService.updateUserProfile(updateData);
+            await authService.updateUserProfile(updateData);
 
-            if (response.code === 0) {
-                message.success('Update profile successfully');
-                onClose();
-            } else {
-                message.error(response.message || 'Fail to update profile');
-            }
         } catch (error) {
             message.error('Fail to update profile');
         } finally {
             setIsSubmitting(false);
+            onClose();
         }
     };
 
@@ -90,31 +84,13 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
             };
             reader.readAsDataURL(file);
 
-            // 上传到 Supabase Storage
-            const fileName = `${file.name}`;
-            const { data: uploadData, error: uploadError } = await supabase.storage
-                .from('posts-images')
-                .upload(fileName, file);
-
-            if (uploadError) {
-                message.error(`Fail to upload avatar: ${uploadError.message}`);
-                return;
-            }
-
-            if (uploadData) {
-                // 构建完整的公共访问URL
-                const { data } = supabase.storage
-                    .from('posts-images')
-                    .getPublicUrl(uploadData.path);
-
-                const publicUrl = data.publicUrl;
-                // 更新预览图为上传后的URL
-                setAvatarPreview(publicUrl);
-                setAvatarFile(file as RcFile);
-                message.success('Upload avatar successfully');
-            }
-        } catch (error) {
-            message.error('Fail to upload avatar');
+            // 使用authService.uploadImage上传图片到服务器
+            const url = await authService.uploadImage(file);
+            setAvatarPreview(url); // 直接用服务器返回的图片url作为预览
+            setAvatarFile(file as RcFile);
+            message.success('头像上传成功');
+        } catch (error: any) {
+            message.error(error?.message || '头像上传失败');
         } finally {
             setIsSubmitting(false);
         }
@@ -214,17 +190,14 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
                             >
                                 <Input style={styles.input} />
                             </Form.Item>
-
-                            <Form.Item>
-                                <Button
-                                    style={styles.submitButton}
-                                    onClick={handleSubmit}
-                                    loading={isSubmitting}
-                                >
-                                    Save
-                                </Button>
-                            </Form.Item>
                         </Form>
+                        <Button
+                            style={styles.submitButton}
+                            onClick={handleSubmit}
+                            loading={isSubmitting}
+                        >
+                            Save
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -253,6 +226,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     content: {
         display: 'flex',
         flexDirection: 'column',
+        justifyContent: 'center',
         alignItems: 'center',
         position: 'relative',
         padding: '40px 0',
@@ -304,7 +278,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         height: '100%',
     },
     submitButton: {
-        width: '35%',
+        width: '25%',
         height: '48px',
         borderRadius: '8px',
         background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)',

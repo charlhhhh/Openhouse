@@ -9,7 +9,6 @@ import { UserLinkAuthSheet } from "./pages/profile/UserLinkAuthSheet";
 import { userSession } from "./utils/UserSession";
 import CustomSider from "./components/CustomSider";
 import TopBar from './components/TopBar';
-import { supabase } from "./supabase/client";
 import warning from "antd/es/_util/warning";
 import styled from 'styled-components';
 

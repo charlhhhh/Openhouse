@@ -1,5 +1,7 @@
 import request from '../utils/request';
 import { Post, PostListParams, PostListResponse, Comment, CommentListResponse, CommentListParams, CommentRepliesParams, CreateCommentParams, CommentResponse } from '../pages/home/types';
+import { data } from 'react-router-dom';
+import { useState } from 'react';
 
 interface BaseResponse {
     code: number;
@@ -25,6 +27,7 @@ export interface UserProfile {
     is_github_bound: boolean;
     is_google_bound: boolean;
     is_email_bound: boolean;
+    match_status: string;
 }
 
 export interface UpdateProfileParams {
@@ -35,6 +38,14 @@ export interface UpdateProfileParams {
     research_area?: string;
     tags?: string[];
     username?: string;
+    is_email_bound?: boolean;
+    is_github_bound?: boolean;
+    is_google_bound?: boolean;
+    coin?: number;
+}
+
+export interface VerifySchoolEmailParams {
+    email: string;
 }
 
 export const authService = {
@@ -46,6 +57,11 @@ export const authService = {
     // 验证邮箱验证码
     verifyEmailCode: async (params: EmailVerifyParams) => {
         return request.post('/api/v1/auth/email/verify', params);
+    },
+
+    // 绑定学校邮箱
+    verifySchoolEmail: async (params: VerifySchoolEmailParams) => {
+        return request.get('/api/v1/auth/email/academic_check', { params });
     },
 
     // 保存token到localStorage
@@ -89,21 +105,16 @@ export const authService = {
     },
 
     // 获取用户信息
-    getUserProfile: async (): Promise<{
-        code: number;
-        data: UserProfile;
-        message: string;
-    }> => {
-        return request.get('/api/v1/user/profile');
+    getUserProfile: async (): Promise<UserProfile> => {
+        const userProfile = (await request.get('/api/v1/user/profile')).data;
+        localStorage.setItem('user_profile', JSON.stringify(userProfile));
+        return userProfile;
     },
 
     // 更新用户信息
-    updateUserProfile: async (params: UpdateProfileParams): Promise<{
-        code: number;
-        data: string;
-        message: string;
-    }> => {
-        return request.post('/api/v1/user/profile', params);
+    updateUserProfile: async (params: UpdateProfileParams): Promise<BaseResponse> => {
+        const response = (await request.post('/api/v1/user/profile', params)).data;
+        return response;
     },
 
     // 检查是否已登录
@@ -130,6 +141,19 @@ export const authService = {
 
         const data = await response.json();
         return data.url; // 假设返回的数据中包含文件的URL
+    },
+
+    // 上传图片到OSS
+    uploadImage: async (file: File): Promise<string> => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const res = await request.post('/api/v1/media/upload', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        }) as { code: number; data: string; message: string };
+        if (res.code !== 0) {
+            throw new Error(res.message || '图片上传失败');
+        }
+        return res.data;
     },
 
     // 获取帖子列表
@@ -203,5 +227,31 @@ export const authService = {
 
     async getMyPosts(params: PostListParams): Promise<PostListResponse> {
         return request.post('/api/v1/posts/mypostlist', params);
-    }
+    },
+
+    // 匹配相关接口
+    matchTrigger: async (): Promise<{ code: number; data: string; message: string }> => {
+        return request.get('/api/v1/match/trigger');
+    },
+
+    getTodayMatch: async (): Promise<{
+        code: number;
+        data: {
+            avatar_url: string;
+            intro_short: string;
+            is_following: boolean;
+            llm_comment: string;
+            match_score: number;
+            research_area: string;
+            tags: string[];
+            username: string;
+            uuid: string;
+        };
+        message: string;
+    }> => {
+        return request.get('/api/v1/match/today');
+    },
+
+    // 匹配
+
 }; 

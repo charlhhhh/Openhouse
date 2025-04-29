@@ -6,6 +6,7 @@ import type { UploadFile } from 'antd/es/upload';
 import { postService } from '../../services/post';
 import { supabase } from '../../supabase/client';
 import { DeleteConfirmAlert } from '../../components/DeleteConfirmAlert';
+import { authService } from '../../services/auth';
 
 const { TextArea } = Input;
 
@@ -301,24 +302,13 @@ export const EditPostSheet: React.FC<EditPostSheetProps> = ({
     try {
       const uploadedUrls = await Promise.all(
         imageFiles.map(async (file, index) => {
-          const extension = file.name.split('.').pop() || '';
-          const safeFileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${extension}`;
-
-          const { data, error } = await supabase.storage
-            .from('posts-images')
-            .upload(safeFileName, file);
-
-          if (error) throw error;
-
-          const { data: { publicUrl } } = supabase.storage
-            .from('posts-images')
-            .getPublicUrl(safeFileName);
-
+          // 使用authService.uploadImage上传图片
+          const url = await authService.uploadImage(file);
           return {
-            uid: safeFileName,
+            uid: `${Date.now()}-${Math.random().toString(36).substring(2)}`,
             name: file.name,
             status: 'done' as const,
-            url: publicUrl,
+            url,
             loading: false,
           };
         })
