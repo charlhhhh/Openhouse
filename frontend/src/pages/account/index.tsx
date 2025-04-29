@@ -30,51 +30,10 @@ interface ContributionDay {
 
 const getContributionLevel = (count: number): ContributionDay['level'] => {
     if (count === 0) return 'empty';
-    if (count <= 3) return 'good';
-    if (count <= 6) return 'excellent';
+    if (count <= 1) return 'good';
+    if (count <= 3) return 'excellent';
     return 'oh';
 };
-
-const generateContributionData = (): ContributionDay[] => {
-    const data: ContributionDay[] = [];
-    const today = new Date();
-    const oneYearAgo = new Date(today);
-    oneYearAgo.setFullYear(today.getFullYear() - 1);
-
-    // 生成一些活跃的时期
-    const activeWeeks = new Set([
-        12, 13, 14,  // 连续活跃期
-        25, 26,      // 短期活跃
-        38, 39, 40,  // 连续活跃期
-        48           // 单周活跃
-    ]);
-
-    let weekCount = 0;
-    for (let d = new Date(oneYearAgo); d <= today; d.setDate(d.getDate() + 1)) {
-        weekCount = Math.floor((d.getTime() - oneYearAgo.getTime()) / (7 * 24 * 60 * 60 * 1000));
-
-        let count;
-        if (activeWeeks.has(weekCount)) {
-            // 活跃周期内的贡献较多
-            count = Math.floor(Math.random() * 8) + 2;
-        } else if (Math.random() < 0.2) {
-            // 随机的少量贡献
-            count = Math.floor(Math.random() * 3) + 1;
-        } else {
-            // 大多数时间无贡献
-            count = 0;
-        }
-
-        data.push({
-            date: d.toISOString().split('T')[0],
-            count,
-            level: getContributionLevel(count)
-        });
-    }
-
-    return data;
-};
-
 
 type Gender = 'male' | 'female' | undefined;
 
@@ -124,6 +83,7 @@ const Account: React.FC = () => {
         email: '',
     });
     const [showBindSheet, setShowBindSheet] = useState(false);
+    const [contributionData, setContributionData] = useState<ContributionDay[]>([]);
 
     useEffect(() => {
         checkAuth();
@@ -286,6 +246,40 @@ const Account: React.FC = () => {
         return content.substring(0, maxLength) + '...';
     };
 
+    // 监听posts变化，生成贡献数据
+    useEffect(() => {
+        // 统计过去一年每天的发帖数
+        const today = new Date();
+        const oneYearAgo = new Date(today);
+        oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+        // 生成日期字符串数组
+        const dateArr: string[] = [];
+        for (let d = new Date(oneYearAgo); d <= today; d.setDate(d.getDate() + 1)) {
+            dateArr.push(d.toISOString().split('T')[0]);
+        }
+
+        // 统计每一天的发帖数
+        const countMap: Record<string, number> = {};
+        posts.forEach(post => {
+            if (post.create_date) {
+                const dateStr = new Date(post.create_date).toISOString().split('T')[0];
+                countMap[dateStr] = (countMap[dateStr] || 0) + 1;
+            }
+        });
+
+        // 生成贡献数据
+        const data: ContributionDay[] = dateArr.map(date => {
+            const count = countMap[date] || 0;
+            return {
+                date,
+                count,
+                level: getContributionLevel(count)
+            };
+        });
+        setContributionData(data);
+    }, [posts]);
+
     if (loading) {
         return <div>加载中...</div>;
     }
@@ -293,8 +287,6 @@ const Account: React.FC = () => {
     if (!userInfo) {
         return null;
     }
-
-    const contributionData = generateContributionData();
 
     return (
         <div className={styles.container}>

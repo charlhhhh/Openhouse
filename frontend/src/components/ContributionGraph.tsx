@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useEffect } from 'react';
 import { Tooltip } from 'antd';
 import styles from './ContributionGraph.module.css';
 
@@ -106,6 +106,14 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data }) => {
         };
     }, [data]);
 
+    // 滚动到最右端
+    const scrollRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+        }
+    }, [data]);
+
     if (!data || data.length === 0) {
         return null;
     }
@@ -121,7 +129,7 @@ const ContributionGraph: React.FC<ContributionGraphProps> = ({ data }) => {
                     ))}
                 </div>
                 <div className={styles.graphContent}>
-                    <div className={styles.scrollContainer}>
+                    <div className={styles.scrollContainer} ref={scrollRef}>
                         <div className={styles.scrollContent}>
                             <div className={styles.monthLabels}>
                                 {monthLabels.map((month, index) => (

@@ -58,18 +58,13 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
             };
 
             // 使用 authService 发送更新请求
-            const response = await authService.updateUserProfile(updateData);
+            await authService.updateUserProfile(updateData);
 
-            if (response.code === 0) {
-                message.success('Update profile successfully');
-                onClose();
-            } else {
-                message.error(response.message || 'Fail to update profile');
-            }
         } catch (error) {
             message.error('Fail to update profile');
         } finally {
             setIsSubmitting(false);
+            onClose();
         }
     };
 
@@ -214,17 +209,14 @@ export const UserProfileEditSheet: React.FC<UserProfileEditSheetProps> = ({
                             >
                                 <Input style={styles.input} />
                             </Form.Item>
-
-                            <Form.Item>
-                                <Button
-                                    style={styles.submitButton}
-                                    onClick={handleSubmit}
-                                    loading={isSubmitting}
-                                >
-                                    Save
-                                </Button>
-                            </Form.Item>
                         </Form>
+                        <Button
+                            style={styles.submitButton}
+                            onClick={handleSubmit}
+                            loading={isSubmitting}
+                        >
+                            Save
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -253,6 +245,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     content: {
         display: 'flex',
         flexDirection: 'column',
+        justifyContent: 'center',
         alignItems: 'center',
         position: 'relative',
         padding: '40px 0',
@@ -304,7 +297,7 @@ const styles: { [key: string]: React.CSSProperties } = {
         height: '100%',
     },
     submitButton: {
-        width: '35%',
+        width: '25%',
         height: '48px',
         borderRadius: '8px',
         background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)',
