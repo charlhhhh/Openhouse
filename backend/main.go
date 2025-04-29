@@ -3,6 +3,7 @@ package main
 import (
 	"OpenHouse/global"
 	"OpenHouse/initialize"
+	"OpenHouse/schedule"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -20,7 +21,9 @@ func main() {
 	defer initialize.CloseMySQL()
 
 	initialize.InitMedia()
-	// initialize.InitElasticSearch()
+	schedule.StartCronJobs()
+
+	// initialize.MockData()
 
 	r := gin.Default()
 	initialize.SetupRouter(r)

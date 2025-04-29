@@ -22,6 +22,7 @@ type User struct {
 	IsEmailBound  bool           `gorm:"default:false" json:"is_email_bound"`
 	IsGitHubBound bool           `gorm:"default:false" json:"is_github_bound"`
 	IsGoogleBound bool           `gorm:"default:false" json:"is_google_bound"`
+	MatchStatus   string         `gorm:"default:'available'" json:"match_status"` // "available" or "matching" or "matched"
 }
 
 // AuthAccount 表结构

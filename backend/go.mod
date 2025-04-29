@@ -3,6 +3,7 @@ module OpenHouse
 go 1.18
 
 require (
+	github.com/Mathpix/swot v0.0.0-20211214032521-bd6130dc8dc0
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.8.1
@@ -11,6 +12,7 @@ require (
 	github.com/jinzhu/gorm v1.9.16
 	github.com/lestrrat-go/file-rotatelogs v2.4.0+incompatible
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/viper v1.12.0
 	github.com/swaggo/files v0.0.0-20220610200504-28940afbdbfe
@@ -25,7 +27,10 @@ require (
 require (
 	cloud.google.com/go/compute v1.6.1 // indirect
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/andybalholm/brotli v1.0.4 // indirect
+	github.com/asaskevich/govalidator v0.0.0-20200907205600-7a23bdc65eef // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/montanaflynn/broccoli/fs v0.0.0-20201214095104-273317009109 // indirect
 	golang.org/x/time v0.0.0-20191024005414-555d28b269f0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect

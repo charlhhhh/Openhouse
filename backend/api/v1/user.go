@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"OpenHouse/model/request"
 	"OpenHouse/model/response"
 	"OpenHouse/service"
 
@@ -38,7 +39,7 @@ func GetProfile(c *gin.Context) {
 func UpdateProfile(c *gin.Context) {
 	uuid := c.MustGet("uuid").(string)
 
-	var input service.UpdateProfileInput
+	var input request.UpdateProfileInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		response.FailWithMessage("参数错误", c)
 		return

@@ -31,6 +31,7 @@ func SetupRouter(r *gin.Engine) {
 		{
 			auth.POST("/email/verify", v1.EmailLogin)
 			auth.POST("/email/send", v1.SendVerifyEmail)
+			auth.GET("/email/academic_check", v1.CheckEmailDomain)
 			auth.GET("/github/callback", v1.GitHubCallback)
 			auth.GET("/google/callback", v1.GoogleCallback)
 		}
@@ -79,6 +80,19 @@ func SetupRouter(r *gin.Engine) {
 			commentsAuth.POST("/like", v1.LikeComment)     // 点赞评论
 			commentsAuth.POST("/unlike", v1.UnlikeComment) // 取消点赞
 		}
+
+		match := apiV1.Group("/match").Use(middleware.JWTAuthMiddleware())
+		{
+			match.GET("/today", v1.MatchToday)
+			match.GET("/trigger", v1.MatchTriggerUser) // 直接触发当前用户的匹配计算,
+			match.GET("/confirm", v1.MatchConfirm)     // 确认匹配, 状态更新为available
+			match.GET("/history", v1.MatchHistory)     // 历史匹配记录
+		}
+
+		// matchTest := apiV1.Group("/match")
+		// {
+		// 	matchTest.POST("/trigger", v1.MatchTrigger) // 直接触发匹配计算
+		// }
 	}
 }
 

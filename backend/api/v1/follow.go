@@ -213,6 +213,7 @@ func FollowedPosts(c *gin.Context) {
 		response.FailWithMessage("参数错误："+err.Error(), c)
 		return
 	}
+
 	userUUID := c.MustGet("uuid").(string)
 
 	if userUUID == "" {
