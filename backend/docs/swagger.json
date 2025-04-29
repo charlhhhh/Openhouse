@@ -6,7 +6,7 @@
     "paths": {
         "/api/v1/auth/email/academic_check": {
             "get": {
-                "description": "检查邮箱域名是否属于高校",
+                "description": "Check if the email domain belongs to an academic institution",
                 "consumes": [
                     "application/json"
                 ],
@@ -16,11 +16,11 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "检查邮箱域名是否属于高校",
+                "summary": "Check if the email domain belongs to an academic institution",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "邮箱地址",
+                        "description": "Email address",
                         "name": "email",
                         "in": "query",
                         "required": true
@@ -34,13 +34,13 @@
                         }
                     },
                     "400": {
-                        "description": "{\"msg\": \"邮箱地址格式错误\", \"status\": 400}",
+                        "description": "{\"msg\": \"Invalid email format\", \"status\": 400}",
                         "schema": {
                             "type": "string"
                         }
                     },
                     "500": {
-                        "description": "{\"msg\": \"邮箱地址不能为空\", \"status\": 500}",
+                        "description": "{\"msg\": \"Email cannot be empty\", \"status\": 500}",
                         "schema": {
                             "type": "string"
                         }
@@ -721,138 +721,6 @@
                 }
             }
         },
-        "/api/v1/posts/create": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "用户创建一条新的帖子（可附带最多3张图）",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "帖子 Posts"
-                ],
-                "summary": "创建帖子",
-                "parameters": [
-                    {
-                        "description": "帖子内容与图片",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.CreatePostRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.PostInfo"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "请求参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "未授权",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器内部错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/posts/delete": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "当前用户删除自己发布的帖子",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "帖子 Posts"
-                ],
-                "summary": "删除帖子",
-                "parameters": [
-                    {
-                        "description": "要删除的帖子ID",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.DeletePostRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "删除成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/posts/detail": {
             "post": {
                 "security": [
@@ -916,264 +784,6 @@
                 }
             }
         },
-        "/api/v1/posts/favorite": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "当前用户收藏某个帖子（不能重复）",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "帖子 Posts"
-                ],
-                "summary": "收藏帖子",
-                "parameters": [
-                    {
-                        "description": "帖子ID",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.FavoritePostRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "收藏成功",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/posts/favorites_list": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "获取当前用户收藏的帖子（分页、时间排序）",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "帖子 Posts"
-                ],
-                "summary": "获取收藏的帖子",
-                "parameters": [
-                    {
-                        "description": "分页参数",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.ListPostRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.PostListResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/posts/list": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "按时间排序获取帖子列表，支持分页",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "帖子 Posts"
-                ],
-                "summary": "获取帖子列表（分页、排序）",
-                "parameters": [
-                    {
-                        "description": "分页请求参数",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.ListPostRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.PostListResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/posts/mypostlist": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "获取当前登录用户发布的帖子（分页 + 时间排序）",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "帖子 Posts"
-                ],
-                "summary": "获取我的帖子列表",
-                "parameters": [
-                    {
-                        "description": "分页请求参数",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.ListPostRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.PostListResponse"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
         "/api/v1/posts/star": {
             "post": {
                 "security": [
@@ -1206,63 +816,6 @@
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/posts/unfavorite": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "当前用户取消对某帖的收藏",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "帖子 Posts"
-                ],
-                "summary": "取消收藏",
-                "parameters": [
-                    {
-                        "description": "帖子ID",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.FavoritePostRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "取消成功",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1338,75 +891,6 @@
                     },
                     "500": {
                         "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    }
-                }
-            }
-        },
-        "/api/v1/posts/update": {
-            "post": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "用户更新帖子内容（可附带最多3张图）",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "帖子 Posts"
-                ],
-                "summary": "更新帖子",
-                "parameters": [
-                    {
-                        "description": "帖子内容与图片",
-                        "name": "data",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/request.UpdatePostRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/response.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/response.PostInfo"
-                                        }
-                                    }
-                                }
-                            ]
-                        }
-                    },
-                    "400": {
-                        "description": "请求参数错误",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "401": {
-                        "description": "未授权",
-                        "schema": {
-                            "$ref": "#/definitions/response.Response"
-                        }
-                    },
-                    "500": {
-                        "description": "服务器内部错误",
                         "schema": {
                             "$ref": "#/definitions/response.Response"
                         }
@@ -1723,7 +1207,7 @@
                 "tags": [
                     "Profile"
                 ],
-                "summary": "获取用户Profile",
+                "summary": "Get user profile",
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -1760,10 +1244,10 @@
                 "tags": [
                     "Profile"
                 ],
-                "summary": "更新用户Profile（部分字段）",
+                "summary": "Update user profile (partial fields)",
                 "parameters": [
                     {
-                        "description": "需要更新的字段",
+                        "description": "Fields to update",
                         "name": "data",
                         "in": "body",
                         "required": true,
@@ -1937,54 +1421,6 @@
                 }
             }
         },
-        "request.CreatePostRequest": {
-            "type": "object",
-            "required": [
-                "content",
-                "title"
-            ],
-            "properties": {
-                "content": {
-                    "description": "帖子内容",
-                    "type": "string"
-                },
-                "image_urls": {
-                    "description": "最多3张图片，每张是合法 URL",
-                    "type": "array",
-                    "maxItems": 3,
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "title": {
-                    "description": "帖子标题 100 字符以内",
-                    "type": "string",
-                    "maxLength": 100
-                }
-            }
-        },
-        "request.DeletePostRequest": {
-            "type": "object",
-            "required": [
-                "post_id"
-            ],
-            "properties": {
-                "post_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "request.FavoritePostRequest": {
-            "type": "object",
-            "required": [
-                "post_id"
-            ],
-            "properties": {
-                "post_id": {
-                    "type": "integer"
-                }
-            }
-        },
         "request.FollowListRequest": {
             "type": "object",
             "required": [
@@ -2137,37 +1573,6 @@
             "properties": {
                 "post_id": {
                     "type": "integer"
-                }
-            }
-        },
-        "request.UpdatePostRequest": {
-            "type": "object",
-            "required": [
-                "content",
-                "post_id",
-                "title"
-            ],
-            "properties": {
-                "content": {
-                    "description": "帖子内容",
-                    "type": "string"
-                },
-                "image_urls": {
-                    "description": "最多3张图片，每张是合法 URL",
-                    "type": "array",
-                    "maxItems": 3,
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "post_id": {
-                    "description": "帖子 ID",
-                    "type": "integer"
-                },
-                "title": {
-                    "description": "帖子标题 100 字符以内",
-                    "type": "string",
-                    "maxLength": 100
                 }
             }
         },

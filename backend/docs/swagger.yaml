@@ -14,39 +14,6 @@ definitions:
     - content
     - post_id
     type: object
-  request.CreatePostRequest:
-    properties:
-      content:
-        description: 帖子内容
-        type: string
-      image_urls:
-        description: 最多3张图片，每张是合法 URL
-        items:
-          type: string
-        maxItems: 3
-        type: array
-      title:
-        description: 帖子标题 100 字符以内
-        maxLength: 100
-        type: string
-    required:
-    - content
-    - title
-    type: object
-  request.DeletePostRequest:
-    properties:
-      post_id:
-        type: integer
-    required:
-    - post_id
-    type: object
-  request.FavoritePostRequest:
-    properties:
-      post_id:
-        type: integer
-    required:
-    - post_id
-    type: object
   request.FollowListRequest:
     properties:
       page_num:
@@ -155,29 +122,6 @@ definitions:
         type: integer
     required:
     - post_id
-    type: object
-  request.UpdatePostRequest:
-    properties:
-      content:
-        description: 帖子内容
-        type: string
-      image_urls:
-        description: 最多3张图片，每张是合法 URL
-        items:
-          type: string
-        maxItems: 3
-        type: array
-      post_id:
-        description: 帖子 ID
-        type: integer
-      title:
-        description: 帖子标题 100 字符以内
-        maxLength: 100
-        type: string
-    required:
-    - content
-    - post_id
-    - title
     type: object
   request.UpdateProfileInput:
     properties:
@@ -465,9 +409,9 @@ paths:
     get:
       consumes:
       - application/json
-      description: 检查邮箱域名是否属于高校
+      description: Check if the email domain belongs to an academic institution
       parameters:
-      - description: 邮箱地址
+      - description: Email address
         in: query
         name: email
         required: true
@@ -480,14 +424,14 @@ paths:
           schema:
             $ref: '#/definitions/response.CheckEmailDomainResponse'
         "400":
-          description: '{"msg": "邮箱地址格式错误", "status": 400}'
+          description: '{"msg": "Invalid email format", "status": 400}'
           schema:
             type: string
         "500":
-          description: '{"msg": "邮箱地址不能为空", "status": 500}'
+          description: '{"msg": "Email cannot be empty", "status": 500}'
           schema:
             type: string
-      summary: 检查邮箱域名是否属于高校
+      summary: Check if the email domain belongs to an academic institution
       tags:
       - Auth
   /api/v1/auth/email/send:
@@ -905,87 +849,6 @@ paths:
       summary: Upload file
       tags:
       - Media File
-  /api/v1/posts/create:
-    post:
-      consumes:
-      - application/json
-      description: 用户创建一条新的帖子（可附带最多3张图）
-      parameters:
-      - description: 帖子内容与图片
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/request.CreatePostRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.PostInfo'
-              type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/response.Response'
-        "500":
-          description: 服务器内部错误
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: 创建帖子
-      tags:
-      - 帖子 Posts
-  /api/v1/posts/delete:
-    post:
-      consumes:
-      - application/json
-      description: 当前用户删除自己发布的帖子
-      parameters:
-      - description: 要删除的帖子ID
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/request.DeletePostRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 删除成功
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.Response'
-        "403":
-          description: Forbidden
-          schema:
-            $ref: '#/definitions/response.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: 删除帖子
-      tags:
-      - 帖子 Posts
   /api/v1/posts/detail:
     post:
       consumes:
@@ -1021,161 +884,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 获取帖子详情
-      tags:
-      - 帖子 Posts
-  /api/v1/posts/favorite:
-    post:
-      consumes:
-      - application/json
-      description: 当前用户收藏某个帖子（不能重复）
-      parameters:
-      - description: 帖子ID
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/request.FavoritePostRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 收藏成功
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: 收藏帖子
-      tags:
-      - 帖子 Posts
-  /api/v1/posts/favorites_list:
-    post:
-      consumes:
-      - application/json
-      description: 获取当前用户收藏的帖子（分页、时间排序）
-      parameters:
-      - description: 分页参数
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/request.ListPostRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.PostListResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: 获取收藏的帖子
-      tags:
-      - 帖子 Posts
-  /api/v1/posts/list:
-    post:
-      consumes:
-      - application/json
-      description: 按时间排序获取帖子列表，支持分页
-      parameters:
-      - description: 分页请求参数
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/request.ListPostRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.PostListResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: 获取帖子列表（分页、排序）
-      tags:
-      - 帖子 Posts
-  /api/v1/posts/mypostlist:
-    post:
-      consumes:
-      - application/json
-      description: 获取当前登录用户发布的帖子（分页 + 时间排序）
-      parameters:
-      - description: 分页请求参数
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/request.ListPostRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.PostListResponse'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: 获取我的帖子列表
       tags:
       - 帖子 Posts
   /api/v1/posts/star:
@@ -1214,42 +922,6 @@ paths:
       summary: 点赞帖子
       tags:
       - 帖子 Posts
-  /api/v1/posts/unfavorite:
-    post:
-      consumes:
-      - application/json
-      description: 当前用户取消对某帖的收藏
-      parameters:
-      - description: 帖子ID
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/request.FavoritePostRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: 取消成功
-          schema:
-            $ref: '#/definitions/response.Response'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: 取消收藏
-      tags:
-      - 帖子 Posts
   /api/v1/posts/unstar:
     post:
       consumes:
@@ -1284,47 +956,6 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: 取消点赞
-      tags:
-      - 帖子 Posts
-  /api/v1/posts/update:
-    post:
-      consumes:
-      - application/json
-      description: 用户更新帖子内容（可附带最多3张图）
-      parameters:
-      - description: 帖子内容与图片
-        in: body
-        name: data
-        required: true
-        schema:
-          $ref: '#/definitions/request.UpdatePostRequest'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            allOf:
-            - $ref: '#/definitions/response.Response'
-            - properties:
-                data:
-                  $ref: '#/definitions/response.PostInfo'
-              type: object
-        "400":
-          description: 请求参数错误
-          schema:
-            $ref: '#/definitions/response.Response'
-        "401":
-          description: 未授权
-          schema:
-            $ref: '#/definitions/response.Response'
-        "500":
-          description: 服务器内部错误
-          schema:
-            $ref: '#/definitions/response.Response'
-      security:
-      - ApiKeyAuth: []
-      summary: 更新帖子
       tags:
       - 帖子 Posts
   /api/v1/user/follow/count:
@@ -1514,14 +1145,14 @@ paths:
               type: object
       security:
       - ApiKeyAuth: []
-      summary: 获取用户Profile
+      summary: Get user profile
       tags:
       - Profile
     post:
       consumes:
       - application/json
       parameters:
-      - description: 需要更新的字段
+      - description: Fields to update
         in: body
         name: data
         required: true
@@ -1536,7 +1167,7 @@ paths:
             $ref: '#/definitions/response.Response'
       security:
       - ApiKeyAuth: []
-      summary: 更新用户Profile（部分字段）
+      summary: Update user profile (partial fields)
       tags:
       - Profile
   /api/v1/user/unfollow:
