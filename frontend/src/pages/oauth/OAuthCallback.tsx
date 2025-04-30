@@ -26,23 +26,33 @@ export default function OAuthCallback() {
             return;
         }
 
-        // 从URL中解析token
-        const token = authService.parseTokenFromUrl();
+        const handleCallback = async () => {
+            // 从URL中解析token
+            const token = authService.parseTokenFromUrl();
 
-        if (token) {
-            // 标记为已处理
-            processedRef.current = true;
-            // 保存token
-            authService.saveToken(token);
-            userSession.setSession(token);
-            message.success('登录成功');
-            // 重定向到首页
-            navigate('/account', { replace: true });
-        } else if (!processedRef.current) {
-            // 只有在第一次失败时才显示错误消息
-            message.error('登录失败，请重试');
-            navigate('/', { replace: true });
-        }
+            if (token) {
+                // 标记为已处理
+                processedRef.current = true;
+                try {
+                    authService.saveToken(token);
+                    await authService.getUserProfile();
+                    // 保存token
+                    userSession.setSession(token);
+                    message.success('Login Success');
+                    // 重定向到首页
+                    navigate('/', { replace: true });
+                } catch (error) {
+                    message.error('Login Failed, Please Try Again Later');
+                    navigate('/', { replace: true });
+                }
+            } else if (!processedRef.current) {
+                // 只有在第一次失败时才显示错误消息
+                message.error('Login Failed, Please Try Again Later');
+                navigate('/', { replace: true });
+            }
+        };
+
+        handleCallback();
     }, [navigate]);
 
     return null;

@@ -30,6 +30,7 @@ class UserSessionManager {
 
     public setSession(token: string) {
         // 保存到cookie
+        console.log('setSession', token);
         this.session = { token };
         Cookies.set('userId', token);
         this.notifyListeners();

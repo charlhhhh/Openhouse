@@ -139,7 +139,7 @@ const Account: React.FC = () => {
                     : undefined;
 
                 setUserInfo({
-                    avatar: profile.avatar_url || '/default-avatar.png',
+                    avatar: profile.avatar_url || '',
                     nickname: profile.username,
                     coins: profile.coin,
                     id: profile.uuid,

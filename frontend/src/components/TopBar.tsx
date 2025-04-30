@@ -54,7 +54,6 @@ const ButtonGroup = styled.div`
 
 const StyledAvatar = styled(Avatar)`
   cursor: pointer;
-  background: #6A4C93;
   &:hover {
     opacity: 0.8;
   }
@@ -144,13 +143,27 @@ export default function TopBar({ onShowLogin }: TopBarProps) {
     const [userAvatar, setUserAvatar] = useState('');
     const navigate = useNavigate();
 
-    useEffect(() => {
-        // 检查登录状态
+    const updateLoginStatus = () => {
         const loggedIn = authService.isLoggedIn();
         setIsLoggedIn(loggedIn);
         if (loggedIn) {
             setUserAvatar(userSession.getUserAvatar());
+        } else {
+            setUserAvatar('');
         }
+    };
+
+    useEffect(() => {
+        // 检查登录状态
+        updateLoginStatus();
+
+        // 注册登录状态变化监听器
+        userSession.addListener(updateLoginStatus);
+
+        // 组件卸载时移除监听器
+        return () => {
+            userSession.removeListener(updateLoginStatus);
+        };
     }, []);
 
     const handleAccountClick = () => {
@@ -165,8 +178,7 @@ export default function TopBar({ onShowLogin }: TopBarProps) {
         authService.clearToken();
         userSession.clearSession();
         localStorage.removeItem('user_profile');
-        setIsLoggedIn(false);
-        setUserAvatar('');
+        updateLoginStatus();
         navigate('/');
     };
 

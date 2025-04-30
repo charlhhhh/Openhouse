@@ -110,6 +110,8 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
             if (response.data?.Token) {
                 // 保存token
                 authService.saveToken(response.data.Token);
+                await authService.getUserProfile();
+                userSession.setSession(response.data.Token);
                 message.success('Login Success');
                 onLoginSuccess();
                 // 重置状态
