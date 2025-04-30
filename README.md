@@ -1,68 +1,68 @@
+
+---
+
 # 🏠 OpenHouse: A Researcher Matching Platform
 
-OpenHouse is an AI-powered academic social platform designed to connect researchers and promote meaningful collaborations. It provides a passwordless login experience, intelligent partner matching, real-time chat, social content sharing, and a lightweight notification system.
+**OpenHouse** is an AI-powered academic social platform designed to connect researchers and foster meaningful collaborations. It offers passwordless login, intelligent partner matching, real-time chat, content sharing, and a lightweight notification system.
 
-🌐 Demo: https://openhouse.horik.cn
+🌐 **Demo**: [https://openhouse.horik.cn](https://openhouse.horik.cn)
 
-📦 Tech Stack
+---
 
-| Layer     | Tech                          |
-|-----------|-------------------------------|
-| Frontend  | React + Vite + TailwindCSS    |
-| Backend   | Go + Gin + GORM + MySQL       |
-| Database  | MySQL 8.x                     |
-| Auth      | Email, GitHub, Google OAuth2  |
-| AI Match  | LLM API (OpenAI/TogetherAI)   |
-| Storage   | Alibaba Cloud OSS (Image CDN) |
+## 📦 Tech Stack
 
-—
+| Layer     | Technology                      |
+|-----------|----------------------------------|
+| Frontend  | React + Vite + TailwindCSS       |
+| Backend   | Go + Gin + GORM + MySQL          |
+| Database  | MySQL 8.x                        |
+| Auth      | Email, GitHub, Google OAuth2     |
+| AI Match  | LLM API (OpenAI / TogetherAI)    |
+| Storage   | Alibaba Cloud OSS (Image CDN)    |
 
-🚀 Features
+---
 
-1. ✅ User Authentication
+## 🚀 Features
 
-- Passwordless login via email verification code
-- OAuth2 login via GitHub & Google
-- JWT-based authentication & authorization
-- Multiple account bindings supported (e.g. Email + GitHub)
+### 1. ✅ User Authentication
+- Passwordless login via email verification code  
+- OAuth2 login via GitHub & Google  
+- JWT-based authentication & authorization  
+- Support for multiple account bindings (e.g., Email + GitHub)  
 
-2. 👤 User Profile
+### 2. 👤 User Profile
+- Editable user profile (nickname, gender, avatar, intro)  
+- Avatar uploaded to OSS  
+- Track bound login methods (email/github/google)  
 
-- Editable user profile (nickname, gender, avatar, intro)
-- Upload avatar to OSS
-- Track authentication methods (email/github/google)
+### 3. 📚 Posts & Social Feed
+- Create, edit, and delete posts with text and images  
+- Like, favorite, comment on posts  
+- Public feed with follow-based filtering  
+- Anonymous “Tree Hole” mode (optional)  
+- **AI-based scoring to manage the community** *(future implementation)*  
 
-3. 📚 Posts & Social Feed
+### 4. 🔍 Researcher Matching
+- Users submit tags, intro, and research area to join match pool  
+- Daily LLM-powered intelligent matching  
+- Matches scored with AI comments and reasons  
+- Results revealed once per day  
+- Matching statuses: `Not Applied`, `Matching`, `Matched`, `Revealed`  
 
-- Create, edit, delete posts with text and images
-- Like, favorite, comment on posts
-- Public feed with follow-based filtering
-- Anonymous "Tree Hole" mode (optional)
-- AI-based scoring to manage the community (future implementation)
+### 5. 💬 Real-time Chat (Polling)
+- One-on-one chat unlocked after successful match  
+- Polling-based new message retrieval  
+- Structured schema with sender/receiver UUID tracking  
 
-4. 🔍 Researcher Matching
+### 6. 🔔 Notification System
+- **System notifications**: match success, likes, comments, admin messages  
+- **User messages**: one-on-one chat after match  
 
-- Users submit tags + intro + research area to enter match pool
-- Daily scheduled LLM-based intelligent matching
-- Matches scored with AI comments & reason
-- Results are revealed daily
-- Matching status: Not Applied / Matching / Matched / Revealed
+---
 
-5. 💬 Real-time Chat (Polling)
+## 🛠 Project Structure
 
-- One-on-one chat after successful match
-- Message history & polling-based new message pull
-- Structured chat schema with sender/receiver UUID
-
-6. 🔔 Notification System
-
-- System notifications: match success, replies, likes, admin broadcast
-- User notifications: private messages (after match)
-
-—
-
-🛠 Project Structure
-
+```
 .
 ├── backend/                # Go + Gin backend
 │   ├── api/                # API layer
@@ -74,63 +74,76 @@ OpenHouse is an AI-powered academic social platform designed to connect research
 │   ├── initialize/         # DB, OSS, config init
 │   └── main.go             # project entrypoint
 ├── frontend/               # React + Vite frontend (optional)
+```
 
-—
+---
 
-🔧 Setup & Run
+## 🔧 Setup & Run
 
-🧩 Prerequisites
+### 🧩 Prerequisites
+- Go 1.20+  
+- MySQL 8.0+  
+- Node.js 18+ (for frontend)  
+- Docker *(optional for local deployment)*  
 
-- Go 1.20+
-- MySQL 8.0+
-- Node.js 18+ (for frontend)
-- Docker (optional for deployment)
+### 📦 Install Dependencies
 
-📦 Install Dependencies
-
-Backend:
-
+**Backend**:
+```bash
 cd backend/
 go mod tidy
+```
 
-Frontend:
-
+**Frontend**:
+```bash
 cd frontend/
 pnpm install
+```
 
-🗃️ Run MySQL (optional):
-
+### 🗃️ Run MySQL (Optional):
+```bash
 docker run --name openhouse-mysql \
   -e MYSQL_ROOT_PASSWORD=123456 \
   -e MYSQL_DATABASE=openhouse \
   -p 3306:3306 \
-  -d mysql:8.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+  -d mysql:8.0 \
+  --character-set-server=utf8mb4 \
+  --collation-server=utf8mb4_unicode_ci
+```
 
-⚙️ Start Backend
-
+### ⚙️ Start Backend
+```bash
 cd backend/
 go run main.go
+```
 
-✅ Swagger Docs: http://openhouse.horik.cn/swagger/index.html#/
+✅ Swagger Docs: [http://openhouse.horik.cn/swagger/index.html#/](http://openhouse.horik.cn/swagger/index.html#/)
 
-🌐 Start Frontend
-
+### 🌐 Start Frontend
+```bash
 cd frontend/
 pnpm dev
+```
 
-—
+---
 
-📝 License
+## 📝 License
 
-This project is licensed under the Apache-2.0 license. See LICENSE for details.
+This project is licensed under the **Apache-2.0 License**.  
+See the `LICENSE` file for details.
 
-—
+---
 
-📬 Contact / Contribution
+## 📬 Contact & Contribution
 
-We welcome contributions from researchers, developers and designers.
+We welcome contributions from researchers, developers, and designers.  
+To contribute:
+- Fork this repository  
+- Open a pull request  
+- Or reach out via GitHub Issues  
 
-To contribute, fork the repository, open a pull request, or contact us via issues.
+Let us build the world’s largest researcher community — together.
 
-—
+---
+
 
