@@ -91,19 +91,14 @@ export const authService = {
     parseTokenFromUrl: () => {
         // 获取完整的查询字符串
         const searchParams = new URLSearchParams(window.location.search);
-        console.log('URL查询参数:', window.location.search);
-
         // 直接从查询参数中获取token
         const token = searchParams.get('token');
-        console.log('解析到的token:', token);
-
         return token;
     },
 
     parseBindSuccessFromUrl: () => {
         const searchParams = new URLSearchParams(window.location.search);
         const result = searchParams.get('result');
-        console.log('解析到的绑定结果:', result);
         return result;
     },
 
