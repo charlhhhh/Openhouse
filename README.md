@@ -95,7 +95,7 @@ cd backend/
 go run main.go
 ```
 
-✅ Swagger Docs: [http://openhouse.horik.cn/swagger/index.html#/](http://openhouse.horik.cn/swagger/index.html#/)
+✅ Swagger Docs: [https://openhouse.horik.cn/swagger/index.html#/](http://openhouse.horik.cn/swagger/index.html#/)
 
 ### 🌐 Start Frontend
 ```bash
