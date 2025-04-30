@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Modal, Input, Button, message } from 'antd';
-import { supabase } from '../../supabase/client';
 import { userSession } from '../../utils/UserSession';
 import { UserProfile } from '../../types/user';
 import {
@@ -41,12 +40,12 @@ export const UserLinkAuthSheet: React.FC<UserProfileCreateSheetProps> = ({
 
     const handleGithubBind = () => {
         const token = localStorage.getItem('token');
-        window.location.href = `https://github.com/login/oauth/authorize?scope=user:email&client_id=Ov23liKlSNhwhBevQPD7&redirect_uri=http://openhouse.horik.cn/api/v1/auth/github/callback?state=${token}`;
+        window.location.href = `https://github.com/login/oauth/authorize?scope=user:email&client_id=Ov23liKlSNhwhBevQPD7&redirect_uri=https://openhouse.horik.cn/api/v1/auth/github/callback?state=${token}`;
     }
 
     const handleGoogleBind = () => {
         const token = localStorage.getItem('token');
-        window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=1096406563590-dg8skdq3ook05s6hj2s9s41arvhj4l4s.apps.googleusercontent.com&redirect_uri=http://openhouse.horik.cn/api/v1/auth/google/callback&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile+openid&state=${token}`;
+        window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=1096406563590-dg8skdq3ook05s6hj2s9s41arvhj4l4s.apps.googleusercontent.com&redirect_uri=https://openhouse.horik.cn/api/v1/auth/google/callback&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile+openid&state=${token}`;
     }
 
     const handleSchoolEmailBind = async () => {

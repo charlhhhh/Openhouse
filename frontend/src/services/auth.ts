@@ -84,7 +84,7 @@ export const authService = {
         return 'https://github.com/login/oauth/authorize?scope=user:email&client_id=Ov23liKlSNhwhBevQPD7';
     },
     getGoogleAuthUrl: () => {
-        return 'https://accounts.google.com/o/oauth2/v2/auth?client_id=1096406563590-dg8skdq3ook05s6hj2s9s41arvhj4l4s.apps.googleusercontent.com&redirect_uri=http://openhouse.horik.cn/api/v1/auth/google/callback&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile+openid';
+        return 'https://accounts.google.com/o/oauth2/v2/auth?client_id=1096406563590-dg8skdq3ook05s6hj2s9s41arvhj4l4s.apps.googleusercontent.com&redirect_uri=https://openhouse.horik.cn/api/v1/auth/google/callback&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile+openid';
     },
 
     // 解析重定向URL中的token
