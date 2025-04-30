@@ -214,7 +214,7 @@ const ChatPage: React.FC = () => {
             const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
             const since = lastMessage?.created_at || new Date().toISOString();
             const response = await authService.pollNewMessages(since);
-            if (response.code === 0 && response.data.length > 0) {
+            if (response.code === 0 && response.data && Array.isArray(response.data) && response.data.length > 0) {
                 setMessages(prev => [...prev, ...response.data]);
                 scrollToBottom();
             }
