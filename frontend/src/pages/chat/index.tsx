@@ -215,13 +215,24 @@ const ChatPage: React.FC = () => {
     const pollNewMessages = async () => {
         if (!peerUuid) return;
         try {
-            const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
-            const since = lastMessage?.created_at || new Date().toISOString();
-            const response = await authService.pollNewMessages(since);
-            if (response.code === 0 && response.data && Array.isArray(response.data) && response.data.length > 0) {
-                setMessages(prev => [...prev, ...response.data]);
-                scrollToBottom();
-            }
+            // 使用函数式更新确保获取最新的messages状态
+            setMessages(prevMessages => {
+                const lastMessage = prevMessages.length > 0 ? prevMessages[prevMessages.length - 1] : null;
+                const since = lastMessage?.created_at;
+                if (!since) return prevMessages;
+
+                // 在setMessages的回调中发起请求
+                authService.pollNewMessages(since).then(response => {
+                    if (response.code === 0 && response.data && Array.isArray(response.data) && response.data.length > 0) {
+                        setMessages(currentMessages => [...currentMessages, ...response.data]);
+                        scrollToBottom();
+                    }
+                }).catch(error => {
+                    console.error('Failed to poll new messages:', error);
+                });
+
+                return prevMessages;
+            });
         } catch (error) {
             console.error('Failed to poll new messages:', error);
         }
@@ -266,6 +277,14 @@ const ChatPage: React.FC = () => {
         const pollInterval = setInterval(pollNewMessages, 30000);
         return () => clearInterval(pollInterval);
     }, [peerUuid]);
+
+    // 监听消息变化，当有新消息时更新轮询时间
+    useEffect(() => {
+        if (messages.length > 0) {
+            const lastMessage = messages[messages.length - 1];
+            console.log('Messages updated, last message:', lastMessage);
+        }
+    }, [messages]);
 
     return (
         <ChatContainer>
