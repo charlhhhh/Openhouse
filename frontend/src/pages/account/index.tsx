@@ -155,7 +155,6 @@ const Account: React.FC = () => {
                     isGithubBind: profile.is_github_bound,
                     isGoogleBind: profile.is_google_bound,
                 });
-                console.log('userInfo', userInfo);
             } else {
                 localStorage.removeItem('user_profile');
                 message.error('Fail to load user profile, please login again');

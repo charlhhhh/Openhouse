@@ -1,7 +1,6 @@
 import { createBrowserRouter, RouteObject } from 'react-router-dom';
 import Root from './Root';
 import Home from './pages/home';
-import Login from './pages/login';
 import FindPartner from './pages/find';
 import Account from './pages/account';
 import Following from './pages/following';
@@ -19,10 +18,6 @@ const routes: RouteObject[] = [
       {
         index: true,
         element: <Home />,
-      },
-      {
-        path: 'login',
-        element: <Login />,
       },
       {
         path: 'sage',

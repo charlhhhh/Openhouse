@@ -380,11 +380,11 @@ const CreatePost: React.FC = () => {
       });
       console.log(data);
 
-      message.success('帖子发布成功');
+      message.success('Post Created Successfully');
       navigate('/'); // 发布成功后跳转到首页
     } catch (error) {
       console.error('发布帖子错误:', error);
-      message.error('发布失败，请稍后重试');
+      message.error('Post Creation Failed, Please Try Again Later');
     } finally {
       setIsSubmitting(false);
     }
@@ -401,7 +401,7 @@ const CreatePost: React.FC = () => {
       }
     } catch (error) {
       console.error('删除图片错误:', error);
-      message.error('删除图片失败，请稍后重试');
+      message.error('Delete Image Failed, Please Try Again Later');
     }
   };
 

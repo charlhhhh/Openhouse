@@ -57,25 +57,6 @@ const ScrollableContent = styled(Content)`
   }
 `;
 
-// supabase.auth.onAuthStateChange(async (event, session) => {
-//   if (event === 'SIGNED_IN' && session) {
-//     const { id, email } = session.user;
-//     // 保存session信息
-//     userSession.setSession(id, email ?? "");
-//     // 查询用户资料
-//     const { data: profile, error } = await supabase.from('profiles').select('*').eq('id', id).single()
-//     if (error) {
-//       console.error('获取用户资料失败:', error);
-//       return;
-//     }
-//     if (profile) {
-//       console.log('更新用户资料:', profile);
-//       userSession.updateProfile(profile);
-//     }
-//   } else if (event === 'SIGNED_OUT') {
-//     userSession.clearSession();
-//   }
-// });
 
 export default function Root() {
   const navigate = useNavigate();
@@ -122,7 +103,7 @@ export default function Root() {
           visible={loginModalVisible}
           onClose={handleLoginCancel}
           onLoginSuccess={async () => {
-            message.success('onLoginSuccess');
+            message.success('Login sucess!');
             setLoginModalVisible(false);
             // TODO: 登录成功后，验证三方认证逻辑
           }}
