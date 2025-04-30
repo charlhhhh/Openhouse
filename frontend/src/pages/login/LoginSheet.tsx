@@ -2,10 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Button, Input, Divider, message } from 'antd';
 import { CloseOutlined, MailOutlined, GoogleOutlined, ArrowLeftOutlined, GithubOutlined, AppleOutlined } from '@ant-design/icons';
 import SMSVerifyCodeInput from './SMSVerifyCodeInput';
-import { supabase } from '../../supabase/client';
 import { userSession } from "../../utils/UserSession";
-import { Provider } from '@supabase/supabase-js';
 import { create } from 'zustand';
+import { authService } from '../../services/auth';
 
 interface LoginSheetStore {
     isVisible: boolean;
@@ -66,10 +65,14 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
 
         setIsLoading(true);
         try {
+            // 发送验证码
+            await authService.sendEmailCode(email);
+            message.success('Verification Code Sent to Your Email');
+            setShowVerification(true);
             setShouldStartCountdown(true);
-            handleVerificationSend();
+
         } catch (error) {
-            console.error('发送验证码失败:', error);
+            message.error('Send Verification Code Failed, Please Try Again Later');
         } finally {
             setIsLoading(false);
         }
@@ -78,65 +81,57 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
     const handleVerificationSend = async () => {
         setIsLoading(true);
         try {
-            // TODO: 重新发送验证码
-            console.log('发送验证码到:', email);
-            const { error } = await supabase.auth.signInWithOtp({ email });
-            if (error) {
-                console.error('发送验证码失败:', error);
-            } else {
-                setShowVerification(true);
-                console.log('验证码发送成功');
+            // 重新发送验证码
+            const response = await authService.sendEmailCode(email);
+            if (response.code === 0) {
+                message.success('Verification Code Re-sent to Your Email');
+                setShouldStartCountdown(true);
             }
-
         } catch (error) {
-            console.error('发送验证码失败:', error);
+            message.error('Send Verification Code Failed, Please Try Again Later');
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleVerificationSubmit = async (code: string) => {
+        if (!email || !code) {
+            message.error('Email or Verification Code Cannot Be Empty');
+            return;
+        }
         setIsLoading(true);
         try {
-            // TODO: 验证验证码
-            console.log('验证验证码:', code);
-            const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' })
-            if (error) {
-                console.error('验证失败:', error);
-                message.warning(error?.message ?? '验证失败');
-            } else {
-                console.log('验证成功');
+            // 验证验证码
+            const response = await authService.verifyEmailCode({
+                email,
+                code
+            });
+
+            if (response.data?.Token) {
+                // 保存token
+                authService.saveToken(response.data.Token);
+                message.success('Login Success');
                 onLoginSuccess();
+                // 重置状态
+                resetState();
+            } else {
+                message.error('Verification Failed, Please Check the Verification Code');
             }
         } catch (error) {
-            console.error('验证失败:', error);
+            message.error('Verification Failed, Please Try Again');
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleThirdPartyLogin = async (thirdParty: string) => {
+    const handleGitHubLogin = () => {
+        // 重定向到Github认证页面
+        window.location.href = authService.getGithubAuthUrl();
+    };
+
+    const handleGoogleLogin = async () => {
         // 添加谷歌登录逻辑
-        setIsLoading(true);
-        try {
-            console.log('登录', thirdParty);
-            const { error } = await supabase.auth.signInWithOAuth({
-                provider: thirdParty as Provider,
-                options: {
-                    redirectTo: window.location.origin
-                }
-            });
-            if (error) {
-                console.error('登录失败:', error);
-            } else {
-                console.log('登录成功');
-                onLoginSuccess()
-            }
-        } catch (error) {
-            console.error('登录失败:', error);
-        } finally {
-            setIsLoading(false);
-        }
+        window.location.href = authService.getGoogleAuthUrl();
     };
 
     const isButtonEnabled = showVerification
@@ -186,7 +181,7 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
                                     ...styles.googleButton,
                                     background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)'
                                 }}
-                                onClick={() => handleThirdPartyLogin('google')}
+                                onClick={handleGoogleLogin}
                                 disabled={isLoading}
                                 icon={<GoogleOutlined style={{ marginRight: 8, fontSize: '20px', color: '#fff' }} />}
                             >
@@ -199,23 +194,11 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
                                     ...styles.googleButton,
                                     background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)'
                                 }}
-                                onClick={() => handleThirdPartyLogin('github')}
+                                onClick={handleGitHubLogin}
                                 disabled={isLoading}
                                 icon={<GithubOutlined style={{ marginRight: 8, fontSize: '20px', color: '#fff' }} />}
                             >
                                 <span style={styles.buttonText}>Continue with Github</span>
-                            </Button>
-                            <Button
-                                style={{
-                                    ...styles.button,
-                                    ...styles.googleButton,
-                                    background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)'
-                                }}
-                                onClick={() => handleThirdPartyLogin('microsoft')}
-                                disabled={isLoading}
-                            // icon={<AppleOutlined style={{ marginRight: 8, fontSize: '20px', color: '#fff' }} />}
-                            >
-                                <span style={styles.buttonText}>Continue with Microsoft</span>
                             </Button>
 
                         </>

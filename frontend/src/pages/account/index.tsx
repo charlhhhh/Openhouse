@@ -10,17 +10,16 @@ import {
 import { Image, message } from 'antd';
 import styles from './Account.module.css';
 import ContributionGraph from '../../components/ContributionGraph';
-import { supabase } from '../../supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLoginSheet } from '../../pages/login/LoginSheet';
 import { UserProfileEditSheet } from '../../pages/profile/UserProfileEditSheet';
+import { EditPostSheet } from '../../pages/post/EditPostSheet';
+import { DeleteConfirmAlert } from '../../components/DeleteConfirmAlert';
+import { UserLinkAuthSheet } from '../../pages/profile/UserLinkAuthSheet';
 
-
-interface Post {
-    id: string;
-    title: string;
-    date: string;
-}
+import { authService } from '../../services/auth';
+import { Post } from '../home/types';
+import { postService } from '../../services/post';
 
 interface ContributionDay {
     date: string;
@@ -30,115 +29,142 @@ interface ContributionDay {
 
 const getContributionLevel = (count: number): ContributionDay['level'] => {
     if (count === 0) return 'empty';
-    if (count <= 3) return 'good';
-    if (count <= 6) return 'excellent';
+    if (count <= 1) return 'good';
+    if (count <= 3) return 'excellent';
     return 'oh';
 };
 
-const generateContributionData = (): ContributionDay[] => {
-    const data: ContributionDay[] = [];
-    const today = new Date();
-    const oneYearAgo = new Date(today);
-    oneYearAgo.setFullYear(today.getFullYear() - 1);
+type Gender = 'male' | 'female' | undefined;
 
-    // 生成一些活跃的时期
-    const activeWeeks = new Set([
-        12, 13, 14,  // 连续活跃期
-        25, 26,      // 短期活跃
-        38, 39, 40,  // 连续活跃期
-        48           // 单周活跃
-    ]);
+interface UserInfo {
+    avatar: string;
+    nickname: string;
+    coins: number;
+    id: string;
+    bio: string;
+    gender: Gender;
+    followers: number;
+    followings: number;
+    isVerified: boolean;
+    contributions: number;
+    researchArea?: string;
+    isEmailBind: boolean;
+    isGithubBind: boolean;
+    isGoogleBind: boolean;
+    email: string;
+}
 
-    let weekCount = 0;
-    for (let d = new Date(oneYearAgo); d <= today; d.setDate(d.getDate() + 1)) {
-        weekCount = Math.floor((d.getTime() - oneYearAgo.getTime()) / (7 * 24 * 60 * 60 * 1000));
-
-        let count;
-        if (activeWeeks.has(weekCount)) {
-            // 活跃周期内的贡献较多
-            count = Math.floor(Math.random() * 8) + 2;
-        } else if (Math.random() < 0.2) {
-            // 随机的少量贡献
-            count = Math.floor(Math.random() * 3) + 1;
-        } else {
-            // 大多数时间无贡献
-            count = 0;
-        }
-
-        data.push({
-            date: d.toISOString().split('T')[0],
-            count,
-            level: getContributionLevel(count)
-        });
-    }
-
-    return data;
-};
-
-export default function Account() {
+const Account: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const { setVisible } = useLoginSheet();
-    const [userInfo, setUserInfo] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [editSheetVisible, setEditSheetVisible] = useState(false);
+    const [editPostSheetVisible, setEditPostSheetVisible] = useState(false);
+    const [selectedPost, setSelectedPost] = useState<any>(null);
+    const [deleteConfirmVisible, setDeleteConfirmVisible] = useState(false);
+    const [postToDelete, setPostToDelete] = useState<string | null>(null);
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [userInfo, setUserInfo] = useState<UserInfo>({
+        avatar: '/default-avatar.png',
+        nickname: 'User',
+        coins: 0,
+        id: '',
+        bio: '',
+        gender: undefined,
+        followers: 0,
+        followings: 0,
+        isVerified: false,
+        contributions: 0,
+        isEmailBind: false,
+        isGithubBind: false,
+        isGoogleBind: false,
+        email: '',
+    });
+    const [showBindSheet, setShowBindSheet] = useState(false);
+    const [contributionData, setContributionData] = useState<ContributionDay[]>([]);
 
     useEffect(() => {
         checkAuth();
     }, []);
 
+    // 处理三方认证回调
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const result = params.get('result');
+        if (result) {
+            if (result === 'success') {
+                message.success('Bind Success');
+            } else if (result === 'duplicate_bind') {
+                message.warning('The third-party account has been bound by another user');
+            } else if (result === 'already_bound') {
+                message.info('You have already bound the third-party account');
+            } else {
+                message.error('Bind Failed');
+            }
+            navigate('/account', { replace: true });
+            checkAuth();
+        }
+    }, [location.search]);
+
+    // 只在首次登录且有未绑定三方时弹窗
+    useEffect(() => {
+        const firstLogin = localStorage.getItem('first_login') === 'true';
+        // const firstLogin = true;
+        if (
+            firstLogin &&
+            (!userInfo.isEmailBind || !userInfo.isGithubBind || !userInfo.isGoogleBind)
+        ) {
+            setShowBindSheet(true);
+            localStorage.removeItem('first_login');
+        }
+    }, [userInfo]);
+
     const checkAuth = async () => {
         try {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
+            // 检查是否已登录
+            if (!authService.isLoggedIn()) {
                 navigate('/');
                 setVisible(true);
                 return;
             }
 
-            const { data: profile, error: profileError } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .single();
+            // 获取用户信息
+            const profile = await authService.getUserProfile();
 
-            // 设置用户信息，如果没有 profile 或获取失败则使用默认值
-            const defaultNickname = session.user.email?.split('@')[0] || 'User';
-            setUserInfo({
-                avatar: profile?.avatar_url || '/default-avatar.png',
-                nickname: profile?.nickname || defaultNickname,
-                coins: profile?.coins || 0,
-                id: session.user.id,
-                bio: profile?.bio || '',
-                gender: profile?.gender,
-                followers: profile?.followers_count || 0,
-                followings: profile?.following_count || 0,
-                isVerified: profile?.is_verified || false,
-                contributions: profile?.contributions || 0,
-            });
+            if (profile) {
+                // 将后端返回的性别值转换为组件期望的类型
+                const gender: Gender = profile.gender === 'male' || profile.gender === 'female'
+                    ? profile.gender
+                    : undefined;
 
-            if (profileError && profileError.code !== 'PGRST116') {
-                message.warning('获取用户信息失败，显示默认信息');
-            }
-        } catch (error) {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                const defaultNickname = session.user.email?.split('@')[0] || 'User';
                 setUserInfo({
-                    avatar: '/default-avatar.png',
-                    nickname: defaultNickname,
-                    coins: 0,
-                    id: session.user.id,
-                    bio: '',
-                    gender: null,
+                    avatar: profile.avatar_url || '/default-avatar.png',
+                    nickname: profile.username,
+                    coins: profile.coin,
+                    id: profile.uuid,
+                    bio: profile.intro_short || profile.intro_long || '',
+                    gender,
                     followers: 0,
                     followings: 0,
-                    isVerified: false,
+                    isVerified: profile.is_verified || profile.is_email_bound || profile.is_github_bound || profile.is_google_bound,
                     contributions: 0,
+                    email: profile.username,
+                    researchArea: profile.research_area,
+                    isEmailBind: profile.is_email_bound,
+                    isGithubBind: profile.is_github_bound,
+                    isGoogleBind: profile.is_google_bound,
                 });
-                message.warning('获取用户信息失败，显示默认信息');
+                console.log('userInfo', userInfo);
             } else {
-                message.error('发生错误，请稍后重试');
+                localStorage.removeItem('user_profile');
+                message.error('Fail to load user profile, please login again');
             }
+        } catch (error) {
+            message.error('Fail to load user profile, please login again');
+            // 清除token并跳转到首页
+            authService.clearToken();
+            navigate('/');
         } finally {
             setLoading(false);
         }
@@ -152,33 +178,113 @@ export default function Account() {
         setEditSheetVisible(false);
         // 重新加载用户信息
         checkAuth();
+
     };
 
+    const handleEdit = (post: any) => {
+        setSelectedPost(post);
+        setEditPostSheetVisible(true);
+    };
+
+    const handleEditPostClose = async () => {
+        setEditPostSheetVisible(false);
+        setSelectedPost(null);
+    };
+
+    const handleDelete = async (postId: number) => {
+        setPostToDelete(String(postId));
+        setDeleteConfirmVisible(true);
+    };
+
+    const handleDeleteCancel = () => {
+        setDeleteConfirmVisible(false);
+        setPostToDelete(null);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!postToDelete) return;
+        try {
+            // TODO: 调用删除帖子接口
+            await postService.deletePost(Number(postToDelete));
+            message.success('Post deleted');
+            fetchMyPosts();
+        } catch (error) {
+            message.error('Delete Failed');
+        } finally {
+            setDeleteConfirmVisible(false);
+            setPostToDelete(null);
+        }
+    };
+
+    const fetchMyPosts = async () => {
+        setLoading(true);
+        try {
+            const response = await authService.getMyPosts({
+                page_num: 1,
+                page_size: 50,
+                sort_order: 'desc'  // 按时间倒序，最新的在前面
+            });
+            if (response.code === 0 && response.data.list) {
+                setPosts(response.data.list);
+            }
+        } catch (error) {
+            console.error('Fail to get history posts:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchMyPosts();
+    }, []);
+
+    // 处理内容截断
+    const truncateContent = (content: string, maxLength: number = 100) => {
+        if (content.length <= maxLength) return content;
+        return content.substring(0, maxLength) + '...';
+    };
+
+    // 监听posts变化，生成贡献数据
+    useEffect(() => {
+        // 统计过去一年每天的发帖数
+        const today = new Date();
+        const oneYearAgo = new Date(today);
+        oneYearAgo.setFullYear(today.getFullYear() - 1);
+
+        // 生成日期字符串数组
+        const dateArr: string[] = [];
+        for (let d = new Date(oneYearAgo); d <= today; d.setDate(d.getDate() + 1)) {
+            dateArr.push(d.toISOString().split('T')[0]);
+        }
+
+        // 统计每一天的发帖数
+        const countMap: Record<string, number> = {};
+        posts.forEach(post => {
+            if (post.create_date) {
+                const dateStr = new Date(post.create_date).toISOString().split('T')[0];
+                countMap[dateStr] = (countMap[dateStr] || 0) + 1;
+            }
+        });
+
+        // 生成贡献数据
+        const data: ContributionDay[] = dateArr.map(date => {
+            const count = countMap[date] || 0;
+            return {
+                date,
+                count,
+                level: getContributionLevel(count)
+            };
+        });
+        setContributionData(data);
+    }, [posts]);
+
     if (loading) {
-        return <div>加载中...</div>;
+        return <div>Loading...</div>;
     }
 
     if (!userInfo) {
         return null;
     }
-
-    const posts: Post[] = [
-        {
-            id: '1',
-            title: 'content dsdadasdasdsadbalbabla',
-            date: '2024-03-20',
-        },
-    ];
-
-    const contributionData = generateContributionData();
-
-    const handleEdit = (postId: string) => {
-        console.log('编辑帖子:', postId);
-    };
-
-    const handleDelete = (postId: string) => {
-        console.log('删除帖子:', postId);
-    };
 
     return (
         <div className={styles.container}>
@@ -198,7 +304,7 @@ export default function Account() {
                                 <div className={styles.verificationBadge}>
                                     <img
                                         src="/profile_verification.svg"
-                                        alt="认证标志"
+                                        alt="Verification Badge"
                                     />
                                 </div>
                             )}
@@ -209,13 +315,13 @@ export default function Account() {
                                 {userInfo.gender && <ManOutlined className={styles.icon} />}
                                 <span className={styles.userName}>{userInfo.nickname}</span>
                                 <EditOutlined className={styles.editIcon} onClick={handleEditClick} />
-                                <GithubOutlined className={styles.icon} />
-                                <GoogleOutlined className={styles.icon} />
-                                <MailOutlined className={styles.icon} />
+                                {userInfo.isGithubBind && <GithubOutlined className={styles.icon} />}
+                                {userInfo.isGoogleBind && <GoogleOutlined className={styles.icon} />}
+                                {userInfo.isEmailBind && <MailOutlined className={styles.icon} />}
                             </div>
                             <div className={styles.userInfoRow}>
                                 <span className={styles.userInfoText}>{userInfo.coins}</span>
-                                <img src="/sage_coin.png" alt="金币" className={styles.coinIcon} />
+                                <img src="/sage_coin.png" alt="Coins" className={styles.coinIcon} />
                             </div>
                             <div className={styles.userInfoRow}>
                                 <span className={styles.userInfoText}>ID: {userInfo.id}</span>
@@ -253,40 +359,42 @@ export default function Account() {
                 </div>
             </div>
 
-            {/* Activities Section */}
+            {/* History Activities Section */}
             <div className={styles.section}>
                 <div className={styles.activitiesSection}>
-                    <h2>Activities</h2>
+                    <h2>History Activities</h2>
                     {posts.length > 0 ? (
                         <>
-                            <p>最近发帖时间: {posts[0].date}</p>
+                            <p>Latest post time: {new Date(posts[0].create_date).toLocaleString()}</p>
                             <div className={styles.postHistory}>
                                 {posts.map((post) => (
-                                    <div key={post.id} className={styles.postCard}>
+                                    <div key={post.post_id} className={styles.postCard}>
                                         <div className={styles.postHeader}>
-                                            <h3>Post History</h3>
+                                            <h3>{post.title || 'No Title'}</h3>
                                             <div className={styles.postActions}>
                                                 <button
-                                                    onClick={() => handleEdit(post.id)}
+                                                    onClick={() => handleEdit(post)}
                                                     className={styles.actionButton}
                                                 >
                                                     <EditOutlined />
                                                 </button>
                                                 <button
-                                                    onClick={() => handleDelete(post.id)}
+                                                    onClick={() => handleDelete(post.post_id)}
                                                     className={styles.actionButton}
                                                 >
                                                     <DeleteOutlined />
                                                 </button>
                                             </div>
                                         </div>
-                                        <p>{post.title}</p>
+                                        <p className={styles.postContent}>
+                                            {truncateContent(post.content)}
+                                        </p>
                                     </div>
                                 ))}
                             </div>
                         </>
                     ) : (
-                        <p>Empty</p>
+                        <p>No posts yet</p>
                     )}
                 </div>
             </div>
@@ -300,9 +408,37 @@ export default function Account() {
                     display_name: userInfo?.nickname,
                     intro: userInfo?.bio,
                     gender: userInfo?.gender,
-                    research_area: userInfo?.research_area,
+                    research_area: userInfo?.researchArea,
                 }}
+            />
+
+            {/* Edit Post Sheet */}
+            {selectedPost && (
+                <EditPostSheet
+                    visible={editPostSheetVisible}
+                    onClose={handleEditPostClose}
+                    post={selectedPost}
+                />
+            )}
+
+            {/* Delete Confirm Alert */}
+            <DeleteConfirmAlert
+                visible={deleteConfirmVisible}
+                onCancel={handleDeleteCancel}
+                onConfirm={handleConfirmDelete}
+            />
+
+            {/* User Link Auth Sheet */}
+            <UserLinkAuthSheet
+                visible={showBindSheet}
+                onClose={() => setShowBindSheet(false)}
+                email={userInfo.email}
+                isGithubBind={userInfo.isGithubBind}
+                isGoogleBind={userInfo.isGoogleBind}
+                isEmailBind={userInfo.isEmailBind}
             />
         </div>
     );
-} 
+};
+
+export default Account; 

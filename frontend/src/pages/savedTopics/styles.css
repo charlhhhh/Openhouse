@@ -1,0 +1,50 @@
+.saved-topics-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.saved-topics-header {
+    margin-bottom: 24px;
+}
+
+.saved-topics-title {
+    color: #000;
+    font-family: Inter;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    margin: 0;
+}
+
+.saved-topics-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.feed-container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+    .saved-topics-container {
+        padding: 16px;
+    }
+}

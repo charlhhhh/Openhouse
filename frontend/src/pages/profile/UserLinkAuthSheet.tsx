@@ -7,24 +7,31 @@ import {
     CloseOutlined,
     MailOutlined,
 } from "@ant-design/icons";
-
+import { authService } from '../../services/auth';
+// import swot from 'swot-js';
 
 interface UserProfileCreateSheetProps {
     visible: boolean;
     onClose: () => void;
+    email: string;
+    isGithubBind: boolean;
+    isGoogleBind: boolean;
+    isEmailBind: boolean;
 }
 
 const SHEET_WIDTH = 840;
 const SHEET_HEIGHT = 908;
 
-export const UserProfileCreateSheet: React.FC<UserProfileCreateSheetProps> = ({
+export const UserLinkAuthSheet: React.FC<UserProfileCreateSheetProps> = ({
     visible,
-    onClose
+    onClose,
+    email,
+    isGithubBind,
+    isGoogleBind,
+    isEmailBind
 }) => {
-    const [nickname, setNickname] = useState('');
-    const [githubUsername, setGithubUsername] = useState('');
-    const [researchAreas, setResearchAreas] = useState('');
-    // const [schoolEmail, setSchoolEmail] = useState('');
+    const [bindEmail, setBindEmail] = useState(isEmailBind);
+    const [schoolEmail] = useState(email);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [createProfileModalVisible, setCreateProfileModalVisible] = useState(true);
     const handleCreateProfileCancel = () => {
@@ -32,50 +39,40 @@ export const UserProfileCreateSheet: React.FC<UserProfileCreateSheetProps> = ({
         onClose();
     }
 
-    const handleSubmit = async () => {
-        console.log('提交:', nickname, githubUsername, researchAreas);
-        if (!nickname.trim()) {
-            message.warning('请输入昵称');
-            return;
-        }
+    const handleGithubBind = () => {
+        const token = localStorage.getItem('token');
+        window.location.href = `https://github.com/login/oauth/authorize?scope=user:email&client_id=Ov23liKlSNhwhBevQPD7&redirect_uri=http://openhouse.horik.cn/api/v1/auth/github/callback?state=${token}`;
+    }
 
+    const handleGoogleBind = () => {
+        const token = localStorage.getItem('token');
+        window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?client_id=1096406563590-dg8skdq3ook05s6hj2s9s41arvhj4l4s.apps.googleusercontent.com&redirect_uri=http://openhouse.horik.cn/api/v1/auth/google/callback&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email+https://www.googleapis.com/auth/userinfo.profile+openid&state=${token}`;
+    }
+
+    const handleSchoolEmailBind = async () => {
         setIsSubmitting(true);
+
         try {
-            const session = userSession.getSession();
-            if (!session) return;
-
-            const profile: UserProfile = {
-                id: session.userId,
-                email: session.email,
-                display_name: nickname,
-                github_username: githubUsername,
-                research_area: researchAreas,
-                tags: [],
-                // school_email: schoolEmail
-            };
-
-            const { error } = await supabase.from('profiles').insert({ ...profile })
-            if (error) {
-                console.error('插入用户资料失败:', error);
-                return;
-            }
-            // if (data) {
-            //     console.log('更新用户资料:', data);
-
-            // }
-
-            if (error) throw error;
-
-            userSession.updateProfile(profile);
-            message.success('个人信息创建成功');
-            onClose();
+            const school = await authService.verifySchoolEmail({
+                email: schoolEmail,
+            });
+            console.log('school', school);
+            await authService.updateUserProfile({
+                is_verified: true,
+                is_email_bound: true,
+            })
+            message.success('Verify school email successfully');
+            setBindEmail(true);
         } catch (error) {
-            console.error('创建个人信息失败:', error);
-            message.error('创建个人信息失败');
+            message.error('Fail to verify school email');
         } finally {
             setIsSubmitting(false);
         }
-    };
+    }
+
+    const handleSkip = () => {
+        onClose();
+    }
 
     return (
         <Modal
@@ -97,36 +94,33 @@ export const UserProfileCreateSheet: React.FC<UserProfileCreateSheetProps> = ({
             <div style={styles.sheetContainer}>
                 <div style={styles.backgroundImage}>
                     <div style={styles.content}>
-                        <h1 style={styles.title}>Welcome to OpenHouse</h1>
-                        <p style={styles.subtitle}>Sign in to continue</p>
-                        <div style={styles.inputContainer}>
-                            <Input
-                                style={styles.input}
-                                placeholder="Enter ID"
-                                onChange={(e) => { setNickname(e.target.value) }}
-                            />
-                        </div>
-                        <div style={styles.inputContainer}>
-                            <Input
-                                style={styles.input}
-                                placeholder="GitHub"
-                                onChange={(e) => { setGithubUsername(e.target.value) }}
-                            />
-                        </div>
-                        <div style={styles.inputContainer}>
-                            <Input
-                                style={styles.input}
-                                placeholder="Reasearch Areas"
-                                onChange={(e) => { setResearchAreas(e.target.value) }}
-                            />
-                        </div>
 
                         <Button
-                            style={styles.submitButton}
-                            onClick={handleSubmit}
-                            loading={isSubmitting}
+                            style={styles.inputContainer}
+                            onClick={handleGithubBind}
+                            disabled={isGithubBind}
                         >
-                            确认
+                            {isGithubBind ? 'Already Bind Github' : 'Bind Github Account'}
+                        </Button>
+
+                        <Button
+                            style={styles.inputContainer}
+                            onClick={handleGoogleBind}
+                            disabled={isGoogleBind}
+                        >
+                            {isGoogleBind ? 'Already Bind Google' : 'Bind Google Account'}
+                        </Button>
+
+                        <Button style={styles.inputContainer}
+                            onClick={handleSchoolEmailBind}
+                            disabled={bindEmail}
+                        >
+                            {bindEmail ? 'Verified School Email' : 'Verify School Email'}
+                        </Button>
+                        <Button style={styles.skipButton}
+                            onClick={handleSkip}
+                        >
+                            Skip for now
                         </Button>
                     </div>
                 </div>
@@ -199,9 +193,16 @@ const styles: { [key: string]: React.CSSProperties } = {
         borderRadius: '8px',
         // marginBottom: '18px',
         padding: '0 16px',
-        width: '65%',
+        width: '50%',
         height: '65px',
         margin: '10px auto',
+        boxShadow: '6px 7px 12.8px 0px rgba(0, 0, 0, 0.25)',
+        color: '#A0A1A5',
+        fontFamily: 'Open Sans',
+        fontSize: '18px',
+        fontStyle: 'normal',
+        fontWeight: '400',
+        lineHeight: 'normal',
     },
     input: {
         flex: 1,
@@ -217,8 +218,8 @@ const styles: { [key: string]: React.CSSProperties } = {
         flexDirection: 'column' as const,
         alignItems: 'center',
     },
-    submitButton: {
-        width: '30%',
+    skipButton: {
+        width: '35%',
         height: '48px',
         borderRadius: '8px',
         background: 'linear-gradient(to bottom, rgba(106, 76, 147, 0.80) 0%, rgba(32, 23, 45, 0.80) 116.11%)',

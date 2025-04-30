@@ -1,0 +1,50 @@
+.following-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.following-header {
+    margin-bottom: 24px;
+}
+
+.following-title {
+    color: #000;
+    font-family: Inter;
+    font-size: 22px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    margin: 0;
+}
+
+.following-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+}
+
+.feed-container {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+@media (max-width: 768px) {
+    .following-container {
+        padding: 16px;
+    }
+}
