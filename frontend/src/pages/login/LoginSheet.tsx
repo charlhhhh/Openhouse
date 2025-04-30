@@ -3,7 +3,6 @@ import { Button, Input, Divider, message } from 'antd';
 import { CloseOutlined, MailOutlined, GoogleOutlined, ArrowLeftOutlined, GithubOutlined, AppleOutlined } from '@ant-design/icons';
 import SMSVerifyCodeInput from './SMSVerifyCodeInput';
 import { userSession } from "../../utils/UserSession";
-import { Provider } from '@supabase/supabase-js';
 import { create } from 'zustand';
 import { authService } from '../../services/auth';
 
@@ -68,12 +67,12 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
         try {
             // 发送验证码
             await authService.sendEmailCode(email);
-            message.success('验证码已发送到您的邮箱');
+            message.success('Verification Code Sent to Your Email');
             setShowVerification(true);
             setShouldStartCountdown(true);
 
         } catch (error) {
-            message.error('发送验证码失败，请稍后重试');
+            message.error('Send Verification Code Failed, Please Try Again Later');
         } finally {
             setIsLoading(false);
         }
@@ -85,11 +84,11 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
             // 重新发送验证码
             const response = await authService.sendEmailCode(email);
             if (response.code === 0) {
-                message.success('验证码已重新发送到您的邮箱');
+                message.success('Verification Code Re-sent to Your Email');
                 setShouldStartCountdown(true);
             }
         } catch (error) {
-            message.error('发送验证码失败，请稍后重试');
+            message.error('Send Verification Code Failed, Please Try Again Later');
         } finally {
             setIsLoading(false);
         }
@@ -97,10 +96,9 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
 
     const handleVerificationSubmit = async (code: string) => {
         if (!email || !code) {
-            message.error('邮箱或验证码不能为空');
+            message.error('Email or Verification Code Cannot Be Empty');
             return;
         }
-        console.log('验证验证码:', code, email);
         setIsLoading(true);
         try {
             // 验证验证码
@@ -112,15 +110,15 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
             if (response.data?.Token) {
                 // 保存token
                 authService.saveToken(response.data.Token);
-                message.success('登录成功');
+                message.success('Login Success');
                 onLoginSuccess();
                 // 重置状态
                 resetState();
             } else {
-                message.error('验证失败，请检查验证码是否正确');
+                message.error('Verification Failed, Please Check the Verification Code');
             }
         } catch (error) {
-            message.error('验证码验证失败，请重试');
+            message.error('Verification Failed, Please Try Again');
         } finally {
             setIsLoading(false);
         }
@@ -133,7 +131,7 @@ export default function LoginSheet({ visible, onClose, onLoginSuccess }: LoginSh
 
     const handleGoogleLogin = async () => {
         // 添加谷歌登录逻辑
-        setIsLoading(true);
+        window.location.href = authService.getGoogleAuthUrl();
     };
 
     const isButtonEnabled = showVerification

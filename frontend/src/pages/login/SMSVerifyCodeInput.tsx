@@ -24,24 +24,76 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
     const countdownRef = useRef<number | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
+    // 处理粘贴事件
+    const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData('text').trim();
+        // 只接受数字
+        const numbers = pastedData.replace(/[^\d]/g, '').split('').slice(0, CODE_LENGTH);
+
+        if (numbers.length > 0) {
+            const newCode = [...code];
+            numbers.forEach((num, index) => {
+                if (index < CODE_LENGTH) {
+                    newCode[index] = num;
+                }
+            });
+            setCode(newCode);
+            setActiveIndex(Math.min(numbers.length, CODE_LENGTH - 1));
+
+            // 如果粘贴的数字长度等于验证码长度，触发完成回调
+            if (numbers.length === CODE_LENGTH) {
+                onInputCompleted(numbers.join(''));
+            }
+        }
+    };
+
     // 处理验证码输入和退格键
     const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === 'Backspace' && activeIndex > 0) {
-            const newCode = [...code];
-            newCode[activeIndex - 1] = '';
-            setCode(newCode);
-            setActiveIndex(Math.max(0, activeIndex - 1));
-        } else if (e.key >= '0' && e.key <= '9') {
+        if (e.key === 'Backspace') {
+            if (activeIndex > 0) {
+                const newCode = [...code];
+                newCode[activeIndex - 1] = '';
+                setCode(newCode);
+                setActiveIndex(activeIndex - 1);
+            } else if (activeIndex === 0 && code[0] !== '') {
+                const newCode = [...code];
+                newCode[0] = '';
+                setCode(newCode);
+            }
+        } else if (/^[0-9]$/.test(e.key)) {
             const newCode = [...code];
             newCode[activeIndex] = e.key;
             setCode(newCode);
-            const nextIndex = Math.min(activeIndex + 1, CODE_LENGTH - 1);
-            setActiveIndex(nextIndex);
-            console.log('newCode:', code);
-            // 如果输入完成，触发回调
-            // if (newCode.every(c => c !== '') && newCode.length === CODE_LENGTH) {
-            //     onInputCompleted(newCode.join(''));
-            // }
+
+            // 如果当前不是最后一个位置，自动前进
+            if (activeIndex < CODE_LENGTH - 1) {
+                setActiveIndex(activeIndex + 1);
+            }
+
+            // 检查是否输入完成
+            const isComplete = newCode.every(c => c !== '');
+            if (isComplete) {
+                onInputCompleted(newCode.join(''));
+            }
+        }
+    };
+
+    // 处理输入框值变化
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value.replace(/[^\d]/g, '').slice(0, CODE_LENGTH);
+        const newCode = Array(CODE_LENGTH).fill('');
+        value.split('').forEach((char, index) => {
+            if (index < CODE_LENGTH) {
+                newCode[index] = char;
+            }
+        });
+        setCode(newCode);
+        setActiveIndex(Math.min(value.length, CODE_LENGTH - 1));
+
+        // 如果输入长度等于验证码长度，触发完成回调
+        if (value.length === CODE_LENGTH) {
+            onInputCompleted(value);
         }
     };
 
@@ -116,8 +168,12 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
                 style={styles.hiddenInput}
                 value={code.join('')}
                 onKeyDown={handleKeyPress}
+                onChange={handleInputChange}
+                onPaste={handlePaste}
                 maxLength={CODE_LENGTH}
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
             />
             <div style={styles.inputContainer}>
                 <div style={styles.cellsContainer}>
