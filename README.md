@@ -64,7 +64,7 @@
 │   ├── global/             # global variables
 │   ├── initialize/         # DB, OSS, config init
 │   └── main.go             # project entrypoint
-├── frontend/               # React + Vite frontend (optional)
+├── frontend/               # React + Vite frontend
 ```
 
 ## 🔧 Setup & Run
