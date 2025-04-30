@@ -1,13 +1,8 @@
-
----
-
 # 🏠 OpenHouse: A Researcher Matching Platform
 
 **OpenHouse** is an AI-powered academic social platform designed to connect researchers and foster meaningful collaborations. It offers passwordless login, intelligent partner matching, real-time chat, content sharing, and a lightweight notification system.
 
 🌐 **Demo**: [https://openhouse.horik.cn](https://openhouse.horik.cn)
-
----
 
 ## 📦 Tech Stack
 
@@ -19,8 +14,6 @@
 | Auth      | Email, GitHub, Google OAuth2     |
 | AI Match  | LLM API (OpenAI / TogetherAI)    |
 | Storage   | Alibaba Cloud OSS (Image CDN)    |
-
----
 
 ## 🚀 Features
 
@@ -58,8 +51,6 @@
 - **System notifications**: match success, likes, comments, admin messages  
 - **User messages**: one-on-one chat after match  
 
----
-
 ## 🛠 Project Structure
 
 ```
@@ -75,8 +66,6 @@
 │   └── main.go             # project entrypoint
 ├── frontend/               # React + Vite frontend (optional)
 ```
-
----
 
 ## 🔧 Setup & Run
 
@@ -125,14 +114,10 @@ cd frontend/
 pnpm dev
 ```
 
----
-
 ## 📝 License
 
 This project is licensed under the **Apache-2.0 License**.  
 See the `LICENSE` file for details.
-
----
 
 ## 📬 Contact & Contribution
 
@@ -144,6 +129,6 @@ To contribute:
 
 Let us build the world’s largest researcher community — together.
 
----
+
 
 
