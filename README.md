@@ -89,17 +89,6 @@ cd frontend/
 pnpm install
 ```
 
-### 🗃️ Run MySQL (Optional):
-```bash
-docker run --name openhouse-mysql \
-  -e MYSQL_ROOT_PASSWORD=123456 \
-  -e MYSQL_DATABASE=openhouse \
-  -p 3306:3306 \
-  -d mysql:8.0 \
-  --character-set-server=utf8mb4 \
-  --collation-server=utf8mb4_unicode_ci
-```
-
 ### ⚙️ Start Backend
 ```bash
 cd backend/
