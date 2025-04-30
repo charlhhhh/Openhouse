@@ -337,4 +337,13 @@ export const authService = {
     }> => {
         return request.post('/api/v1/chat/send', params);
     },
+
+    // 获取用户信息
+    getUserInfo: async (uuid: string): Promise<{
+        code: number;
+        data: UserProfile;
+        message: string;
+    }> => {
+        return request.get(`/api/v1/user/${uuid}`);
+    },
 }; 

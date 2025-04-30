@@ -384,11 +384,6 @@ export default function FindPartner() {
 
   const handleMessage = () => {
     // 保存匹配用户信息到localStorage
-    localStorage.setItem('chat_peer_info', JSON.stringify({
-      uuid: matchedUser.uuid,
-      avatar_url: matchedUser.avatar_url,
-      username: matchedUser.username
-    }));
     navigate(`/chat/${matchedUser.uuid}`);
   };
 

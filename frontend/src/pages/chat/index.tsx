@@ -149,25 +149,29 @@ const ChatPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
 
-    // 从localStorage获取聊天对象信息
+    // 获取聊天对象信息
     useEffect(() => {
-        const storedPeerInfo = localStorage.getItem('chat_peer_info');
-        if (storedPeerInfo) {
+        const fetchPeerInfo = async () => {
+            if (!peerUuid) return;
             try {
-                const info = JSON.parse(storedPeerInfo);
-                setPeerInfo(info);
-            } catch (error) {
-                console.error('Failed to parse peer info:', error);
-            }
-        }
-    }, []);
+                const response = await authService.getUserInfo(peerUuid);
+                setPeerInfo(response.data);
+                // if (response.code === 0) {
 
-    // 组件卸载时清除localStorage中的聊天对象信息
-    useEffect(() => {
-        return () => {
-            localStorage.removeItem('chat_peer_info');
+                // } else {
+                //     message.error('获取用户信息失败');
+                //     navigate('/findPartner');
+                // }
+            } catch (error) {
+                console.error('Failed to fetch peer info:', error);
+                message.error('Failed to fetch peer info');
+                // navigate('/findPartner');
+            }
         };
-    }, []);
+
+        fetchPeerInfo();
+    }, [peerUuid, navigate]);
+
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
