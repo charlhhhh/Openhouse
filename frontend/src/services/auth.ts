@@ -130,7 +130,7 @@ export const authService = {
         const formData = new FormData();
         formData.append('file', file);
 
-        const response = await fetch('http://openhouse.horik.cn/api/v1/upload', {
+        const response = await fetch('https://openhouse.horik.cn/api/v1/media/upload', {
             method: 'POST',
             body: formData,
             headers: {

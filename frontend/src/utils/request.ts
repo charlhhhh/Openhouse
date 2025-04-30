@@ -3,7 +3,7 @@ import { message } from 'antd';
 
 // 创建axios实例
 const request = axios.create({
-    baseURL: 'http://openhouse.horik.cn',
+    baseURL: 'https://openhouse.horik.cn',
     timeout: 10000,
 });
 
