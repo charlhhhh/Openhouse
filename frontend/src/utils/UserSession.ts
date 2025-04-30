@@ -1,4 +1,3 @@
-import { supabase } from '../supabase/client';
 import { UserProfile, UserSession } from '../types/user';
 import Cookies from 'js-cookie';
 
@@ -6,13 +5,15 @@ class UserSessionManager {
     private static instance: UserSessionManager;
     private session: UserSession | null = null;
     private listeners: Set<() => void> = new Set();
+    private userId: string = '';
+    private profile: UserProfile | null = null;
 
     private constructor() {
         // 从cookie中恢复session
-        const userId = Cookies.get('userId');
-        const email = Cookies.get('email');
-        if (userId && email) {
-            this.session = { userId, email };
+        const token = Cookies.get('token');
+
+        if (token) {
+            this.session = { token };
         }
     }
 
@@ -27,29 +28,17 @@ class UserSessionManager {
         return this.session;
     }
 
-    public setSession(userId: string, email: string, profile?: UserProfile) {
-        this.session = { userId, email, profile };
+    public setSession(token: string) {
         // 保存到cookie
-        Cookies.set('userId', userId);
-        Cookies.set('email', email);
+        this.session = { token };
+        Cookies.set('userId', token);
         this.notifyListeners();
     }
 
     public clearSession() {
         this.session = null;
-        Cookies.remove('userId');
-        Cookies.remove('email');
+        Cookies.remove('token');
         this.notifyListeners();
-    }
-
-    public updateProfile(profile: UserProfile) {
-        console.log('更新用户资料:', profile);
-        userSession.updateProfile(profile);
-
-        if (this.session) {
-            this.session.profile = profile;
-            this.notifyListeners();
-        }
     }
 
     public addListener(listener: () => void) {
@@ -62,6 +51,34 @@ class UserSessionManager {
 
     private notifyListeners() {
         this.listeners.forEach(listener => listener());
+    }
+
+    getUserId(): string {
+        const userProfile = localStorage.getItem('user_profile');
+        if (userProfile) {
+            try {
+                const profile = JSON.parse(userProfile);
+                return profile.uuid || '';
+            } catch (error) {
+                console.error('解析用户信息失败:', error);
+                return '';
+            }
+        }
+        return '';
+    }
+
+    getUserAvatar(): string {
+        const userProfile = localStorage.getItem('user_profile');
+        if (userProfile) {
+            try {
+                const profile = JSON.parse(userProfile);
+                return profile.avatar_url || '';
+            } catch (error) {
+                console.error('解析用户信息失败:', error);
+                return '';
+            }
+        }
+        return '';
     }
 }
 

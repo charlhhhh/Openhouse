@@ -139,7 +139,7 @@ const Account: React.FC = () => {
                     : undefined;
 
                 setUserInfo({
-                    avatar: profile.avatar_url || '/default-avatar.png',
+                    avatar: profile.avatar_url || '',
                     nickname: profile.username,
                     coins: profile.coin,
                     id: profile.uuid,
@@ -155,7 +155,6 @@ const Account: React.FC = () => {
                     isGithubBind: profile.is_github_bound,
                     isGoogleBind: profile.is_google_bound,
                 });
-                console.log('userInfo', userInfo);
             } else {
                 localStorage.removeItem('user_profile');
                 message.error('Fail to load user profile, please login again');

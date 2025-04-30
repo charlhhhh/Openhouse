@@ -1,6 +1,9 @@
 export interface UserProfile {
     id: string;
+    username: string;
     email: string;
+    avatar_url: string;
+    intro_short?: string;
     display_name?: string;
     github_username?: string;
     school_email?: string;
@@ -10,7 +13,5 @@ export interface UserProfile {
 }
 
 export interface UserSession {
-    userId: string;
-    email: string;
-    profile?: UserProfile;
+    token: string;
 } 

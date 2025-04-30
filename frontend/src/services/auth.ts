@@ -250,6 +250,100 @@ export const authService = {
         return request.get('/api/v1/match/today');
     },
 
-    // 匹配
+    // 聊天相关接口
+    // 获取最近聊天记录
+    getRecentChat: async (peerUuid: string): Promise<{
+        code: number;
+        data: Array<{
+            content: string;
+            created_at: string;
+            id: number;
+            is_mine: boolean;
+            receiver_uuid: string;
+            sender_uuid: string;
+        }>;
+        message: string;
+    }> => {
+        return request.get('/api/v1/chat/recent', { params: { peer_uuid: peerUuid } });
+    },
 
+    // 获取聊天历史
+    getChatHistory: async (params: {
+        peer_uuid: string;
+        page: number;
+        page_size: number;
+    }): Promise<{
+        code: number;
+        data: {
+            list: Array<{
+                content: string;
+                created_at: string;
+                id: number;
+                is_mine: boolean;
+                receiver_uuid: string;
+                sender_uuid: string;
+            }>;
+            total: number;
+        };
+        message: string;
+    }> => {
+        return request.get('/api/v1/chat/history', { params });
+    },
+
+    // 获取更多历史消息
+    getMoreChat: async (params: {
+        peer_uuid: string;
+        last_time: string;
+        last_id: string;
+    }): Promise<{
+        code: number;
+        data: Array<{
+            content: string;
+            created_at: string;
+            id: number;
+            is_mine: boolean;
+            receiver_uuid: string;
+            sender_uuid: string;
+        }>;
+        message: string;
+    }> => {
+        return request.get('/api/v1/chat/more', { params });
+    },
+
+    // 轮询新消息
+    pollNewMessages: async (since: string): Promise<{
+        code: number;
+        data: Array<{
+            content: string;
+            created_at: string;
+            id: number;
+            is_mine: boolean;
+            receiver_uuid: string;
+            sender_uuid: string;
+        }>;
+        message: string;
+    }> => {
+        return request.get('/api/v1/chat/poll', { params: { since } });
+    },
+
+    // 发送消息
+    sendMessage: async (params: {
+        content: string;
+        receiver_uuid: string;
+    }): Promise<{
+        code: number;
+        data: string;
+        message: string;
+    }> => {
+        return request.post('/api/v1/chat/send', params);
+    },
+
+    // 获取用户信息
+    getUserInfo: async (uuid: string): Promise<{
+        code: number;
+        data: UserProfile;
+        message: string;
+    }> => {
+        return request.get(`/api/v1/user/${uuid}`);
+    },
 }; 

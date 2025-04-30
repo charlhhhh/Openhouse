@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Input, Button, Dropdown } from 'antd';
+import { Input, Button, Dropdown, MenuProps, Avatar } from 'antd';
 import { SearchOutlined, BellOutlined, UserOutlined, LogoutOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { userSession } from '../utils/UserSession';
-import type { MenuProps } from 'antd';
 import { authService } from '../services/auth';
 
 const TopBarContainer = styled.div`
@@ -53,22 +52,24 @@ const ButtonGroup = styled.div`
   gap: 16px;
 `;
 
+const StyledAvatar = styled(Avatar)`
+  cursor: pointer;
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
 const AccountButton = styled(Button)`
-  width: 35px;
-  height: 35px;
+  width: 40px;
+  height: 40px;
   padding: 0;
+  border: none;
+  background: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  background: transparent;
-  
-  &:hover, &:active, &:focus {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-    outline: none !important;
-    border-color: #6A4C93!important;
+  &:hover {
+    background: none;
   }
 `;
 
@@ -139,11 +140,30 @@ interface TopBarProps {
 
 export default function TopBar({ onShowLogin }: TopBarProps) {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userAvatar, setUserAvatar] = useState('');
     const navigate = useNavigate();
+
+    const updateLoginStatus = () => {
+        const loggedIn = authService.isLoggedIn();
+        setIsLoggedIn(loggedIn);
+        if (loggedIn) {
+            setUserAvatar(userSession.getUserAvatar());
+        } else {
+            setUserAvatar('');
+        }
+    };
 
     useEffect(() => {
         // 检查登录状态
-        setIsLoggedIn(authService.isLoggedIn());
+        updateLoginStatus();
+
+        // 注册登录状态变化监听器
+        userSession.addListener(updateLoginStatus);
+
+        // 组件卸载时移除监听器
+        return () => {
+            userSession.removeListener(updateLoginStatus);
+        };
     }, []);
 
     const handleAccountClick = () => {
@@ -158,7 +178,7 @@ export default function TopBar({ onShowLogin }: TopBarProps) {
         authService.clearToken();
         userSession.clearSession();
         localStorage.removeItem('user_profile');
-        setIsLoggedIn(false);
+        updateLoginStatus();
         navigate('/');
     };
 
@@ -169,7 +189,7 @@ export default function TopBar({ onShowLogin }: TopBarProps) {
     const accountMenuItems: MenuProps['items'] = [
         {
             key: 'logout',
-            label: '退出登录',
+            label: 'Logout',
             icon: <LogoutOutlined />,
             onClick: handleLogout
         }
@@ -192,8 +212,9 @@ export default function TopBar({ onShowLogin }: TopBarProps) {
                         trigger={['hover']}
                         placement="bottomRight"
                     >
-                        <AccountButton
-                            icon={<UserOutlined style={{ fontSize: '20px' }} />}
+                        <StyledAvatar
+                            src={userAvatar}
+                            icon={!userAvatar && <UserOutlined />}
                             onClick={handleAccountClick}
                         />
                     </StyledDropdown>

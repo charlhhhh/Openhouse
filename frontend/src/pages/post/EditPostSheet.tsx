@@ -4,7 +4,6 @@ import { ArrowLeftOutlined, EditOutlined, LoadingOutlined, DeleteOutlined } from
 import styled from 'styled-components';
 import type { UploadFile } from 'antd/es/upload';
 import { postService } from '../../services/post';
-import { supabase } from '../../supabase/client';
 import { DeleteConfirmAlert } from '../../components/DeleteConfirmAlert';
 import { authService } from '../../services/auth';
 
@@ -357,11 +356,11 @@ export const EditPostSheet: React.FC<EditPostSheetProps> = ({
         image_urls: imageUrls,
       });
 
-      message.success('保存成功');
+      message.success('Save Success');
       onClose();
     } catch (error) {
       console.error('Save error:', error);
-      message.error('保存失败');
+      message.error('Save Failed');
     }
   };
 

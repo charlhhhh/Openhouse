@@ -79,24 +79,6 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
         }
     };
 
-    // 处理输入框值变化
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value.replace(/[^\d]/g, '').slice(0, CODE_LENGTH);
-        const newCode = Array(CODE_LENGTH).fill('');
-        value.split('').forEach((char, index) => {
-            if (index < CODE_LENGTH) {
-                newCode[index] = char;
-            }
-        });
-        setCode(newCode);
-        setActiveIndex(Math.min(value.length, CODE_LENGTH - 1));
-
-        // 如果输入长度等于验证码长度，触发完成回调
-        if (value.length === CODE_LENGTH) {
-            onInputCompleted(value);
-        }
-    };
-
     // 处理单元格点击
     const handleCellPress = (index: number) => {
         setActiveIndex(index);
@@ -168,7 +150,6 @@ export default function SMSVerifyCodeInput({ onInputCompleted, onVerificationSen
                 style={styles.hiddenInput}
                 value={code.join('')}
                 onKeyDown={handleKeyPress}
-                onChange={handleInputChange}
                 onPaste={handlePaste}
                 maxLength={CODE_LENGTH}
                 type="text"

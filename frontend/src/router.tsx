@@ -1,7 +1,6 @@
 import { createBrowserRouter, RouteObject } from 'react-router-dom';
 import Root from './Root';
 import Home from './pages/home';
-import Login from './pages/login';
 import FindPartner from './pages/find';
 import Account from './pages/account';
 import Following from './pages/following';
@@ -9,6 +8,7 @@ import CreatePost from './pages/createPost';
 import OAuthCallback from './pages/oauth/OAuthCallback';
 import SavedTopics from './pages/savedTopics';
 import BindSuccess from './pages/oauth/BindSuccess';
+import ChatPage from './pages/chat';
 
 const routes: RouteObject[] = [
   {
@@ -18,10 +18,6 @@ const routes: RouteObject[] = [
       {
         index: true,
         element: <Home />,
-      },
-      {
-        path: 'login',
-        element: <Login />,
       },
       {
         path: 'sage',
@@ -54,6 +50,10 @@ const routes: RouteObject[] = [
       {
         path: 'bind_success',
         element: <BindSuccess />,
+      },
+      {
+        path: 'chat/:peerUuid',
+        element: <ChatPage />,
       }
     ],
   },
