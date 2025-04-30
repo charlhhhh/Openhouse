@@ -41,6 +41,11 @@ func SetupRouter(r *gin.Engine) {
 			media.POST("/upload", v1.UploadFile)
 		}
 
+		userPublic := apiV1.Group("/user")
+		{
+			userPublic.GET("/:uuid", v1.GetUserInfo) // 获取用户信息
+		}
+
 		user := apiV1.Group("/user").Use(middleware.JWTAuthMiddleware())
 		{
 			user.GET("/profile", v1.GetProfile)
@@ -87,6 +92,15 @@ func SetupRouter(r *gin.Engine) {
 			match.GET("/trigger", v1.MatchTriggerUser) // 直接触发当前用户的匹配计算,
 			match.GET("/confirm", v1.MatchConfirm)     // 确认匹配, 状态更新为available
 			match.GET("/history", v1.MatchHistory)     // 历史匹配记录
+		}
+
+		chat := apiV1.Group("/chat").Use(middleware.JWTAuthMiddleware())
+		{
+			chat.POST("/send", v1.SendChatMessage)       // 发送消息
+			chat.GET("/recent", v1.GetRecentMessages)    // 获取最近20条
+			chat.GET("/more", v1.GetMoreMessages)        // 加载更旧的20条
+			chat.GET("/poll", v1.PollNewMessages)        // 轮询新消息
+			chat.GET("/history", v1.GetChatHistoryPaged) // 获取历史消息记录
 		}
 
 		// matchTest := apiV1.Group("/match")

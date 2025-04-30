@@ -1,0 +1,122 @@
+[
+    {
+        "sender_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "receiver_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "content": "你好，我最近在研究图神经网络，有没有兴趣交流？",
+        "created_at": "2024-04-30T10:00:00Z"
+    },
+    {
+        "sender_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "receiver_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "content": "当然有兴趣！你目前在哪个方向做实验？",
+        "created_at": "2024-04-30T10:02:00Z"
+    },
+    {
+        "sender_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "receiver_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "content": "主要是图神经网络在分子属性预测上的应用。",
+        "created_at": "2024-04-30T10:04:00Z"
+    },
+    {
+        "sender_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "receiver_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "content": "听起来很有意思，我最近在调研图表示学习。",
+        "created_at": "2024-04-30T10:06:00Z"
+    },
+    {
+        "sender_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "receiver_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "content": "我们可以一起写一篇综述或者申请一个项目试试？",
+        "created_at": "2024-04-30T10:08:00Z"
+    },
+    {
+        "sender_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "receiver_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "content": "可以的，我之前写过关于GNN的综述，可以参考一下。",
+        "created_at": "2024-04-30T10:10:00Z"
+    },
+    {
+        "sender_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "receiver_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "content": "那我来起草一个大纲，我们明天一起review。",
+        "created_at": "2024-04-30T10:12:00Z"
+    },
+    {
+        "sender_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "receiver_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "content": "好主意，顺便把你的数据集介绍也写上。",
+        "created_at": "2024-04-30T10:14:00Z"
+    },
+    {
+        "sender_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "receiver_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "content": "用的是QM9和ZINC两个公开数据集，实验效果不错。",
+        "created_at": "2024-04-30T10:16:00Z"
+    },
+    {
+        "sender_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "receiver_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "content": "那我们可以考虑提交到AAAI或者IJCAI。",
+        "created_at": "2024-04-30T10:18:00Z"
+    },
+    {
+        "sender_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "receiver_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "content": "是的，截稿时间我来查一下，到时候安排好进度。",
+        "created_at": "2024-04-30T10:20:00Z"
+    },
+    {
+        "sender_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "receiver_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "content": "你用什么框架实现的？PyTorch 还是 DGL？",
+        "created_at": "2024-04-30T10:22:00Z"
+    },
+    {
+        "sender_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "receiver_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "content": "主要用的是PyTorch Geometric，接口更清晰。",
+        "created_at": "2024-04-30T10:24:00Z"
+    },
+    {
+        "sender_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "receiver_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "content": "那我们可以整合一个训练pipeline，方便复现。",
+        "created_at": "2024-04-30T10:26:00Z"
+    },
+    {
+        "sender_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "receiver_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "content": "嗯，我这两天先整理一下代码和文档。",
+        "created_at": "2024-04-30T10:28:00Z"
+    },
+    {
+        "sender_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "receiver_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "content": "我这边也补一些数据预处理的说明。",
+        "created_at": "2024-04-30T10:30:00Z"
+    },
+    {
+        "sender_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "receiver_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "content": "对了，我们可以用Markdown写文档，方便整理。",
+        "created_at": "2024-04-30T10:32:00Z"
+    },
+    {
+        "sender_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "receiver_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "content": "非常好，我晚点传一个模板过来。",
+        "created_at": "2024-04-30T10:34:00Z"
+    },
+    {
+        "sender_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "receiver_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "content": "收到！我们保持沟通，进展不错。",
+        "created_at": "2024-04-30T10:36:00Z"
+    },
+    {
+        "sender_uuid": "cfb4240d-44a0-4a22-ac3d-e31ee95d53b9",
+        "receiver_uuid": "06741fa7-5395-4f14-9bba-8f16492121e1",
+        "content": "合作愉快，期待后续成果！",
+        "created_at": "2024-04-30T10:38:00Z"
+    }
+]

@@ -123,6 +123,18 @@ definitions:
     required:
     - post_id
     type: object
+  request.SendChatMessageRequest:
+    properties:
+      content:
+        description: 聊天文本内容
+        type: string
+      receiver_uuid:
+        description: 接收方用户UUID
+        type: string
+    required:
+    - content
+    - receiver_uuid
+    type: object
   request.UpdateProfileInput:
     properties:
       avatar_url:
@@ -155,6 +167,31 @@ definitions:
           type: string
         type: array
       username:
+        type: string
+    type: object
+  response.ChatHistoryPage:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/response.ChatMessageVO'
+        type: array
+      total:
+        type: integer
+    type: object
+  response.ChatMessageVO:
+    properties:
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      is_mine:
+        description: 是否是当前用户发出的
+        type: boolean
+      receiver_uuid:
+        type: string
+      sender_uuid:
         type: string
     type: object
   response.CheckEmailDomainResponse:
@@ -556,6 +593,163 @@ paths:
       summary: Google 登录回调，前端不调用该接口
       tags:
       - Auth
+  /api/v1/chat/history:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 对方 UUID
+        in: query
+        name: peer_uuid
+        required: true
+        type: string
+      - description: 页码，从 1 开始
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: 每页条数
+        in: query
+        name: page_size
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/response.ChatHistoryPage'
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取聊天历史（分页）
+      tags:
+      - Chat
+  /api/v1/chat/more:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 对话对象 UUID
+        in: query
+        name: peer_uuid
+        required: true
+        type: string
+      - description: 最后一条消息的时间戳，如 2024-05-01T15:04:05Z
+        in: query
+        name: last_time
+        required: true
+        type: string
+      - description: 最后一条消息的 ID
+        in: query
+        name: last_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.ChatMessageVO'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 上滑查看更多历史消息
+      tags:
+      - Chat
+  /api/v1/chat/poll:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 起始时间 (RFC3339)
+        in: query
+        name: since
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.ChatMessageVO'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 轮询新消息（拉取当前用户自指定时间之后的所有新消息）
+      tags:
+      - Chat
+  /api/v1/chat/recent:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 对话对象 UUID
+        in: query
+        name: peer_uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/response.ChatMessageVO'
+                  type: array
+              type: object
+      security:
+      - ApiKeyAuth: []
+      summary: 获取最近聊天记录 获取最近20条消息（首次加载）
+      tags:
+      - Chat
+  /api/v1/chat/send:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: receiver_uuid, content
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/request.SendChatMessageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - ApiKeyAuth: []
+      summary: 发送聊天消息
+      tags:
+      - Chat
   /api/v1/comments/create:
     post:
       consumes:
@@ -958,6 +1152,35 @@ paths:
       summary: 取消点赞
       tags:
       - 帖子 Posts
+  /api/v1/user/{uuid}:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: User UUID
+        in: path
+        name: uuid
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/service.ProfileResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Get user information BY UUID
+      tags:
+      - User
   /api/v1/user/follow/count:
     post:
       consumes:

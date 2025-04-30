@@ -22,7 +22,7 @@ type UserImportItem struct {
 }
 
 // MockData 初始化模拟数据
-func MockData() {
+func MockUserData() {
 	// 读取文件
 	data, err := os.ReadFile("data/users.json")
 	if err != nil {
@@ -69,4 +69,29 @@ func MockData() {
 	}
 
 	fmt.Println("🎉 所有用户导入完成！")
+}
+
+func MockMessageData() {
+	// 读取文件
+	data, err := os.ReadFile("data/messages.json")
+	if err != nil {
+		panic("❌ 读取 messages.json 失败：" + err.Error())
+	}
+
+	// 解析 JSON
+	var messages []database.ChatMessage
+	if err := json.Unmarshal(data, &messages); err != nil {
+		panic("❌ JSON 解析失败：" + err.Error())
+	}
+
+	// 写入数据库
+	for _, msg := range messages {
+		msg.CreatedAt = time.Now()
+		if err := global.DB.Create(&msg).Error; err != nil {
+			fmt.Println("❌ 插入消息失败:", msg, err)
+			continue
+		}
+	}
+
+	fmt.Println("🎉 所有消息导入完成！")
 }

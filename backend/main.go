@@ -23,7 +23,7 @@ func main() {
 	initialize.InitMedia()
 	schedule.StartCronJobs()
 
-	// initialize.MockData()
+	// initialize.MockMessageData()
 
 	r := gin.Default()
 	initialize.SetupRouter(r)

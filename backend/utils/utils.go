@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"os"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -78,4 +79,16 @@ func ConvertPostModelWithUser(post database.Post, currentUserUUID string) respon
 		AvatarURL:   author.AvatarURL,
 		IsFollowing: isFollow,
 	}
+}
+
+func ParseUint(s string) (uint64, error) {
+	return strconv.ParseUint(s, 10, 64)
+}
+
+func StringToInt(s string, defaultValue int) int {
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return defaultValue
+	}
+	return i
 }

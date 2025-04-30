@@ -8,6 +8,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GetUserInfo
+// @Summary Get user information BY UUID
+// @Tags User
+// @Accept json
+// @Produce json
+// @Param uuid path string true "User UUID"
+// @Success 200 {object} response.Response{data=service.ProfileResponse}
+// @Router /api/v1/user/{uuid} [get]
+// @Failure 400 {object} response.Response
+func GetUserInfo(c *gin.Context) {
+	uuid := c.Param("uuid")
+	if uuid == "" {
+		response.FailWithMessage("UUID is required", c)
+		return
+	}
+
+	userInfo, err := service.GetProfile(uuid)
+	if err != nil {
+		response.FailWithMessage("Failed to retrieve user information", c)
+		return
+	}
+	response.OkWithData(userInfo, c)
+}
+
 // GetProfile
 // @Summary Get user profile
 // @Security ApiKeyAuth
