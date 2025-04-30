@@ -1,158 +1,136 @@
-# 🏠 OpenHouse
+# 🏠 OpenHouse: A Researcher Matching Platform
 
-## Mission
+OpenHouse is an AI-powered academic social platform designed to connect researchers and promote meaningful collaborations. It provides a passwordless login experience, intelligent partner matching, real-time chat, social content sharing, and a lightweight notification system.
 
-Become the world's largest researcher community.
+🌐 Demo: https://openhouse.horik.cn
 
-Create an organization that exists for over 300 years with the mission to completely deconstruct human science.
+📦 Tech Stack
 
-## Project Overview
+| Layer     | Tech                          |
+|-----------|-------------------------------|
+| Frontend  | React + Vite + TailwindCSS    |
+| Backend   | Go + Gin + GORM + MySQL       |
+| Database  | MySQL 8.x                     |
+| Auth      | Email, GitHub, Google OAuth2  |
+| AI Match  | LLM API (OpenAI/TogetherAI)   |
+| Storage   | Alibaba Cloud OSS (Image CDN) |
 
-OpenHouse is a community platform connecting researchers worldwide, managed by an AI-driven ecosystem dedicated to matching complementary research partners and promoting interdisciplinary collaboration. Core features include:
+—
 
-- **Passwordless Login** - Quick authentication via email verification code
-- **AI Sage Advisor** - Daily coin rewards, contribution scoring, and intelligent matching
-- **Researcher Precision Matching** - Tag-based pairing system with a 7-day cooldown to ensure quality
-- **Real-time Chat** - Instant messaging after successful matching
-- **Community Content Sharing** - Public posts and the "TreeHole" anonymous wall
+🚀 Features
 
-## Tech Stack
+1. ✅ User Authentication
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | React Native (Expo) |
-| Backend | Python (FastAPI) |
-| Database | PostgreSQL |
-| Development | Node.js, Python 3.8+ |
-| Deployment | TBD |
+- Passwordless login via email verification code
+- OAuth2 login via GitHub & Google
+- JWT-based authentication & authorization
+- Multiple account bindings supported (e.g. Email + GitHub)
 
-## Project Structure
+2. 👤 User Profile
 
-```
-openhouse/
-├── backend/              # Backend directory
-│   ├── app/              # Main application
-│   └── venv/             # Python virtual environment
-├── frontend/             # Frontend directory
-│   ├── .expo/            # Expo configuration
-│   ├── app/              # Main app components
-│   ├── assets/           # Static resources
-│   ├── components/       # Reusable UI components
-│   ├── constants/        # Constant definitions
-│   ├── hooks/            # Custom React hooks
-│   ├── scripts/          # Helper scripts
-│   ├── .gitignore
-│   ├── app.json
-│   ├── package.json
-│   └── tsconfig.json
-├── LICENSE
-└── README.md
-```
+- Editable user profile (nickname, gender, avatar, intro)
+- Upload avatar to OSS
+- Track authentication methods (email/github/google)
 
-## Prerequisites
+3. 📚 Posts & Social Feed
 
-- **Node.js** (v16+ recommended, use nvm for version management)
-- **Python** 3.8 or higher
-- **PostgreSQL** database
-- **Expo Go** app (for mobile testing)
+- Create, edit, delete posts with text and images
+- Like, favorite, comment on posts
+- Public feed with follow-based filtering
+- Anonymous "Tree Hole" mode (optional)
+- AI-based scoring to manage the community (future implementation)
 
-## Installation & Setup
+4. 🔍 Researcher Matching
 
-### Backend Setup
+- Users submit tags + intro + research area to enter match pool
+- Daily scheduled LLM-based intelligent matching
+- Matches scored with AI comments & reason
+- Results are revealed daily
+- Matching status: Not Applied / Matching / Matched / Revealed
 
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
+5. 💬 Real-time Chat (Polling)
 
-2. Create and activate a virtual environment:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # Windows: venv\Scripts\activate
-   ```
+- One-on-one chat after successful match
+- Message history & polling-based new message pull
+- Structured chat schema with sender/receiver UUID
 
-3. Install the required Python packages:
-   ```bash
-   pip install fastapi uvicorn sqlalchemy pydantic psycopg2-binary python-jose passlib bcrypt python-multipart
-   ```
-   
-   Or if you have a requirements.txt file:
-   ```bash
-   pip install -r requirements.txt
-   ```
+6. 🔔 Notification System
 
-4. Start the backend server:
-   ```bash
-   uvicorn app.main:app --reload
-   ```
+- System notifications: match success, replies, likes, admin broadcast
+- User notifications: private messages (after match)
 
-   The API will be available at http://localhost:8000 and API documentation at http://localhost:8000/docs
+—
 
-### Frontend Setup
+🛠 Project Structure
 
-1. Navigate to the frontend directory from the project root:
-   ```bash
-   cd frontend
-   ```
+.
+├── backend/                # Go + Gin backend
+│   ├── api/                # API layer
+│   ├── model/              # request/response/database models
+│   ├── service/            # business logic
+│   ├── middleware/         # JWT auth, logging
+│   ├── utils/              # helper functions
+│   ├── global/             # global variables
+│   ├── initialize/         # DB, OSS, config init
+│   └── main.go             # project entrypoint
+├── frontend/               # React + Vite frontend (optional)
 
-2. For first-time setup, create a new Expo app:
-   ```bash
-   npx create-expo-app .   # choose "blank (TypeScript)" when prompted
-   ```
+—
 
-3. Install the required dependencies:
-   ```bash
-   npm install expo-router react-native-safe-area-context react-native-screens expo-linking expo-constants expo-status-bar @expo/vector-icons axios react-native-gesture-handler
-   ```
+🔧 Setup & Run
 
-4. Additional UI and functionality dependencies:
-   ```bash
-   npm install react-native-paper @react-navigation/native @react-navigation/stack react-hook-form
-   ```
+🧩 Prerequisites
 
-5. Start the frontend development server:
+- Go 1.20+
+- MySQL 8.0+
+- Node.js 18+ (for frontend)
+- Docker (optional for deployment)
 
-   For web:
-   ```bash
-   npm run web
-   ```
+📦 Install Dependencies
 
-   For iOS/Android:
-   ```bash
-   npx expo start
-   ```
-   Then scan the QR code with the Expo Go app on your device
+Backend:
 
-## Key Features Explained
+cd backend/
+go mod tidy
 
-### Login and Registration
+Frontend:
 
-- Passwordless login using email verification codes
-- Supports school/company/Google/Microsoft emails
-- After successful login, users are directed to the profile binding page
+cd frontend/
+pnpm install
 
-### AI Sage
+🗃️ Run MySQL (optional):
 
-- Daily coin reward system
-- Contribution-based scoring mechanism
-- Intelligent matching algorithm recommendations
+docker run --name openhouse-mysql \
+  -e MYSQL_ROOT_PASSWORD=123456 \
+  -e MYSQL_DATABASE=openhouse \
+  -p 3306:3306 \
+  -d mysql:8.0 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 
-### Researcher Matching
+⚙️ Start Backend
 
-- Matching system based on 2-6 research tags
-- Limited to one match every 7 days to ensure quality
-- Four matching states: Unmatched, Matching, Match Completed, Match Successful
+cd backend/
+go run main.go
 
-### Community Interaction
+✅ Swagger Docs: http://openhouse.horik.cn/swagger/index.html#/
 
-- Public posting functionality
-- "TreeHole" anonymous wall (text posts only)
-- Comment and reply system
+🌐 Start Frontend
 
-## Project Status
+cd frontend/
+pnpm dev
 
-Current version: 1.0 (In development)
+—
 
-## License
+📝 License
 
-See the LICENSE file in the project root directory for details.
+This project is licensed under the Apache-2.0 license. See LICENSE for details.
+
+—
+
+📬 Contact / Contribution
+
+We welcome contributions from researchers, developers and designers.
+
+To contribute, fork the repository, open a pull request, or contact us via issues.
+
+—
+
