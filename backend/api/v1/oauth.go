@@ -211,11 +211,6 @@ func GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	if userUUID == nil {
-		response.OkWithData(result, c)
-		return
-	}
-
 	// redirectURL := fmt.Sprintf("https://localhost:5173/oauth_success?token=%s", result.Token)
 	redirectURL := fmt.Sprintf("https://openhouse.horik.cn/oauth_success?token=%s", result.Token)
 
