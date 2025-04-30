@@ -152,7 +152,7 @@ func GitHubCallback(c *gin.Context) {
 		fmt.Println("Registered user binding GitHub, UUID:", userUUIDStr)
 		bindresult, _ := service.BindAccount(authInput, userUUIDStr)
 		fmt.Println("bindresult", bindresult)
-		// redirectURL := fmt.Sprintf("https://localhost:5173/bind_success?result=%s", bindresult.Result)
+		// redirectURL := fmt.Sprintf("http://localhost:5173/bind_success?result=%s", bindresult.Result)
 		redirectURL := fmt.Sprintf("https://openhouse.horik.cn/bind_success?result=%s", bindresult.Result)
 		c.Redirect(http.StatusFound, redirectURL)
 		return
@@ -164,8 +164,8 @@ func GitHubCallback(c *gin.Context) {
 		return
 	}
 
-	// redirectURL := fmt.Sprintf("https://localhost:5173/oauth_success?token=%s", result.Token)
-	redirectURL := fmt.Sprintf("https://openhouse.horik.cn/oauth_success?token=%s", result.Token)
+	redirectURL := fmt.Sprintf("http://localhost:5173/oauth_success?token=%s", result.Token)
+	// redirectURL := fmt.Sprintf("https://openhouse.horik.cn/oauth_success?token=%s", result.Token)
 	c.Redirect(http.StatusFound, redirectURL)
 }
 
@@ -199,7 +199,7 @@ func GoogleCallback(c *gin.Context) {
 	if userUUIDStr, ok := userUUID.(string); ok {
 		fmt.Println("Registered user binding Google, UUID:", userUUIDStr)
 		bindresult, _ := service.BindAccount(authInput, userUUIDStr)
-		// redirectURL := fmt.Sprintf("https://localhost:5173/bind_success?result=%s", bindresult.Result)
+		// redirectURL := fmt.Sprintf("http://localhost:5173/bind_success?result=%s", bindresult.Result)
 		redirectURL := fmt.Sprintf("https://openhouse.horik.cn/bind_success?result=%s", bindresult.Result)
 		c.Redirect(http.StatusFound, redirectURL)
 		return
@@ -211,8 +211,8 @@ func GoogleCallback(c *gin.Context) {
 		return
 	}
 
-	// redirectURL := fmt.Sprintf("https://localhost:5173/oauth_success?token=%s", result.Token)
-	redirectURL := fmt.Sprintf("https://openhouse.horik.cn/oauth_success?token=%s", result.Token)
+	redirectURL := fmt.Sprintf("http://localhost:5173/oauth_success?token=%s", result.Token)
+	// redirectURL := fmt.Sprintf("https://openhouse.horik.cn/oauth_success?token=%s", result.Token)
 
 	c.Redirect(http.StatusFound, redirectURL)
 }

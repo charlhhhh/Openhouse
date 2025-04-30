@@ -25,6 +25,23 @@ func markUserMatchStatus(userUUID string, status string) error {
 	return nil
 }
 
+// TriggerDailyConfirm, 将所有用户的匹配状态更新为 "Available"
+func TriggerDailyConfirm() error {
+	var users []database.User
+	if err := global.DB.Where("match_status = ?", "matched").Find(&users).Error; err != nil {
+		return errors.New("拉取用户失败")
+	}
+	fmt.Println("匹配用户数量:", len(users))
+	fmt.Println("匹配用户列表:", users)
+	for i := range users {
+		// call markUserMatchStatus
+		if err := markUserMatchStatus(users[i].UUID, "available"); err != nil {
+			return errors.New("更新用户状态失败")
+		}
+	}
+	return nil
+}
+
 // TriggerDailyMatch 每日批量匹配执行
 func TriggerDailyMatch() error {
 	// Step 1：拉取所有符合条件的用户，match_status = "matching"
@@ -198,7 +215,10 @@ func GetTodayMatch(currentUUID string) (response.MatchUserInfo, string, error) {
 	now := time.Now()
 	revealHour := 12 // 中午12点揭晓，可配置
 
-	// 如果还没到揭晓时间, 同时用户的状态不是 "matched"，则返回提示
+	// 1. 如果用户的状态是 "matched"，则直接返回匹配结果
+	// 2. 如果用户的状态不是 "matched"，则判断当前时间是否在揭晓时间之前
+	// 3. 如果在揭晓时间之前，则返回提示
+	// 4. 如果在揭晓时间之后，则查询数据库
 	if user.MatchStatus != "matched" {
 		if now.Hour() < revealHour {
 			remaining := time.Duration((revealHour-now.Hour())*3600-now.Minute()*60-now.Second()) * time.Second

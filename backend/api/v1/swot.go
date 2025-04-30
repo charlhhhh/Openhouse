@@ -50,5 +50,4 @@ func CheckEmailDomain(c *gin.Context) {
 		return
 	}
 	response.FailWithMessage("Email does not belong to an academic institution", c)
-	return
 }
