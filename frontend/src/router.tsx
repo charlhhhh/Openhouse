@@ -9,6 +9,7 @@ import CreatePost from './pages/createPost';
 import OAuthCallback from './pages/oauth/OAuthCallback';
 import SavedTopics from './pages/savedTopics';
 import BindSuccess from './pages/oauth/BindSuccess';
+import ChatPage from './pages/chat';
 
 const routes: RouteObject[] = [
   {
@@ -54,6 +55,10 @@ const routes: RouteObject[] = [
       {
         path: 'bind_success',
         element: <BindSuccess />,
+      },
+      {
+        path: 'chat/:peerUuid',
+        element: <ChatPage />,
       }
     ],
   },

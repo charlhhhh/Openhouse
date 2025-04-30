@@ -22,19 +22,7 @@ interface UserInfo {
   tags: string[];
 }
 
-const mockCurrentUser: UserInfo = {
-  avatar: '/avatar.png',
-  username: '当前用户',
-  intro: '这是一段个人介绍',
-  tags: ['标签1', '标签2']
-};
 
-const mockMatchedUser: UserInfo = {
-  avatar: '/matched-avatar.png',
-  username: '匹配用户',
-  intro: '匹配用户的个人介绍',
-  tags: ['兴趣1', '兴趣2', '兴趣3']
-};
 
 const Container = styled.div`
   position: fixed;
@@ -280,6 +268,10 @@ export default function FindPartner() {
               setMatchedUser(res.data);
               setMatchStatus(MatchStatus.COMPLETED);
               if (pollingRef.current) clearInterval(pollingRef.current);
+            } else {
+              message.error(res.message);
+              setMatchStatus(MatchStatus.MATCHING);
+              startPollingMatch();
             }
           } catch (e) { }
 
@@ -391,8 +383,13 @@ export default function FindPartner() {
   }, [matchStatus]);
 
   const handleMessage = () => {
-    // 实现发送消息的逻辑
-    console.log('发送消息');
+    // 保存匹配用户信息到localStorage
+    localStorage.setItem('chat_peer_info', JSON.stringify({
+      uuid: matchedUser.uuid,
+      avatar_url: matchedUser.avatar_url,
+      username: matchedUser.username
+    }));
+    navigate(`/chat/${matchedUser.uuid}`);
   };
 
   const playAudio = async () => {
@@ -488,10 +485,10 @@ export default function FindPartner() {
           {matchStatus === MatchStatus.PREPARE ? (
             <>
               <CardHeader>
-                <Avatar src={(userProfile?.avatar) || mockCurrentUser.avatar} alt="avatar" />
+                <Avatar src={(userProfile?.avatar)} alt="avatar" />
                 <UserInfo>
                   <Title>Magic Card</Title>
-                  <Username>{userProfile?.username || mockCurrentUser.username}</Username>
+                  <Username>{userProfile?.username}</Username>
                 </UserInfo>
               </CardHeader>
               <TagsContainer>
