@@ -189,6 +189,25 @@ const MessageButton = styled(SendCardButton)`
   margin-top: auto;
 `;
 
+const MatchingText = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #20172D;
+  text-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+  font-family: Inter;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: normal;
+  z-index: 2;
+  padding: 20px 60px;
+  border-radius: 50px;
+  background: #FFF;
+  box-shadow: 6px 7px 12.8px 0px rgba(0, 0, 0, 0.25);
+`;
+
 interface PlayError extends Error {
   name: string;
 }
@@ -311,7 +330,7 @@ export default function FindPartner() {
   const handleTagInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     if (value.length > 18) {
-      setTagError('标签不能超过18个字符');
+      setTagError('Tag cannot exceed 18 characters');
     } else {
       setTagError('');
     }
@@ -320,11 +339,11 @@ export default function FindPartner() {
 
   const handleTagModalOk = () => {
     if (!newTag.trim()) {
-      setTagError('标签不能为空');
+      setTagError('Tag cannot be empty');
       return;
     }
     if (newTag.length > 18) {
-      setTagError('标签不能超过18个字符');
+      setTagError('Tag cannot exceed 18 characters');
       return;
     }
     setTags([...tags, newTag.trim()]);
@@ -474,6 +493,10 @@ export default function FindPartner() {
       <ModalOkButtonStyle />
       <BackgroundImage src={bgGif} alt="background" />
       <audio ref={audioRef} />
+
+      {matchStatus === MatchStatus.MATCHING && (
+        <MatchingText>Matching in progress, estimated time: 1 hour</MatchingText>
+      )}
 
       {(matchStatus === MatchStatus.PREPARE || matchStatus === MatchStatus.COMPLETED) && (
         <Card>
